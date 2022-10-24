@@ -1,7 +1,7 @@
 local IS_SERVER = IsDuplicityVersion()
 
 API.RadarBlipManager = {}
----@type table<string,CRadarBlip>
+---@type table<string, CRadarBlip>
 API.RadarBlipManager.Entities = {}
 
 ---@class IRadarBlip
@@ -18,6 +18,11 @@ API.RadarBlipManager.new = function(data)
     local self = {}
 
     self.data = data
+
+    if API.RadarBlipManager.exists(self.data.blipUid) then
+        print("^1RadarBlip already exists with uid: " .. self.data.blipUid)
+        return
+    end
 
     if IS_SERVER then
         self.server = {}
@@ -104,6 +109,12 @@ API.RadarBlipManager.new = function(data)
     return self
 end
 
+API.RadarBlipManager.exists = function(id)
+    if API.RadarBlipManager.Entities[API.InvokeResourceName() .. id] then
+        return true
+    end
+end
+
 API.RadarBlipManager.get = function(id)
     return API.RadarBlipManager.Entities[API.InvokeResourceName() .. id]
 end
@@ -116,23 +127,16 @@ if IS_SERVER then
     AddEventHandler("onResourceStart", function(resourceName)
         if GetCurrentResourceName() ~= resourceName then return end
 
-        Citizen.Wait(500)
+        API.EventManager.AddLocalEvent("RadarBlip:RequestData", function()
+            local source = source
 
-        -- TODO: Testing purpose.
-        local onlinePlayers = GetPlayers()
-        for i = 1, #onlinePlayers do
-            local srcID = onlinePlayers[i]
-            API.RadarBlipManager.new({
-                position = GetEntityCoords(GetPlayerPed(srcID)),
-                radius = 50.0,
-                alpha = 100,
-                color = 1,
-                blipUid = "aaaa"
-            })
-        end
+            for k, v in pairs(API.RadarBlipManager.Entities) do
+                API.EventManager.TriggerClientLocalEvent("RadarBlip:Create", source, v.data)
+            end
+        end)
     end)
 else
-    AddEventHandler("onResourceStart", function(resourceName)
+    AddEventHandler("onClientResourceStart", function(resourceName)
         if GetCurrentResourceName() ~= resourceName then return end
 
         API.EventManager.AddLocalEvent({
@@ -165,5 +169,18 @@ else
                 RadarBlipEntity.Destroy()
             end
         })
+
+        Citizen.CreateThread(function()
+            while true do
+
+                if NetworkIsPlayerActive(PlayerId()) then
+                    -- Request Data from server.
+                    API.EventManager.TriggerServerLocalEvent("RadarBlip:RequestData")
+                    break
+                end
+
+                Citizen.Wait(500)
+            end
+        end)
     end)
 end

@@ -11,8 +11,12 @@ dependencies {
 shared_scripts {
     'api.lua',
     'radarblips.lua',
+    'blips.lua',
     'eventhandler.lua',
-    'versionchecker.lua'
+    'versionchecker.lua',
+
+    -- This one should start the last.
+    'main.lua'
 }
 
 ui_page 'html/compiled/index.html'

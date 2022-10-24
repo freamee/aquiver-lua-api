@@ -66,28 +66,8 @@ if IS_SERVER then
         local source = source
         API.EventManager.TriggerServerLocalEvent(eventName, table.unpack(args))
     end)
-
-    Citizen.CreateThread(function()
-        while true do
-            for k, v in pairs(API.EventManager.LocalEvents) do
-                print(k)
-            end
-
-            Citizen.Wait(3000)
-        end
-    end)
 else
     RegisterNetEvent("server-to-client-local", function(eventName, args)
         API.EventManager.TriggerClientLocalEvent(eventName, table.unpack(args))
-    end)
-
-    Citizen.CreateThread(function()
-        while true do
-            for k, v in pairs(API.EventManager.LocalEvents) do
-                print(k)
-            end
-
-            Citizen.Wait(3000)
-        end
     end)
 end
