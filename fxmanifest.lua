@@ -14,6 +14,9 @@ shared_scripts {
     'blips.lua',
     'eventhandler.lua',
     'versionchecker.lua',
+    'utils.lua',
+    'player.lua',
+    'attachments.lua',
 
     -- This one should start the last.
     'main.lua'

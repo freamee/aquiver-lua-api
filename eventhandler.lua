@@ -3,7 +3,7 @@ local IS_SERVER = IsDuplicityVersion()
 API.EventManager = {}
 API.EventManager.LocalEvents = {}
 
---- Registering local events.
+--- Registering local events. (These events are only reachable inside this resource.)
 ---@param eventName string | table<string, fun(...):nil>
 ---@param func? fun(...):nil
 API.EventManager.AddLocalEvent = function(eventName, func)
@@ -20,6 +20,9 @@ API.EventManager.AddLocalEvent = function(eventName, func)
     end
 end
 
+--- Triggering an event locally. (This means this event can only be triggered from this resource.)
+---@param eventName any
+---@param ... unknown
 API.EventManager.TriggerServerLocalEvent = function(eventName, ...)
     local invokeResource = API.InvokeResourceName()
     if invokeResource == nil then
