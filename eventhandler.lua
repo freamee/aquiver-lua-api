@@ -16,13 +16,13 @@ API.EventManager.AddLocalEvent = function(eventName, func)
     elseif type(eventName) == "string" then
         API.EventManager.LocalEvents[invokeResource .. "-" .. eventName] = func
     else
-        print("AddLocalEvent failed.")
+        API.Utils.Debug.Print("AddLocalEvent failed.")
     end
 end
 
 --- Triggering an event locally. (This means this event can only be triggered from this resource.)
 ---@param eventName any
----@param ... unknown
+---@param ... unknown Arguments...
 API.EventManager.TriggerServerLocalEvent = function(eventName, ...)
     local invokeResource = API.InvokeResourceName()
     if invokeResource == nil then
@@ -30,7 +30,7 @@ API.EventManager.TriggerServerLocalEvent = function(eventName, ...)
     end
 
     if IS_SERVER and not API.EventManager.LocalEvents[invokeResource .. "-" .. eventName] then
-        print("^1&LocalEvent is not registered: " .. eventName)
+        API.Utils.Debug.Print("^1&LocalEvent is not registered: " .. eventName)
         return
     end
 
@@ -41,6 +41,9 @@ API.EventManager.TriggerServerLocalEvent = function(eventName, ...)
     end
 end
 
+--- Triggering an event locally. (This means this event can only be triggered from this resource.)
+---@param eventName any
+---@param ... unknown Arguments... First argument is always the source if there is any.
 API.EventManager.TriggerClientLocalEvent = function(eventName, ...)
     local invokeResource = API.InvokeResourceName()
     if invokeResource == nil then
@@ -48,7 +51,7 @@ API.EventManager.TriggerClientLocalEvent = function(eventName, ...)
     end
 
     if not IS_SERVER and not API.EventManager.LocalEvents[invokeResource .. "-" .. eventName] then
-        print("^1LocalEvent is not registered: " .. eventName)
+        API.Utils.Debug.Print("^1LocalEvent is not registered: " .. eventName)
         return
     end
 

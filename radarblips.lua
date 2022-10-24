@@ -20,7 +20,7 @@ API.RadarBlipManager.new = function(data)
     self.data = data
 
     if API.RadarBlipManager.exists(self.data.blipUid) then
-        print("^1RadarBlip already exists with uid: " .. self.data.blipUid)
+        API.Utils.Debug.Print("^1RadarBlip already exists with uid: " .. self.data.blipUid)
         return
     end
 

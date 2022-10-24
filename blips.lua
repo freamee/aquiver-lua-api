@@ -23,7 +23,7 @@ API.BlipManager.new = function(data)
     self.data = data
 
     if API.BlipManager.exists(self.data.blipUid) then
-        print("^1Blip already exists with uid: " .. self.data.blipUid)
+        API.Utils.Debug.Print("^1Blip already exists with uid: " .. self.data.blipUid)
         return
     end
 

@@ -10,13 +10,14 @@ dependencies {
 
 shared_scripts {
     'api.lua',
+    'utils.lua',
     'radarblips.lua',
     'blips.lua',
     'eventhandler.lua',
     'versionchecker.lua',
-    'utils.lua',
     'player.lua',
     'attachments.lua',
+    'peds.lua',
 
     -- This one should start the last.
     'main.lua'
