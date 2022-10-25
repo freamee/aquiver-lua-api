@@ -18,6 +18,7 @@ shared_scripts {
     'player.lua',
     'attachments.lua',
     'peds.lua',
+    'nui.lua',
 
     -- This one should start the last.
     'main.lua'
