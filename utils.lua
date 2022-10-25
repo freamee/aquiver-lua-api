@@ -16,7 +16,13 @@ API.Utils.Debug.Print = function(content, toJSON)
     if IS_SERVER and not API.Utils.Debug.ServerDebug then return end
     if not IS_SERVER and not API.Utils.Debug.ClientDebug then return end
 
-    local f = "[" .. os.date("%X") .. "]" .. "->" .. " "
+    local f = ""
+    if IS_SERVER then
+        f = "[" .. os.date("%X") .. "]" .. "->" .. " "
+    else
+        f = "->" .. " "
+    end
+
 
     if toJSON then
         print(f .. json.encode(content))

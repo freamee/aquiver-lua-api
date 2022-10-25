@@ -1,7 +1,7 @@
 local IS_SERVER = IsDuplicityVersion()
 
 API.AttachmentManager = {}
----@type table<string, IAttachment>
+---@type table<string, { registeredResource:string; data: IAttachment; }>
 API.AttachmentManager.Data = {}
 
 ---@class IAttachment
@@ -14,63 +14,10 @@ API.AttachmentManager.Data = {}
 ---@field ry number
 ---@field rz number
 
-API.AttachmentManager.Data["bucket"] = {
-    model = "prop_bucket_02a",
-    boneId = 57005,
-    x = 0.65,
-    y = -0.1,
-    z = 0.0,
-    rx = 208.0,
-    ry = -85.0,
-    rz = -7.0
-}
-
-API.AttachmentManager.Data["player-barrel-hand"] = {
-    model = "prop_barrel_02a",
-    boneId = 0,
-    x = 0.0,
-    y = 0.45,
-    z = 0.5,
-    rx = 0.0,
-    ry = 0.0,
-    rz = 0.0
-}
-
-API.AttachmentManager.Data["player-wooden-barrel-hand"] = {
-    model = "avp_wooden_barrel",
-    boneId = 0,
-    x = 0.0,
-    y = 0.45,
-    z = 0.5,
-    rx = 0.0,
-    ry = 0.0,
-    rz = 0.0
-}
-
-API.AttachmentManager.Data["player-grinder-hand"] = {
-    model = "avp_fruit_grinder",
-    boneId = 0,
-    x = 0.0,
-    y = 0.45,
-    z = -0.75,
-    rx = 0.0,
-    ry = 0.0,
-    rz = 0.0
-}
-
-API.AttachmentManager.Data["player-distillery-hand"] = {
-    model = "prop_cardbordbox_04a",
-    boneId = 0,
-    x = 0.0,
-    y = 0.5,
-    z = 0.1,
-    rx = 0.0,
-    ry = 0.0,
-    rz = 0.0
-}
-
 API.AttachmentManager.get = function(attachmentName)
-    return API.AttachmentManager.Data[attachmentName]
+    if API.AttachmentManager.exists(attachmentName) then
+        return API.AttachmentManager.Data[attachmentName].data
+    end
 end
 
 API.AttachmentManager.getAll = function()
@@ -90,5 +37,31 @@ API.AttachmentManager.register = function(attachmentName, d)
         return
     end
 
-    API.AttachmentManager.Data[attachmentName] = d
+    API.AttachmentManager.Data[attachmentName] = {
+        data = d,
+        registeredResource = API.InvokeResourceName()
+    }
+
+    API.Utils.Debug.Print("^3Registered new attachment: " .. attachmentName)
 end
+
+-- Default examples
+API.AttachmentManager.register("bucket", {
+    model = "prop_bucket_02a",
+    boneId = 57005,
+    x = 0.65,
+    y = -0.1,
+    z = 0.0,
+    rx = 208.0,
+    ry = -85.0,
+    rz = -7.0
+})
+
+-- Delete if another resource is restarted which has connections to this.
+AddEventHandler("onResourceStop", function(resourceName)
+    for k, v in pairs(API.AttachmentManager.Data) do
+        if v.registeredResource == resourceName then
+            API.AttachmentManager.Data[k] = nil
+        end
+    end
+end)

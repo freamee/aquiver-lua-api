@@ -1,20 +1,27 @@
 local IS_SERVER = IsDuplicityVersion()
 
 API.EventManager = {}
+---@type table<string, { registeredResource: string; func: fun(...) }>
 API.EventManager.LocalEvents = {}
 
 --- Registering local events. (These events are only reachable inside this resource.)
----@param eventName string | table<string, fun(...):nil>
----@param func? fun(...):nil
+---@param eventName string | table<string, fun(...)>
+---@param func? fun(...)
 API.EventManager.AddLocalEvent = function(eventName, func)
     local invokeResource = API.InvokeResourceName()
 
     if type(eventName) == "table" then
         for k, v in pairs(eventName) do
-            API.EventManager.LocalEvents[invokeResource .. "-" .. k] = v
+            API.EventManager.LocalEvents[invokeResource .. "-" .. k] = {
+                registeredResource = invokeResource,
+                func = v
+            }
         end
-    elseif type(eventName) == "string" then
-        API.EventManager.LocalEvents[invokeResource .. "-" .. eventName] = func
+    elseif type(eventName) == "string" and func then
+        API.EventManager.LocalEvents[invokeResource .. "-" .. eventName] = {
+            registeredResource = invokeResource,
+            func = func
+        }
     else
         API.Utils.Debug.Print("AddLocalEvent failed.")
     end
@@ -25,9 +32,6 @@ end
 ---@param ... unknown Arguments...
 API.EventManager.TriggerServerLocalEvent = function(eventName, ...)
     local invokeResource = API.InvokeResourceName()
-    if invokeResource == nil then
-        invokeResource = "api"
-    end
 
     if IS_SERVER and not API.EventManager.LocalEvents[invokeResource .. "-" .. eventName] then
         API.Utils.Debug.Print("^1&LocalEvent is not registered: " .. eventName)
@@ -35,7 +39,13 @@ API.EventManager.TriggerServerLocalEvent = function(eventName, ...)
     end
 
     if IS_SERVER then
-        API.EventManager.LocalEvents[invokeResource .. "-" .. eventName](...)
+        local Event = API.EventManager.LocalEvents[invokeResource .. "-" .. eventName]
+        if Event.registeredResource ~= invokeResource then
+            API.Utils.Debug.Print("^1&Can not trigger this function from another resource: " .. eventName)
+            return
+        end
+
+        Event.func(...)
     else
         TriggerServerEvent("client-to-server-local", eventName, table.pack(...))
     end
@@ -46,9 +56,6 @@ end
 ---@param ... unknown Arguments... First argument is always the source if there is any.
 API.EventManager.TriggerClientLocalEvent = function(eventName, ...)
     local invokeResource = API.InvokeResourceName()
-    if invokeResource == nil then
-        invokeResource = "api"
-    end
 
     if not IS_SERVER and not API.EventManager.LocalEvents[invokeResource .. "-" .. eventName] then
         API.Utils.Debug.Print("^1LocalEvent is not registered: " .. eventName)
@@ -63,7 +70,13 @@ API.EventManager.TriggerClientLocalEvent = function(eventName, ...)
 
         TriggerClientEvent("server-to-client-local", onSource, eventName, args)
     else
-        API.EventManager.LocalEvents[invokeResource .. "-" .. eventName](...)
+        local Event = API.EventManager.LocalEvents[invokeResource .. "-" .. eventName]
+        if Event.registeredResource ~= invokeResource then
+            API.Utils.Debug.Print("^1&Can not trigger this function from another resource: " .. eventName)
+            return
+        end
+
+        Event.func(...)
     end
 end
 
@@ -77,3 +90,12 @@ else
         API.EventManager.TriggerClientLocalEvent(eventName, table.unpack(args))
     end)
 end
+
+-- Delete events if another resource is restarted which has connections to this.
+AddEventHandler("onResourceStop", function(resourceName)
+    for k, v in pairs(API.EventManager.LocalEvents) do
+        if v.registeredResource == resourceName then
+            API.EventManager.LocalEvents[k] = nil
+        end
+    end
+end)

@@ -1,7 +1,7 @@
 local IS_SERVER = IsDuplicityVersion()
 
 API.PedManager = {}
----@type table<string, CPed>
+---@type table<string, { registeredResource: string; ped: CPed; }>
 API.PedManager.Entities = {}
 
 ---@class IPed
@@ -64,6 +64,8 @@ API.PedManager.new = function(data)
 
             -- Resync animation here. This is basically a set again.
             self.SetAnimation(self.data.animDict, self.data.animName, self.data.animFlag)
+
+            self.client.pedHandle = ped
         end
 
         self.RemoveStream = function()
@@ -163,7 +165,11 @@ API.PedManager.new = function(data)
         API.Utils.Debug.Print("^3Removed ped with uid: " .. self.data.uid)
     end
 
-    API.PedManager.Entities[self.data.uid] = self
+    API.PedManager.Entities[self.data.uid] = {
+        ped = self,
+        registeredResource = API.InvokeResourceName()
+    }
+
     API.Utils.Debug.Print("^3Created new ped with uid: " .. self.data.uid)
 
     return self
@@ -176,11 +182,23 @@ API.PedManager.exists = function(id)
 end
 
 API.PedManager.get = function(id)
-    return API.PedManager.Entities[id]
+    if API.PedManager.exists(id) then
+        return API.PedManager.Entities[id].ped
+    end
 end
 
 API.PedManager.getAll = function()
     return API.PedManager.Entities
+end
+
+API.PedManager.atHandle = function(handleId)
+    if IS_SERVER then return end
+
+    for k, v in pairs(API.PedManager.Entities) do
+        if v.ped.client.pedHandle == handleId then
+            return v.ped
+        end
+    end
 end
 
 if IS_SERVER then
@@ -191,7 +209,7 @@ if IS_SERVER then
             local source = source
 
             for k, v in pairs(API.PedManager.Entities) do
-                API.EventManager.TriggerClientLocalEvent("Ped:Create", source, v.data)
+                API.EventManager.TriggerClientLocalEvent("Ped:Create", source, v.ped.data)
             end
         end)
     end)
@@ -201,7 +219,7 @@ else
         if resourceName ~= GetCurrentResourceName() then return end
 
         for k, v in pairs(API.PedManager.Entities) do
-            v.Destroy()
+            v.ped.Destroy()
         end
     end)
 
@@ -259,12 +277,12 @@ else
                 local playerPos = GetEntityCoords(PlayerPedId())
 
                 for k, v in pairs(API.PedManager.Entities) do
-                    local dist = #(playerPos - v.GetPositionVector3())
+                    local dist = #(playerPos - v.ped.GetPositionVector3())
 
                     if dist < 15.0 then
-                        v.AddStream()
+                        v.ped.AddStream()
                     else
-                        v.RemoveStream()
+                        v.ped.RemoveStream()
                     end
                 end
 
@@ -273,3 +291,12 @@ else
         end)
     end)
 end
+
+-- Delete if another resource is restarted which has connections to this.
+AddEventHandler("onResourceStop", function(resourceName)
+    for k, v in pairs(API.PedManager.Entities) do
+        if v.registeredResource == resourceName then
+            v.ped.Destroy()
+        end
+    end
+end)

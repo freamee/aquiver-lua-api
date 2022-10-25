@@ -19,6 +19,8 @@ shared_scripts {
     'attachments.lua',
     'peds.lua',
     'nui.lua',
+    'object.lua',
+    'raycast.lua',
 
     -- This one should start the last.
     'main.lua'

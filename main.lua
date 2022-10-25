@@ -13,3 +13,8 @@ local IS_SERVER = IsDuplicityVersion()
 
 --     end)
 -- end
+if IS_SERVER then
+
+else
+    API.RaycastManager.Enable(true)
+end

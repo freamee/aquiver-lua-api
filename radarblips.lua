@@ -1,7 +1,7 @@
 local IS_SERVER = IsDuplicityVersion()
 
 API.RadarBlipManager = {}
----@type table<string, CRadarBlip>
+---@type table<string, { registeredResource:string; blip: CRadarBlip; }>
 API.RadarBlipManager.Entities = {}
 
 ---@class IRadarBlip
@@ -104,7 +104,10 @@ API.RadarBlipManager.new = function(data)
         end
     end
 
-    API.RadarBlipManager.Entities[API.InvokeResourceName() .. self.data.blipUid] = self
+    API.RadarBlipManager.Entities[API.InvokeResourceName() .. self.data.blipUid] = {
+        blip = self,
+        registeredResource = API.InvokeResourceName()
+    }
 
     return self
 end
@@ -116,7 +119,9 @@ API.RadarBlipManager.exists = function(id)
 end
 
 API.RadarBlipManager.get = function(id)
-    return API.RadarBlipManager.Entities[API.InvokeResourceName() .. id]
+    if API.RadarBlipManager.exists(id) then
+        return API.RadarBlipManager.Entities[API.InvokeResourceName() .. id].blip
+    end
 end
 
 API.RadarBlipManager.getAll = function()
@@ -131,7 +136,7 @@ if IS_SERVER then
             local source = source
 
             for k, v in pairs(API.RadarBlipManager.Entities) do
-                API.EventManager.TriggerClientLocalEvent("RadarBlip:Create", source, v.data)
+                API.EventManager.TriggerClientLocalEvent("RadarBlip:Create", source, v.blip.data)
             end
         end)
     end)
@@ -184,3 +189,12 @@ else
         end)
     end)
 end
+
+-- Delete if another resource is restarted which has connections to this.
+AddEventHandler("onResourceStop", function(resourceName)
+    for k, v in pairs(API.RadarBlipManager.Entities) do
+        if v.registeredResource == resourceName then
+            v.blip.Destroy()
+        end
+    end
+end)

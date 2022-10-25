@@ -1,7 +1,7 @@
 local IS_SERVER = IsDuplicityVersion()
 
 API.BlipManager = {}
----@type table<string, CBlip>
+---@type table<string, {registeredResource:string; blip: CBlip; }>
 API.BlipManager.Entities = {}
 
 ---@class IBlip
@@ -162,7 +162,10 @@ API.BlipManager.new = function(data)
         end
     end
 
-    API.BlipManager.Entities[API.InvokeResourceName() .. self.data.blipUid] = self
+    API.BlipManager.Entities[API.InvokeResourceName() .. self.data.blipUid] = {
+        blip = self,
+        registeredResource = API.InvokeResourceName()
+    }
 
     return self
 end
@@ -174,7 +177,9 @@ API.BlipManager.exists = function(id)
 end
 
 API.BlipManager.get = function(id)
-    return API.BlipManager.Entities[API.InvokeResourceName() .. id]
+    if API.BlipManager.exists(id) then
+        return API.BlipManager.Entities[API.InvokeResourceName() .. id].blip
+    end
 end
 
 API.BlipManager.getAll = function()
@@ -189,7 +194,7 @@ if IS_SERVER then
             local source = source
 
             for k, v in pairs(API.BlipManager.Entities) do
-                API.EventManager.TriggerClientLocalEvent("Blip:Create", source, v.data)
+                API.EventManager.TriggerClientLocalEvent("Blip:Create", source, v.blip.data)
             end
         end)
     end)
@@ -262,3 +267,12 @@ else
         end)
     end)
 end
+
+-- Delete if another resource is restarted which has connections to this.
+AddEventHandler("onResourceStop", function(resourceName)
+    for k, v in pairs(API.BlipManager.Entities) do
+        if v.registeredResource == resourceName then
+            v.blip.Destroy()
+        end
+    end
+end)
