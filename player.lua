@@ -96,6 +96,49 @@ if IS_SERVER then
             API.EventManager.TriggerClientLocalEvent("Player:DisableMovement:State", self.srcID, state)
         end
 
+        ---@param type "error" | "success" | "info" | "warning"
+        ---@param message string
+        self.Notification = function(type, message)
+            self.SendNUIMessage({
+                event = "Send-Notification",
+                type = type,
+                message = message
+            })
+        end
+
+        --- Start progress for player.
+        --- Callback passes the Player after the progress is finished: cb(Player)
+        ---@param text string
+        ---@param time number Time in milliseconds (MS) 1000ms-1second
+        ---@param cb fun(Player:CPlayer)
+        self.Progress = function(text, time, cb)
+            if self.variables.hasProgress then return end
+
+            self.variables.hasProgress = true
+
+            self.SendNUIMessage({
+                event = "Progress-Start",
+                time = time,
+                text = text
+            })
+
+            Citizen.SetTimeout(time, function()
+                -- No idea, if that can happen on FiveM..
+                if not self then return end
+
+                self.variables.hasProgress = false
+
+                if type(cb) == "function" then
+                    cb(self)
+                end
+            end)
+        end
+
+        ---@param jsonContent table
+        self.SendNUIMessage = function(jsonContent)
+            API.EventManager.TriggerClientLocalEvent("Player:SendNUIMessage", self.srcID, jsonContent)
+        end
+
         self.Destroy = function()
             -- Delete from table
             if API.PlayerManager.Entities[self.srcID] then

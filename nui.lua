@@ -15,5 +15,9 @@ else
         API.EventManager.AddLocalEvent("focusNUI", function(state)
             SetNuiFocus(state, state)
         end)
+
+        API.EventManager.AddLocalEvent("Player:SendNUIMessage", function(jsonContent)
+            SendNUIMessage(jsonContent)
+        end)
     end)
 end
