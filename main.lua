@@ -14,7 +14,7 @@ local IS_SERVER = IsDuplicityVersion()
 --     end)
 -- end
 if IS_SERVER then
-
+    API.ObjectManager.LoadObjectsFromSQL()
 else
     API.RaycastManager.Enable(true)
 end

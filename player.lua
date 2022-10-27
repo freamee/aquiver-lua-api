@@ -106,6 +106,13 @@ if IS_SERVER then
             })
         end
 
+        self.SetDimension = function(dimension)
+            if GetPlayerRoutingBucket(self.srcID) == dimension then return end
+
+            SetPlayerRoutingBucket(self.srcID, dimension)
+            API.EventManager.TriggerClientLocalEvent("Player:Set:Dimension", self.srcID, dimension)
+        end
+
         --- Start progress for player.
         --- Callback passes the Player after the progress is finished: cb(Player)
         ---@param text string
@@ -197,6 +204,7 @@ else
         flag = nil
     }
     API.LocalPlayer.isMovementDisabled = false
+    API.LocalPlayer.dimension = 0
 
     API.LocalPlayer.HasAttachment = function(attachmentName)
         if API.LocalPlayer.attachments[attachmentName] and DoesEntityExist(API.LocalPlayer.attachments[attachmentName]) then
@@ -341,6 +349,9 @@ else
                 else
                     API.LocalPlayer.isMovementDisabled = state
                 end
+            end,
+            ["Player:Set:Dimension"] = function(dimension)
+                API.LocalPlayer.dimension = dimension
             end
         })
     end)

@@ -29,19 +29,6 @@ local function RotationToDirection(rotation)
     return direction
 end
 
-API.RaycastManager.GetHitPed = function()
-    if GetEntityType(API.RaycastManager.entityHitHandle) == 1 and
-        API.PedManager.atHandle(API.RaycastManager.entityHitHandle) then
-        return API.PedManager.atHandle(API.RaycastManager.entityHitHandle)
-    end
-end
-
--- ClientAPI.Raycast.GetHitObject = function(self)
---     if GetEntityType(self.entityHitHandle) == 3 and ClientAPI.Objects:atHandle(self.entityHitHandle) then
---         return ClientAPI.Objects:atHandle(self.entityHitHandle)
---     end
--- end
-
 -- ---@param Object ClientObjectClass
 -- AddEventHandler(EVENTS.CLIENT.RAYCAST_AIMED_OBJECT, function(Object)
 --     local header = "UNDEFINED_NAME"
@@ -214,6 +201,19 @@ API.RaycastManager.SetEntityHandle = function(handle)
         --             TriggerEvent(EVENTS.CLIENT.RAYCAST_AIMED_OBJECT, hitObject)
         --         end
 
+        -- Caching the class entity itself, so we do not have to loop the table always.
+        if GetEntityType(API.RaycastManager.entityHitHandle) == 1 then
+            local at = API.PedManager.atHandle(API.RaycastManager.entityHitHandle)
+            if at then
+                API.RaycastManager.AimedPedEntity = at
+            end
+        elseif GetEntityType(API.RaycastManager.entityHitHandle) == 3 then
+            local at = API.ObjectManager.atHandle(API.RaycastManager.entityHitHandle)
+            if at then
+                API.RaycastManager.AimedObjectEntity = at
+            end
+        end
+
         Citizen.CreateThread(function()
             while API.RaycastManager.entityHitHandle == handle do
 
@@ -230,39 +230,31 @@ API.RaycastManager.SetEntityHandle = function(handle)
                     API.RaycastManager.Config.spriteColor.a
                 )
 
-                local Ped = API.RaycastManager.GetHitPed()
+                local Ped = API.RaycastManager.AimedPedEntity
                 if Ped then
                     API.Utils.Client.DrawText2D(0.5, 0.505, Ped.data.model)
+
+
+                    --                     if IsDisabledControlJustPressed(0, self.Config.interactionKey) then
+                    --                         TriggerServerEvent("Ped:Interaction:Press", Ped.data.uid)
+                    --                     end
                 end
 
-                --                 local Ped = self:GetHitPed()
-                --                 if Ped then
+                local Object = API.RaycastManager.AimedObjectEntity
+                if Object then
+                    API.Utils.Client.DrawText2D(0.5, 0.505, Object.data.model)
 
-                --                     if IsDisabledControlJustPressed(0, self.Config.interactionKey) then
-                --                         TriggerServerEvent("Ped:Interaction:Press", Ped.data.uid)
-                --                     end
-                --                 end
+                    --                     if IsDisabledControlJustPressed(0, self.Config.interactionKey) then
+                    --                         TriggerServerEvent("Object:Interaction:Press", Obj.data.id)
+                    --                     end
+                end
 
                 Citizen.Wait(1)
             end
         end)
-
-        --         Citizen.CreateThread(function()
-        --             while self.entityHitHandle == handle do
-
-        --                 local Obj = self:GetHitObject()
-        --                 if Obj then
-        --                     API.Utils.Client:DrawText2D(0.5, 0.505, Obj.data.model)
-
-        --                     if IsDisabledControlJustPressed(0, self.Config.interactionKey) then
-        --                         TriggerServerEvent("Object:Interaction:Press", Obj.data.id)
-        --                     end
-
-        --                 end
-
-        --                 Citizen.Wait(1)
-        --             end
-        --         end)
+    else
+        API.RaycastManager.AimedObjectEntity = nil
+        API.RaycastManager.AimedPedEntity = nil
     end
 end
 
@@ -303,14 +295,14 @@ API.RaycastManager.Enable = function(state)
 
                     -- Check if Object.
                     if entityType == 3 then
-                        --     local Object = ClientAPI.Objects:atHandle(hitHandle)
-                        --     if Object then
-                        --         local objDistance = #(Object:GetPositionVector3() - GetEntityCoords(PlayerPedId()))
-                        --         if objDistance < 2.5 then
-                        --             self:SetEntityHandle(hitHandle)
-                        --             goto nextTick
-                        --         end
-                        --     end
+                        local Object = API.ObjectManager.atHandle(hitHandle)
+                        if Object then
+                            local objDistance = #(Object.GetPositionVector3() - GetEntityCoords(PlayerPedId()))
+                            if objDistance < 2.5 then
+                                API.RaycastManager.SetEntityHandle(hitHandle)
+                                goto nextTick
+                            end
+                        end
                     elseif entityType == 1 then
                         local Ped = API.PedManager.atHandle(hitHandle)
                         if Ped then
