@@ -149,8 +149,9 @@ API.ObjectManager.new = function(data)
 
             self.client.objectHandle = obj
 
-            -- // TODO: Stream in event
-            -- TriggerEvent(EVENTS.CLIENT.OBJECT_STREAMED_IN, self)
+            API.EventManager.TriggerClientGlobalEvent("onObjectStreamIn", self)
+
+            API.Utils.Debug.Print(string.format("^3Object streamed in (%d, %s)", self.data.remoteId, self.data.model))
         end
 
         self.RemoveStream = function()
@@ -162,8 +163,9 @@ API.ObjectManager.new = function(data)
 
             self.client.isStreamed = false
 
-            -- // TODO: Streamed out event
-            --     TriggerEvent(EVENTS.CLIENT.OBJECT_STREAMED_OUT, self)
+            API.EventManager.TriggerClientGlobalEvent("onObjectStreamOut", self)
+
+            API.Utils.Debug.Print(string.format("^3Object streamed out (%d, %s)", self.data.remoteId, self.data.model))
         end
     end
 
@@ -588,7 +590,7 @@ else
                         v.RemoveStream()
                     else
                         local dist = #(playerPos - v.GetPositionVector3())
-                        if dist < CONFIG.STREAM_INTERVALS.OBJECT then
+                        if dist < CONFIG.STREAM_DISTANCES.OBJECT then
                             v.AddStream()
                         else
                             v.RemoveStream()

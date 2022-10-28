@@ -23,6 +23,7 @@ shared_scripts {
     'nui.lua',
     'object.lua',
     'raycast.lua',
+    'particle.lua',
 
     -- This one should start the last.
     'main.lua'
