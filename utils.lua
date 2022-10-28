@@ -4,15 +4,13 @@ API.Utils.Client = {}
 -- Server table & functions only exists on the serverside.
 API.Utils.Server = {}
 API.Utils.Debug = {}
-API.Utils.Debug.ServerDebug = true
-API.Utils.Debug.ClientDebug = true
 
 --- Print to console
 ---@param content table|string|boolean|number
 ---@param toJSON? boolean
 API.Utils.Debug.Print = function(content, toJSON)
-    if API.IsServer and not API.Utils.Debug.ServerDebug then return end
-    if not API.IsServer and not API.Utils.Debug.ClientDebug then return end
+    if API.IsServer and not CONFIG.SERVER_DEBUG_ENABLED then return end
+    if not API.IsServer and not CONFIG.CLIENT_DEBUG_ENABLED then return end
 
     local f = ""
     if API.IsServer then

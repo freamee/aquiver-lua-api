@@ -173,7 +173,7 @@ if API.IsServer then
             API.Utils.Debug.Print("^3Removed player with sourceID: " .. self.srcID)
         end
 
-        self.SetDimension(0)
+        self.SetDimension(CONFIG.DEFAULT_DIMENSION)
         API.PlayerManager.Entities[self.srcID] = self
         API.Utils.Debug.Print("^3Created new player with sourceID: " .. self.srcID)
 
@@ -223,7 +223,7 @@ else
         flag = nil
     }
     API.LocalPlayer.isMovementDisabled = false
-    API.LocalPlayer.dimension = 0
+    API.LocalPlayer.dimension = CONFIG.DEFAULT_DIMENSION
 
     API.LocalPlayer.HasAttachment = function(attachmentName)
         if API.LocalPlayer.attachments[attachmentName] and DoesEntityExist(API.LocalPlayer.attachments[attachmentName]) then
@@ -337,7 +337,7 @@ else
                             )
                         end
 
-                        Citizen.Wait(250)
+                        Citizen.Wait(CONFIG.FORCE_ANIMATION_INTERVAL)
                     end
                 end)
             end,

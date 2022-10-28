@@ -316,7 +316,7 @@ API.RaycastManager.Enable = function(state)
                 API.RaycastManager.SetEntityHandle(nil)
 
                 ::nextTick::
-                Citizen.Wait(10)
+                Citizen.Wait(CONFIG.RAYCAST_INTERVAL)
             end
         end)
     end

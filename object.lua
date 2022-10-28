@@ -53,10 +53,15 @@ API.ObjectManager.new = function(data)
         data.hide = false
     end
 
+    if type(data.dimension) ~= "number" then
+        data.dimension = CONFIG.DEFAULT_DIMENSION
+    end
+
     self.data = data
 
     if API.IsServer then
         self.server = {}
+        self.server.invokedFromResource = API.InvokeResourceName()
         self.data.remoteId = API.ObjectManager.remoteIdCount
         API.ObjectManager.remoteIdCount = (API.ObjectManager.remoteIdCount or 0) + 1
     end
@@ -288,7 +293,7 @@ API.ObjectManager.new = function(data)
             API.EventManager.TriggerClientLocalEvent("Object:Update:Dimension", -1, self.data.remoteId, dimension)
         else
             if DoesEntityExist(self.client.objectHandle) and API.LocalPlayer.dimension ~= dimension then
-                self:RemoveStream()
+                self.RemoveStream()
             end
         end
     end
@@ -480,6 +485,14 @@ if API.IsServer then
             vars.barrelAmount = API.Utils.RoundNumber(vars.barrelAmount or 0, 0)
         end)
     end)
+
+    AddEventHandler("onResourceStop", function(resourceName)
+        for k, v in pairs(API.ObjectManager.Entities) do
+            if v.server.invokedFromResource == resourceName then
+                v.Destroy()
+            end
+        end
+    end)
 else
 
     API.ObjectManager.atHandle = function(handleId)
@@ -575,7 +588,7 @@ else
                         v.RemoveStream()
                     else
                         local dist = #(playerPos - v.GetPositionVector3())
-                        if dist < 20.0 then
+                        if dist < CONFIG.STREAM_INTERVALS.OBJECT then
                             v.AddStream()
                         else
                             v.RemoveStream()
@@ -583,16 +596,8 @@ else
                     end
                 end
 
-                Citizen.Wait(1000)
+                Citizen.Wait(CONFIG.STREAM_INTERVALS.OBJECT)
             end
         end)
     end)
 end
-
-AddEventHandler("onResourceStop", function(resourceName)
-    if GetCurrentResourceName() ~= resourceName then return end
-
-    for k, v in pairs(API.ObjectManager.Entities) do
-        v.Destroy()
-    end
-end)

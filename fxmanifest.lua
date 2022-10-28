@@ -9,6 +9,8 @@ dependencies {
 }
 
 shared_scripts {
+    'CONFIG.lua',
+
     'api.lua',
     'utils.lua',
     'radarblips.lua',

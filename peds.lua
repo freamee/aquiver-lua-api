@@ -1,5 +1,5 @@
 API.PedManager = {}
----@type table<string, { registeredResource: string; ped: CPed; }>
+---@type table<string, CPed>
 API.PedManager.Entities = {}
 
 ---@class IPed
@@ -7,6 +7,7 @@ API.PedManager.Entities = {}
 ---@field position { x:number; y:number; z:number; }
 ---@field heading number
 ---@field model string
+---@field dimension number
 ---@field animDict? string
 ---@field animName? string
 ---@field animFlag? number
@@ -15,6 +16,10 @@ API.PedManager.Entities = {}
 API.PedManager.new = function(data)
     ---@class CPed
     local self = {}
+
+    if type(data.dimension) ~= "number" then
+        data.dimension = CONFIG.DEFAULT_DIMENSION
+    end
 
     self.data = data
 
@@ -25,6 +30,7 @@ API.PedManager.new = function(data)
 
     if API.IsServer then
         self.server = {}
+        self.server.invokedFromResource = API.InvokeResourceName()
 
         API.EventManager.TriggerClientLocalEvent("Ped:Create", -1, self.data)
 
@@ -97,7 +103,7 @@ API.PedManager.new = function(data)
             API.EventManager.TriggerClientLocalEvent("Ped:Update:Position", -1, self.data.uid, position)
         else
             if DoesEntityExist(self.client.pedHandle) then
-                SetEntityCoordsNoOffset(self.client.pedHandle, self:GetPositionVector3(), false, false, false)
+                SetEntityCoordsNoOffset(self.client.pedHandle, self.GetPositionVector3(), false, false, false)
             end
         end
     end
@@ -121,8 +127,8 @@ API.PedManager.new = function(data)
             API.EventManager.TriggerClientLocalEvent("Ped:Update:Model", -1, self.data.uid, model)
         else
             if self.client.isStreamed then
-                self:RemoveStream()
-                self:AddStream()
+                self.RemoveStream()
+                self.AddStream()
             end
         end
     end
@@ -153,6 +159,21 @@ API.PedManager.new = function(data)
         end
     end
 
+
+    self.SetDimension = function(dimension)
+        if self.data.dimension == dimension then return end
+
+        self.data.dimension = dimension
+
+        if API.IsServer then
+            API.EventManager.TriggerClientLocalEvent("Ped:Update:Dimension", -1, self.data.uid, dimension)
+        else
+            if DoesEntityExist(self.client.pedHandle) and API.LocalPlayer.dimension ~= dimension then
+                self.RemoveStream()
+            end
+        end
+    end
+
     self.Destroy = function()
         -- Delete from table.
         if API.PedManager.Entities[self.data.uid] then
@@ -171,10 +192,7 @@ API.PedManager.new = function(data)
         API.Utils.Debug.Print("^3Removed ped with uid: " .. self.data.uid)
     end
 
-    API.PedManager.Entities[self.data.uid] = {
-        ped = self,
-        registeredResource = API.InvokeResourceName()
-    }
+    API.PedManager.Entities[self.data.uid] = self
 
     API.Utils.Debug.Print("^3Created new ped with uid: " .. self.data.uid)
 
@@ -189,7 +207,7 @@ end
 
 API.PedManager.get = function(id)
     if API.PedManager.exists(id) then
-        return API.PedManager.Entities[id].ped
+        return API.PedManager.Entities[id]
     end
 end
 
@@ -205,16 +223,24 @@ if API.IsServer then
             local source = source
 
             for k, v in pairs(API.PedManager.Entities) do
-                API.EventManager.TriggerClientLocalEvent("Ped:Create", source, v.ped.data)
+                API.EventManager.TriggerClientLocalEvent("Ped:Create", source, v.data)
             end
         end)
+    end)
+
+    AddEventHandler("onResourceStop", function(resourceName)
+        for k, v in pairs(API.PedManager.Entities) do
+            if v.server.invokedFromResource == resourceName then
+                v.Destroy()
+            end
+        end
     end)
 else
 
     API.PedManager.atHandle = function(handleId)
         for k, v in pairs(API.PedManager.Entities) do
-            if v.ped.client.pedHandle == handleId then
-                return v.ped
+            if v.client.pedHandle == handleId then
+                return v
             end
         end
     end
@@ -223,7 +249,7 @@ else
         if resourceName ~= GetCurrentResourceName() then return end
 
         for k, v in pairs(API.PedManager.Entities) do
-            v.ped.Destroy()
+            v.Destroy()
         end
     end)
 
@@ -254,6 +280,11 @@ else
                 if not PedEntity then return end
                 PedEntity.SetPosition(position)
             end,
+            ["Ped:Update:Dimension"] = function(id, dimension)
+                local PedEntity = API.PedManager.get(id)
+                if not PedEntity then return end
+                PedEntity.SetDimension(dimension)
+            end,
             ["Ped:Destroy"] = function(id)
                 local PedEntity = API.PedManager.get(id)
                 if not PedEntity then return end
@@ -281,26 +312,21 @@ else
                 local playerPos = GetEntityCoords(PlayerPedId())
 
                 for k, v in pairs(API.PedManager.Entities) do
-                    local dist = #(playerPos - v.ped.GetPositionVector3())
 
-                    if dist < 15.0 then
-                        v.ped.AddStream()
+                    if API.LocalPlayer.dimension ~= v.data.dimension then
+                        v.RemoveStream()
                     else
-                        v.ped.RemoveStream()
+                        local dist = #(playerPos - v.GetPositionVector3())
+                        if dist < CONFIG.STREAM_DISTANCES.PED then
+                            v.AddStream()
+                        else
+                            v.RemoveStream()
+                        end
                     end
                 end
 
-                Citizen.Wait(1000)
+                Citizen.Wait(CONFIG.STREAM_INTERVALS.PED)
             end
         end)
     end)
 end
-
--- Delete if another resource is restarted which has connections to this.
-AddEventHandler("onResourceStop", function(resourceName)
-    for k, v in pairs(API.PedManager.Entities) do
-        if v.registeredResource == resourceName then
-            v.ped.Destroy()
-        end
-    end
-end)
