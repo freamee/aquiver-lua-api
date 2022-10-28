@@ -1,5 +1,3 @@
-local IS_SERVER = IsDuplicityVersion()
-
 API.PedManager = {}
 ---@type table<string, { registeredResource: string; ped: CPed; }>
 API.PedManager.Entities = {}
@@ -25,17 +23,26 @@ API.PedManager.new = function(data)
         return
     end
 
-    if IS_SERVER then
+    if API.IsServer then
         self.server = {}
 
         API.EventManager.TriggerClientLocalEvent("Ped:Create", -1, self.data)
+
+        ---@param cb fun(Player:CPlayer, Ped:CPed)
+        self.AddPressFunction = function(cb)
+            if not Citizen.GetFunctionReference(cb) then
+                API.Utils.Debug.Print("^1Ped AddPressFunction failed, cb should be a function reference.")
+                return
+            end
+
+            self.server.onPress = cb
+        end
     else
         self.client = {}
         self.client.pedHandle = nil
         self.client.isStreamed = false
 
         self.AddStream = function()
-            if IS_SERVER then return end
             if self.client.isStreamed then return end
 
             self.client.isStreamed = true
@@ -69,7 +76,6 @@ API.PedManager.new = function(data)
         end
 
         self.RemoveStream = function()
-            if IS_SERVER then return end
             if not self.client.isStreamed then return end
 
             if DoesEntityExist(self.client.pedHandle) then
@@ -87,7 +93,7 @@ API.PedManager.new = function(data)
     self.SetPosition = function(position)
         self.data.position = position
 
-        if IS_SERVER then
+        if API.IsServer then
             API.EventManager.TriggerClientLocalEvent("Ped:Update:Position", -1, self.data.uid, position)
         else
             if DoesEntityExist(self.client.pedHandle) then
@@ -99,7 +105,7 @@ API.PedManager.new = function(data)
     self.SetHeading = function(heading)
         self.data.heading = heading
 
-        if IS_SERVER then
+        if API.IsServer then
             API.EventManager.TriggerClientLocalEvent("Ped:Update:Heading", -1, self.data.uid, heading)
         else
             if DoesEntityExist(self.client.pedHandle) then
@@ -111,7 +117,7 @@ API.PedManager.new = function(data)
     self.SetModel = function(model)
         self.data.model = model
 
-        if IS_SERVER then
+        if API.IsServer then
             API.EventManager.TriggerClientLocalEvent("Ped:Update:Model", -1, self.data.uid, model)
         else
             if self.client.isStreamed then
@@ -126,7 +132,7 @@ API.PedManager.new = function(data)
         self.data.animName = anim
         self.data.animFlag = flag
 
-        if IS_SERVER then
+        if API.IsServer then
             API.EventManager.TriggerClientLocalEvent("Ped:Update:Animation",
                 -1,
                 self.data.uid,
@@ -153,7 +159,7 @@ API.PedManager.new = function(data)
             API.PedManager.Entities[self.data.uid] = nil
         end
 
-        if IS_SERVER then
+        if API.IsServer then
             API.EventManager.TriggerClientLocalEvent("Ped:Destroy", -1, self.data.uid)
         else
             if DoesEntityExist(self.client.pedHandle) then
@@ -191,17 +197,7 @@ API.PedManager.getAll = function()
     return API.PedManager.Entities
 end
 
-API.PedManager.atHandle = function(handleId)
-    if IS_SERVER then return end
-
-    for k, v in pairs(API.PedManager.Entities) do
-        if v.ped.client.pedHandle == handleId then
-            return v.ped
-        end
-    end
-end
-
-if IS_SERVER then
+if API.IsServer then
     AddEventHandler("onResourceStart", function(resourceName)
         if GetCurrentResourceName() ~= resourceName then return end
 
@@ -214,6 +210,14 @@ if IS_SERVER then
         end)
     end)
 else
+
+    API.PedManager.atHandle = function(handleId)
+        for k, v in pairs(API.PedManager.Entities) do
+            if v.ped.client.pedHandle == handleId then
+                return v.ped
+            end
+        end
+    end
 
     AddEventHandler("onResourceStop", function(resourceName)
         if resourceName ~= GetCurrentResourceName() then return end

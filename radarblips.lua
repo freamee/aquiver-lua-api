@@ -1,5 +1,3 @@
-local IS_SERVER = IsDuplicityVersion()
-
 API.RadarBlipManager = {}
 ---@type table<string, { registeredResource:string; blip: CRadarBlip; }>
 API.RadarBlipManager.Entities = {}
@@ -24,7 +22,7 @@ API.RadarBlipManager.new = function(data)
         return
     end
 
-    if IS_SERVER then
+    if API.IsServer then
         self.server = {}
 
         API.EventManager.TriggerClientLocalEvent("RadarBlip:Create", -1, self.data)
@@ -44,7 +42,7 @@ API.RadarBlipManager.new = function(data)
     self.SetRadius = function(radius)
         self.data.radius = radius
 
-        if not IS_SERVER then
+        if not API.IsServer then
             if DoesBlipExist(self.client.blipHandle) then
                 SetBlipScale(self.client.blipHandle, radius)
             end
@@ -56,7 +54,7 @@ API.RadarBlipManager.new = function(data)
     self.SetColor = function(color)
         self.data.color = color
 
-        if not IS_SERVER then
+        if not API.IsServer then
             if DoesBlipExist(self.client.blipHandle) then
                 SetBlipColour(self.client.blipHandle, color)
             end
@@ -68,7 +66,7 @@ API.RadarBlipManager.new = function(data)
     self.SetAlpha = function(alpha)
         self.data.alpha = alpha
 
-        if not IS_SERVER then
+        if not API.IsServer then
             if DoesBlipExist(self.client.blipHandle) then
                 SetBlipAlpha(self.client.blipHandle, alpha)
             end
@@ -80,7 +78,7 @@ API.RadarBlipManager.new = function(data)
     self.SetFlashing = function(state)
         self.data.isFlashing = state
 
-        if not IS_SERVER then
+        if not API.IsServer then
             if DoesBlipExist(self.client.blipHandle) then
                 SetBlipFlashes(self.client.blipHandle, state)
             end
@@ -91,11 +89,11 @@ API.RadarBlipManager.new = function(data)
 
     self.Destroy = function()
         -- Delete from table
-        if RadarBlipManager.Entities[API.InvokeResourceName() .. self.data.blipUid] then
-            RadarBlipManager.Entities[API.InvokeResourceName() .. self.data.blipUid] = nil
+        if RadarBlipManager.Entities[self.data.blipUid] then
+            RadarBlipManager.Entities[self.data.blipUid] = nil
         end
 
-        if IS_SERVER then
+        if API.IsServer then
             API.EventManager.TriggerClientLocalEvent("RadarBlip:Destroy", -1, self.data.blipUid)
         else
             if DoesBlipExist(self.client.blipHandle) then
@@ -104,7 +102,7 @@ API.RadarBlipManager.new = function(data)
         end
     end
 
-    API.RadarBlipManager.Entities[API.InvokeResourceName() .. self.data.blipUid] = {
+    API.RadarBlipManager.Entities[self.data.blipUid] = {
         blip = self,
         registeredResource = API.InvokeResourceName()
     }
@@ -113,14 +111,14 @@ API.RadarBlipManager.new = function(data)
 end
 
 API.RadarBlipManager.exists = function(id)
-    if API.RadarBlipManager.Entities[API.InvokeResourceName() .. id] then
+    if API.RadarBlipManager.Entities[id] then
         return true
     end
 end
 
 API.RadarBlipManager.get = function(id)
     if API.RadarBlipManager.exists(id) then
-        return API.RadarBlipManager.Entities[API.InvokeResourceName() .. id].blip
+        return API.RadarBlipManager.Entities[id].blip
     end
 end
 
@@ -128,7 +126,7 @@ API.RadarBlipManager.getAll = function()
     return API.RadarBlipManager.Entities
 end
 
-if IS_SERVER then
+if API.IsServer then
     AddEventHandler("onResourceStart", function(resourceName)
         if GetCurrentResourceName() ~= resourceName then return end
 

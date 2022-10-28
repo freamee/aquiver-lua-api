@@ -1,4 +1,5 @@
 API = {}
+API.IsServer = IsDuplicityVersion()
 
 API.InvokeResourceName = function()
     return GetInvokingResource() or "api"

@@ -1,5 +1,3 @@
-local IS_SERVER = IsDuplicityVersion()
-
 API.Utils = {}
 -- Client table & functions only exists on the clientside.
 API.Utils.Client = {}
@@ -13,11 +11,11 @@ API.Utils.Debug.ClientDebug = true
 ---@param content table|string|boolean|number
 ---@param toJSON? boolean
 API.Utils.Debug.Print = function(content, toJSON)
-    if IS_SERVER and not API.Utils.Debug.ServerDebug then return end
-    if not IS_SERVER and not API.Utils.Debug.ClientDebug then return end
+    if API.IsServer and not API.Utils.Debug.ServerDebug then return end
+    if not API.IsServer and not API.Utils.Debug.ClientDebug then return end
 
     local f = ""
-    if IS_SERVER then
+    if API.IsServer then
         f = "[" .. os.date("%X") .. "]" .. "->" .. " "
     else
         f = "->" .. " "
@@ -36,7 +34,7 @@ API.Utils.RoundNumber = function(num, decimals)
     return math.floor(num * mult + 0.5) / mult
 end
 
-if not IS_SERVER then
+if not API.IsServer then
     ---@type { X:number|nil; Y:number|nil; }
     API.Utils.Client.CACHED_RESOLUTION = {
         X = nil,

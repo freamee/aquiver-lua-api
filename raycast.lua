@@ -1,5 +1,3 @@
-local IS_SERVER = IsDuplicityVersion()
-
 API.RaycastManager = {}
 API.RaycastManager.isEnabled = false
 API.RaycastManager.Config = {
@@ -234,19 +232,18 @@ API.RaycastManager.SetEntityHandle = function(handle)
                 if Ped then
                     API.Utils.Client.DrawText2D(0.5, 0.505, Ped.data.model)
 
-
-                    --                     if IsDisabledControlJustPressed(0, self.Config.interactionKey) then
-                    --                         TriggerServerEvent("Ped:Interaction:Press", Ped.data.uid)
-                    --                     end
+                    if IsDisabledControlJustPressed(0, API.RaycastManager.Config.interactionKey) then
+                        API.EventManager.TriggerServerLocalEvent("Ped:Interaction:Press", Ped.data.uid)
+                    end
                 end
 
                 local Object = API.RaycastManager.AimedObjectEntity
                 if Object then
                     API.Utils.Client.DrawText2D(0.5, 0.505, Object.data.model)
 
-                    --                     if IsDisabledControlJustPressed(0, self.Config.interactionKey) then
-                    --                         TriggerServerEvent("Object:Interaction:Press", Obj.data.id)
-                    --                     end
+                    if IsDisabledControlJustPressed(0, API.RaycastManager.Config.interactionKey) then
+                        API.EventManager.TriggerServerLocalEvent("Object:Interaction:Press", Object.data.remoteId)
+                    end
                 end
 
                 Citizen.Wait(1)
@@ -325,8 +322,39 @@ API.RaycastManager.Enable = function(state)
     end
 end
 
-if IS_SERVER then
+if API.IsServer then
+    AddEventHandler("onResourceStart", function(resourceName)
+        if GetCurrentResourceName() ~= resourceName then return end
 
+        API.EventManager.AddLocalEvent({
+            ["Object:Interaction:Press"] = function(remoteId)
+                local srcID = source
+
+                local ObjectEntity = API.ObjectManager.get(remoteId)
+                if not ObjectEntity then return end
+
+                local Player = API.PlayerManager.get(srcID)
+                if not Player then return end
+
+                if Citizen.GetFunctionReference(ObjectEntity.server.onPress) then
+                    ObjectEntity.server.onPress(Player, ObjectEntity)
+                end
+            end,
+            ["Ped:Interaction:Press"] = function(uid)
+                local srcID = source
+
+                local PedEntity = API.PedManager.get(uid)
+                if not PedEntity then return end
+
+                local Player = API.PlayerManager.get(srcID)
+                if not Player then return end
+
+                if Citizen.GetFunctionReference(PedEntity.server.onPress) then
+                    PedEntity.server.onPress(Player, PedEntity)
+                end
+            end
+        })
+    end)
 else
 
 end

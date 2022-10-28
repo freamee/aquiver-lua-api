@@ -1,7 +1,4 @@
-local IS_SERVER = IsDuplicityVersion()
-
-
-if IS_SERVER then
+if API.IsServer then
     API.PlayerManager = {}
     ---@type table<number, CPlayer>
     API.PlayerManager.Entities = {}
@@ -19,6 +16,29 @@ if IS_SERVER then
         if API.PlayerManager.exists(self.srcID) then
             API.Utils.Debug.Print("^1Player already exists with source: " .. self.srcID)
             return
+        end
+
+        self.GetVariable = function(key)
+            return self.variables[key]
+        end
+
+        self.GetVariables = function()
+            return self.variables
+        end
+
+        self.SetVariables = function(vars)
+            if type(vars) ~= "table" then
+                API.Utils.Debug.Print("^Player SetVariables failed: vars should be a key-value table.")
+                return
+            end
+
+            for k, v in pairs(vars) do
+                self.variables[k] = v
+            end
+        end
+
+        self.SetVariable = function(key, value)
+            self.variables[key] = value
         end
 
         self.AddItem = function(item, amount)
@@ -107,8 +127,6 @@ if IS_SERVER then
         end
 
         self.SetDimension = function(dimension)
-            if GetPlayerRoutingBucket(self.srcID) == dimension then return end
-
             SetPlayerRoutingBucket(self.srcID, dimension)
             API.EventManager.TriggerClientLocalEvent("Player:Set:Dimension", self.srcID, dimension)
         end
@@ -135,7 +153,7 @@ if IS_SERVER then
 
                 self.variables.hasProgress = false
 
-                if type(cb) == "function" then
+                if Citizen.GetFunctionReference(cb) then
                     cb(self)
                 end
             end)
@@ -155,6 +173,7 @@ if IS_SERVER then
             API.Utils.Debug.Print("^3Removed player with sourceID: " .. self.srcID)
         end
 
+        self.SetDimension(0)
         API.PlayerManager.Entities[self.srcID] = self
         API.Utils.Debug.Print("^3Created new player with sourceID: " .. self.srcID)
 

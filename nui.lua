@@ -1,6 +1,4 @@
-local IS_SERVER = IsDuplicityVersion()
-
-if IS_SERVER then
+if API.IsServer then
 
 else
     RegisterNUICallback("trigger_client", function(d)

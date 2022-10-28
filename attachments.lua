@@ -1,5 +1,3 @@
-local IS_SERVER = IsDuplicityVersion()
-
 API.AttachmentManager = {}
 ---@type table<string, { registeredResource:string; data: IAttachment; }>
 API.AttachmentManager.Data = {}

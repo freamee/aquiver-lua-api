@@ -1,7 +1,5 @@
-local IS_SERVER = IsDuplicityVersion()
-
 API.ObjectManager = {}
----@type table<string, { registeredResource:string; object:CObject; }>
+---@type table<string, CObject>
 API.ObjectManager.Entities = {}
 ---@type table<string, table<string, fun(Object:CObject)>>
 API.ObjectManager.VariableValidators = {}
@@ -57,7 +55,8 @@ API.ObjectManager.new = function(data)
 
     self.data = data
 
-    if IS_SERVER then
+    if API.IsServer then
+        self.server = {}
         self.data.remoteId = API.ObjectManager.remoteIdCount
         API.ObjectManager.remoteIdCount = (API.ObjectManager.remoteIdCount or 0) + 1
     end
@@ -67,11 +66,40 @@ API.ObjectManager.new = function(data)
         return
     end
 
-    if IS_SERVER then
+    if API.IsServer then
         API.EventManager.TriggerClientLocalEvent("Object:Create", -1, self.data)
 
+        ---@param cb fun(Player:CPlayer, Object:CObject)
+        self.AddPressFunction = function(cb)
+            if not Citizen.GetFunctionReference(cb) then
+                API.Utils.Debug.Print("^1Object AddPressFunction failed, cb should be a function reference.")
+                return
+            end
+
+            self.server.onPress = cb
+        end
+
+        self.SetVariables = function(vars)
+            if type(vars) ~= "table" then
+                API.Utils.Debug.Print("^1Object SetVariables failed: vars should be a key-value table.")
+                return
+            end
+
+            for k, v in pairs(vars) do
+                self.data.variables[k] = v
+            end
+
+            self.SyncVariables()
+        end
+
+        self.SetVariable = function(key, value)
+            self.data.variables[key] = value
+
+            self.SyncVariables()
+        end
+
         self.SyncVariables = function()
-            local validators = API.ObjectManager.GetObjectVariableValidators(self.data.model)
+            local validators = API.ObjectManager.GetVariableValidator(self.data.model)
             if validators then
                 for i = 1, #validators, 1 do
                     validators[i](self)
@@ -134,6 +162,13 @@ API.ObjectManager.new = function(data)
         end
     end
 
+    self.GetVariables = function()
+        return self.data.variables
+    end
+
+    self.GetVariable = function(key)
+        return self.data.variables[key]
+    end
 
     self.SetPosition = function(x, y, z)
         if self.data.x == x and self.data.y == y and self.data.z == z then return end
@@ -142,7 +177,7 @@ API.ObjectManager.new = function(data)
         self.data.y = y
         self.data.z = z
 
-        if IS_SERVER then
+        if API.IsServer then
             API.EventManager.TriggerClientLocalEvent("Object:Update:Position", -1, self.data.remoteId, x, y, z)
 
             if GetResourceState("oxmysql") == "started" then
@@ -170,7 +205,7 @@ API.ObjectManager.new = function(data)
         self.data.ry = ry
         self.data.rz = rz
 
-        if IS_SERVER then
+        if API.IsServer then
             API.EventManager.TriggerClientLocalEvent("Object:Update:Rotation", -1, self.data.remoteId, rx, ry, rz)
 
             if GetResourceState("oxmysql") == "started" then
@@ -196,7 +231,7 @@ API.ObjectManager.new = function(data)
 
         self.data.model = model
 
-        if IS_SERVER then
+        if API.IsServer then
             API.EventManager.TriggerClientLocalEvent("Object:Update:Model", -1, self.data.remoteId, model)
 
             if GetResourceState("oxmysql") == "started" then
@@ -220,7 +255,7 @@ API.ObjectManager.new = function(data)
 
         self.data.alpha = alpha
 
-        if IS_SERVER then
+        if API.IsServer then
             API.EventManager.TriggerClientLocalEvent("Object:Update:Alpha", -1, self.data.remoteId, alpha)
         else
             if DoesEntityExist(self.client.objectHandle) then
@@ -234,7 +269,7 @@ API.ObjectManager.new = function(data)
 
         self.data.hide = state
 
-        if IS_SERVER then
+        if API.IsServer then
             API.EventManager.TriggerClientLocalEvent("Object:Update:Hide", -1, self.data.remoteId, state)
         else
             if DoesEntityExist(self.client.objectHandle) then
@@ -249,7 +284,7 @@ API.ObjectManager.new = function(data)
 
         self.data.dimension = dimension
 
-        if IS_SERVER then
+        if API.IsServer then
             API.EventManager.TriggerClientLocalEvent("Object:Update:Dimension", -1, self.data.remoteId, dimension)
         else
             if DoesEntityExist(self.client.objectHandle) and API.LocalPlayer.dimension ~= dimension then
@@ -269,10 +304,10 @@ API.ObjectManager.new = function(data)
     self.Destroy = function()
         -- Delete from table.
         if API.ObjectManager.exists(self.data.remoteId) then
-            API.ObjectManager.Entities[API.InvokeResourceName() .. "-" .. self.data.remoteId] = nil
+            API.ObjectManager.Entities[self.data.remoteId] = nil
         end
 
-        if IS_SERVER then
+        if API.IsServer then
             API.EventManager.TriggerClientLocalEvent("Object:Destroy", -1, self.data.remoteId)
         else
             if DoesEntityExist(self.client.objectHandle) then
@@ -284,10 +319,7 @@ API.ObjectManager.new = function(data)
         API.Utils.Debug.Print("^3Removed object with remoteId: " .. self.data.remoteId)
     end
 
-    API.ObjectManager.Entities[API.InvokeResourceName() .. "-" .. self.data.remoteId] = {
-        object = self,
-        registeredResource = API.InvokeResourceName()
-    }
+    API.ObjectManager.Entities[self.data.remoteId] = self
 
     API.Utils.Debug.Print("^3Created new object with remoteId: " .. self.data.remoteId)
 
@@ -295,14 +327,14 @@ API.ObjectManager.new = function(data)
 end
 
 API.ObjectManager.exists = function(id)
-    if API.ObjectManager.Entities[API.InvokeResourceName() .. "-" .. id] then
+    if API.ObjectManager.Entities[id] then
         return true
     end
 end
 
 API.ObjectManager.get = function(id)
     if API.ObjectManager.exists(id) then
-        return API.ObjectManager.Entities[API.InvokeResourceName() .. "-" .. id].object
+        return API.ObjectManager.Entities[id]
     end
 end
 
@@ -310,28 +342,18 @@ API.ObjectManager.getAll = function()
     return API.ObjectManager.Entities
 end
 
-API.ObjectManager.atHandle = function(handleId)
-    if IS_SERVER then return end
-
-    for k, v in pairs(API.ObjectManager.Entities) do
-        if v.object.client.objectHandle == handleId then
-            return v.object
-        end
-    end
-end
-
 API.ObjectManager.atRemoteId = function(remoteId)
     for k, v in pairs(API.ObjectManager.Entities) do
-        if v.object.data.remoteId == remoteId then
-            return v.object
+        if v.data.remoteId == remoteId then
+            return v
         end
     end
 end
 
 API.ObjectManager.atMysqlId = function(mysqlId)
     for k, v in pairs(API.ObjectManager.Entities) do
-        if v.object.data.id == mysqlId then
-            return v.object
+        if v.data.id == mysqlId then
+            return v
         end
     end
 end
@@ -343,8 +365,8 @@ API.ObjectManager.GetNearestObject = function(vec3, model, range)
     if type(vec3) ~= "vector3" then return end
 
     for k, v in pairs(API.ObjectManager.Entities) do
-        if v.object.data.model == model then
-            local dist = #(v.object.GetPositionVector3() - vec3)
+        if v.data.model == model then
+            local dist = #(v.GetPositionVector3() - vec3)
 
             if dist < rangeMeter then
                 rangeMeter = dist
@@ -356,83 +378,85 @@ API.ObjectManager.GetNearestObject = function(vec3, model, range)
     return closest
 end
 
----@param data MysqlObjectInterface
-API.ObjectManager.InsertSQL = function(data)
-    if not IS_SERVER then return end
+if API.IsServer then
 
-    API.Utils.Debug.Print("^4Inserting SQL Object...")
+    ---@param data MysqlObjectInterface
+    ---@async
+    API.ObjectManager.InsertSQL = function(data)
+        if not API.IsServer then return end
 
-    if GetResourceState("oxmysql") == "started" then
-        local insertId = exports.oxmysql:insert_async(
-            "INSERT INTO av_module_objects (model,x,y,z,rx,ry,rz,variables) VALUES (@model,@x,@y,@z,@rx,@ry,@rz,@variables)"
-            ,
-            {
-                ["@model"] = data.model,
-                ["@x"] = data.x,
-                ["@y"] = data.y,
-                ["@z"] = data.z,
-                ["@rx"] = data.rx,
-                ["@ry"] = data.ry,
-                ["@rz"] = data.rz,
-                ["@variables"] = json.encode(data.variables) or {}
-            }
-        )
-        if type(insertId) == "number" then
-            local dataResponse = exports.oxmysql:single_async(
-                "SELECT * FROM av_module_objects WHERE id = @id",
+        API.Utils.Debug.Print("^4Inserting SQL Object...")
+
+        if GetResourceState("oxmysql") == "started" then
+            local insertId = exports.oxmysql:insert_async(
+                "INSERT INTO av_module_objects (model,x,y,z,rx,ry,rz,variables) VALUES (@model,@x,@y,@z,@rx,@ry,@rz,@variables)"
+                ,
                 {
-                    ["@id"] = insertId
+                    ["@model"] = data.model,
+                    ["@x"] = data.x,
+                    ["@y"] = data.y,
+                    ["@z"] = data.z,
+                    ["@rx"] = data.rx or 0,
+                    ["@ry"] = data.ry or 0,
+                    ["@rz"] = data.rz or 0,
+                    ["@variables"] = json.encode(data.variables) or {}
                 }
             )
-            if dataResponse then
-                return API.ObjectManager.new(dataResponse)
+            if type(insertId) == "number" then
+                local dataResponse = exports.oxmysql:single_async(
+                    "SELECT * FROM av_module_objects WHERE id = @id",
+                    {
+                        ["@id"] = insertId
+                    }
+                )
+                if dataResponse then
+                    return API.ObjectManager.new(dataResponse)
+                end
             end
         end
     end
-end
 
-API.ObjectManager.LoadObjectsFromSQL = function()
-    if not IS_SERVER then return end
+    API.ObjectManager.LoadObjectsFromSQL = function()
+        if not API.IsServer then return end
 
-    if GetResourceState("oxmysql") == "started" then
-        exports.oxmysql:query(
-            "SELECT * FROM av_module_objects",
-            function(response)
-                if response and type(response) == "table" then
-                    API.Utils.Debug.Print(string.format("^4Loading %d objects...", #response))
+        if GetResourceState("oxmysql") == "started" then
+            exports.oxmysql:query(
+                "SELECT * FROM av_module_objects",
+                function(response)
+                    if response and type(response) == "table" then
+                        API.Utils.Debug.Print(string.format("^4Loading %d objects...", #response))
 
-                    for i = 1, #response do
-                        API.ObjectManager.new(response[i])
+                        for i = 1, #response do
+                            API.ObjectManager.new(response[i])
+                        end
+
+                        API.Utils.Debug.Print("^4Objects successfully loaded.")
                     end
-
-                    API.Utils.Debug.Print("^4Objects successfully loaded.")
                 end
-            end
-        )
-    end
-end
-
----@param validatorFunction fun(Object:CObject)
-API.ObjectManager.AddObjectVariableValidator = function(model, validatorFunction)
-    if type(validatorFunction) ~= "function" then
-        API.Utils.Debug.Print("^1Object validator should be a function.")
-        return
+            )
+        end
     end
 
-    if not API.ObjectManager.VariableValidators[model] then
-        API.ObjectManager.VariableValidators[model] = {}
+    ---@param validatorFunction fun(Object:CObject)
+    API.ObjectManager.AddVariableValidator = function(model, validatorFunction)
+        if type(validatorFunction) ~= "function" then
+            API.Utils.Debug.Print("^1Object validator should be a function.")
+            return
+        end
+
+        if not API.ObjectManager.VariableValidators[model] then
+            API.ObjectManager.VariableValidators[model] = {}
+        end
+
+        table.insert(API.ObjectManager.VariableValidators[model], validatorFunction)
     end
 
-    table.insert(API.ObjectManager.VariableValidators[model], validatorFunction)
-end
-
-API.ObjectManager.GetObjectVariableValidators = function(model)
-    if type(API.ObjectManager.VariableValidators[model]) == "table" then
-        return API.ObjectManager.VariableValidators[model]
+    API.ObjectManager.GetVariableValidator = function(model)
+        if type(API.ObjectManager.VariableValidators[model]) == "table" then
+            return API.ObjectManager.VariableValidators[model]
+        end
     end
-end
 
-if IS_SERVER then
     AddEventHandler("onResourceStart", function(resourceName)
         if GetCurrentResourceName() ~= resourceName then return end
 
@@ -440,23 +464,39 @@ if IS_SERVER then
             local source = source
 
             for k, v in pairs(API.ObjectManager.Entities) do
-                API.EventManager.TriggerClientLocalEvent("Object:Create", source, v.object.data)
+                API.EventManager.TriggerClientLocalEvent("Object:Create", source, v.data)
             end
         end)
 
-        API.ObjectManager.AddObjectVariableValidator("avp_wooden_barrel", function(Object)
+        API.ObjectManager.AddVariableValidator("avp_wooden_barrel", function(Object)
             local vars = Object.data.variables
 
             vars.grinderItemAmount = API.Utils.RoundNumber(vars.grinderItemAmount or 0, 0)
         end)
+
+        API.ObjectManager.AddVariableValidator("avp_wooden_barrel", function(Object)
+            local vars = Object.data.variables
+
+            vars.barrelAmount = API.Utils.RoundNumber(vars.barrelAmount or 0, 0)
+        end)
     end)
 else
+
+    API.ObjectManager.atHandle = function(handleId)
+        if API.IsServer then return end
+
+        for k, v in pairs(API.ObjectManager.Entities) do
+            if v.client.objectHandle == handleId then
+                return v
+            end
+        end
+    end
 
     AddEventHandler("onResourceStop", function(resourceName)
         if resourceName ~= GetCurrentResourceName() then return end
 
         for k, v in pairs(API.ObjectManager.Entities) do
-            v.object.Destroy()
+            v.Destroy()
         end
     end)
 
@@ -529,12 +569,16 @@ else
                 local playerPos = GetEntityCoords(PlayerPedId())
 
                 for k, v in pairs(API.ObjectManager.Entities) do
-                    if API.LocalPlayer.dimension == v.object.data.dimension then
-                        local dist = #(playerPos - v.object.GetPositionVector3())
+
+                    -- If dimension is not equals.
+                    if API.LocalPlayer.dimension ~= v.data.dimension then
+                        v.RemoveStream()
+                    else
+                        local dist = #(playerPos - v.GetPositionVector3())
                         if dist < 20.0 then
-                            v.object.AddStream()
+                            v.AddStream()
                         else
-                            v.object.RemoveStream()
+                            v.RemoveStream()
                         end
                     end
                 end
@@ -545,11 +589,10 @@ else
     end)
 end
 
--- Delete if another resource is restarted which has connections to this.
 AddEventHandler("onResourceStop", function(resourceName)
+    if GetCurrentResourceName() ~= resourceName then return end
+
     for k, v in pairs(API.ObjectManager.Entities) do
-        if v.registeredResource == resourceName then
-            v.object.Destroy()
-        end
+        v.Destroy()
     end
 end)

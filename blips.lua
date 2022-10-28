@@ -1,5 +1,3 @@
-local IS_SERVER = IsDuplicityVersion()
-
 API.BlipManager = {}
 ---@type table<string, {registeredResource:string; blip: CBlip; }>
 API.BlipManager.Entities = {}
@@ -27,7 +25,7 @@ API.BlipManager.new = function(data)
         return
     end
 
-    if IS_SERVER then
+    if API.IsServer then
         self.server = {}
 
         API.EventManager.TriggerClientLocalEvent("Blip:Create", -1, self.data)
@@ -51,7 +49,7 @@ API.BlipManager.new = function(data)
     self.SetColor = function(color)
         self.data.color = color
 
-        if not IS_SERVER then
+        if not API.IsServer then
             if DoesBlipExist(self.client.blipHandle) then
                 SetBlipColour(self.client.blipHandle, color)
             end
@@ -63,7 +61,7 @@ API.BlipManager.new = function(data)
     self.SetAlpha = function(alpha)
         self.data.alpha = alpha
 
-        if not IS_SERVER then
+        if not API.IsServer then
             if DoesBlipExist(self.client.blipHandle) then
                 SetBlipAlpha(self.client.blipHandle, alpha)
             end
@@ -75,7 +73,7 @@ API.BlipManager.new = function(data)
     self.SetSprite = function(sprite)
         self.data.sprite = sprite
 
-        if not IS_SERVER then
+        if not API.IsServer then
             if DoesBlipExist(self.client.blipHandle) then
                 SetBlipSprite(self.client.blipHandle, sprite)
             end
@@ -88,7 +86,7 @@ API.BlipManager.new = function(data)
     self.SetDisplay = function(displayId)
         self.data.display = displayId
 
-        if not IS_SERVER then
+        if not API.IsServer then
             if DoesBlipExist(self.client.blipHandle) then
                 SetBlipDisplay(self.client.blipHandle, displayId)
             end
@@ -100,7 +98,7 @@ API.BlipManager.new = function(data)
     self.SetShortRange = function(state)
         self.data.shortRange = state
 
-        if not IS_SERVER then
+        if not API.IsServer then
             if DoesBlipExist(self.client.blipHandle) then
                 SetBlipAsShortRange(self.client.blipHandle, state)
             end
@@ -112,7 +110,7 @@ API.BlipManager.new = function(data)
     self.SetScale = function(scale)
         self.data.scale = scale
 
-        if not IS_SERVER then
+        if not API.IsServer then
             if DoesBlipExist(self.client.blipHandle) then
                 SetBlipScale(self.client.blipHandle, scale)
             end
@@ -124,7 +122,7 @@ API.BlipManager.new = function(data)
     self.SetName = function(name)
         self.data.name = name
 
-        if not IS_SERVER then
+        if not API.IsServer then
             if DoesBlipExist(self.client.blipHandle) then
                 BeginTextCommandSetBlipName("STRING")
                 AddTextComponentString(name)
@@ -138,7 +136,7 @@ API.BlipManager.new = function(data)
     self.SetPosition = function(position)
         self.data.position = position
 
-        if not IS_SERVER then
+        if not API.IsServer then
             if DoesBlipExist(self.client.blipHandle) then
                 SetBlipCoords(self.client.blipHandle, position.x, position.y, position.z)
             end
@@ -149,11 +147,11 @@ API.BlipManager.new = function(data)
 
     self.Destroy = function()
         -- Delete from table
-        if API.BlipManager.Entities[API.InvokeResourceName() .. self.data.blipUid] then
-            API.BlipManager.Entities[API.InvokeResourceName() .. self.data.blipUid] = nil
+        if API.BlipManager.Entities[self.data.blipUid] then
+            API.BlipManager.Entities[self.data.blipUid] = nil
         end
 
-        if IS_SERVER then
+        if API.IsServer then
             API.EventManager.TriggerClientLocalEvent("Blip:Destroy", -1, self.data.blipUid)
         else
             if DoesBlipExist(self.client.blipHandle) then
@@ -162,7 +160,7 @@ API.BlipManager.new = function(data)
         end
     end
 
-    API.BlipManager.Entities[API.InvokeResourceName() .. self.data.blipUid] = {
+    API.BlipManager.Entities[self.data.blipUid] = {
         blip = self,
         registeredResource = API.InvokeResourceName()
     }
@@ -171,14 +169,14 @@ API.BlipManager.new = function(data)
 end
 
 API.BlipManager.exists = function(id)
-    if API.BlipManager.Entities[API.InvokeResourceName() .. id] then
+    if API.BlipManager.Entities[id] then
         return true
     end
 end
 
 API.BlipManager.get = function(id)
     if API.BlipManager.exists(id) then
-        return API.BlipManager.Entities[API.InvokeResourceName() .. id].blip
+        return API.BlipManager.Entities[id].blip
     end
 end
 
@@ -186,7 +184,7 @@ API.BlipManager.getAll = function()
     return API.BlipManager.Entities
 end
 
-if IS_SERVER then
+if API.IsServer then
     AddEventHandler("onResourceStart", function(resourceName)
         if GetCurrentResourceName() ~= resourceName then return end
 

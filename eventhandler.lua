@@ -1,5 +1,3 @@
-local IS_SERVER = IsDuplicityVersion()
-
 API.EventManager = {}
 ---@type table<string, { registeredResource: string; func: fun(...) }>
 API.EventManager.LocalEvents = {}
@@ -33,12 +31,12 @@ end
 API.EventManager.TriggerServerLocalEvent = function(eventName, ...)
     local invokeResource = API.InvokeResourceName()
 
-    if IS_SERVER and not API.EventManager.LocalEvents[invokeResource .. "-" .. eventName] then
+    if API.IsServer and not API.EventManager.LocalEvents[invokeResource .. "-" .. eventName] then
         API.Utils.Debug.Print("^1&LocalEvent is not registered: " .. eventName)
         return
     end
 
-    if IS_SERVER then
+    if API.IsServer then
         local Event = API.EventManager.LocalEvents[invokeResource .. "-" .. eventName]
         if Event.registeredResource ~= invokeResource then
             API.Utils.Debug.Print("^1&Can not trigger this function from another resource: " .. eventName)
@@ -57,12 +55,12 @@ end
 API.EventManager.TriggerClientLocalEvent = function(eventName, ...)
     local invokeResource = API.InvokeResourceName()
 
-    if not IS_SERVER and not API.EventManager.LocalEvents[invokeResource .. "-" .. eventName] then
+    if not API.IsServer and not API.EventManager.LocalEvents[invokeResource .. "-" .. eventName] then
         API.Utils.Debug.Print("^1LocalEvent is not registered: " .. eventName)
         return
     end
 
-    if IS_SERVER then
+    if API.IsServer then
         -- Here important to remove source.
         local args = table.pack(...)
         local onSource = args[1] or -1
@@ -80,7 +78,7 @@ API.EventManager.TriggerClientLocalEvent = function(eventName, ...)
     end
 end
 
-if IS_SERVER then
+if API.IsServer then
     RegisterNetEvent("client-to-server-local", function(eventName, args)
         local source = source
         API.EventManager.TriggerServerLocalEvent(eventName, table.unpack(args))
