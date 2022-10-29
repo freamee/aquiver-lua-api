@@ -24,6 +24,7 @@ shared_scripts {
     'object.lua',
     'raycast.lua',
     'particle.lua',
+    'actionshape.lua',
 
     -- This one should start the last.
     'main.lua'
