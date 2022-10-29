@@ -293,6 +293,16 @@ API.ObjectManager.new = function(data)
 
         if API.IsServer then
             API.EventManager.TriggerClientLocalEvent("Object:Update:Dimension", -1, self.data.remoteId, dimension)
+
+            if GetResourceState("oxmysql") == "started" then
+                exports.oxmysql:query(
+                    "UPDATE av_module_objects SET dimension = @dimension WHERE id = @id",
+                    {
+                        ["@id"] = self.data.id,
+                        ["@dimension"] = self.data.dimension,
+                    }
+                )
+            end
         else
             if DoesEntityExist(self.client.objectHandle) and API.LocalPlayer.dimension ~= dimension then
                 self.RemoveStream()
@@ -406,6 +416,7 @@ if API.IsServer then
                     ["@rx"] = data.rx or 0,
                     ["@ry"] = data.ry or 0,
                     ["@rz"] = data.rz or 0,
+                    ["@dimension"] = data.dimension or CONFIG.DEFAULT_DIMENSION,
                     ["@variables"] = json.encode(data.variables) or {}
                 }
             )
@@ -478,13 +489,16 @@ if API.IsServer then
         API.ObjectManager.AddVariableValidator("avp_wooden_barrel", function(Object)
             local vars = Object.data.variables
 
-            vars.grinderItemAmount = API.Utils.RoundNumber(vars.grinderItemAmount or 0, 0)
-        end)
+            vars.woodenBarrelLitre = API.Utils.RoundNumber((vars.woodenBarrelLitre or 0), 1)
+            vars.woodenBarrelAlcoholPercentage = API.Utils.RoundNumber((vars.woodenBarrelAlcoholPercentage or 0), 1)
+            vars.woodenBarrelAge = API.Utils.RoundNumber((vars.woodenBarrelAge or 0), 0)
 
-        API.ObjectManager.AddVariableValidator("avp_wooden_barrel", function(Object)
-            local vars = Object.data.variables
-
-            vars.barrelAmount = API.Utils.RoundNumber(vars.barrelAmount or 0, 0)
+            -- Reset if the litre is less then zero.
+            if vars.woodenBarrelLitre <= 0 then
+                vars.woodenBarrelItem = nil
+                vars.woodenBarrelAlcoholPercentage = 0
+                vars.woodenBarrelAge = 0
+            end
         end)
     end)
 

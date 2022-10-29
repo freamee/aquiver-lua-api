@@ -194,21 +194,18 @@ API.RaycastManager.SetEntityHandle = function(handle)
     API.RaycastManager.entityHitHandle = handle
 
     if API.RaycastManager.entityHitHandle then
-        --         local hitObject = self:GetHitObject()
-        --         if hitObject then
-        --             TriggerEvent(EVENTS.CLIENT.RAYCAST_AIMED_OBJECT, hitObject)
-        --         end
-
         -- Caching the class entity itself, so we do not have to loop the table always.
         if GetEntityType(API.RaycastManager.entityHitHandle) == 1 then
             local at = API.PedManager.atHandle(API.RaycastManager.entityHitHandle)
             if at then
                 API.RaycastManager.AimedPedEntity = at
+                API.EventManager.TriggerClientGlobalEvent("onPedRaycast", at)
             end
         elseif GetEntityType(API.RaycastManager.entityHitHandle) == 3 then
             local at = API.ObjectManager.atHandle(API.RaycastManager.entityHitHandle)
             if at then
                 API.RaycastManager.AimedObjectEntity = at
+                API.EventManager.TriggerClientGlobalEvent("onObjectRaycast", at)
             end
         end
 
@@ -252,6 +249,7 @@ API.RaycastManager.SetEntityHandle = function(handle)
     else
         API.RaycastManager.AimedObjectEntity = nil
         API.RaycastManager.AimedPedEntity = nil
+        API.EventManager.TriggerClientGlobalEvent("onNullRaycast")
     end
 end
 
