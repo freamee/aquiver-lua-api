@@ -83,6 +83,21 @@ API.ActionShapeManager.new = function(data)
 
     end
 
+    self.Destroy = function()
+        -- Delete from table.
+        if API.ActionShapeManager.Entities[self.data.remoteId] then
+            API.ActionShapeManager.Entities[self.data.remoteId] = nil
+        end
+
+        if API.IsServer then
+            API.EventManager.TriggerClientLocalEvent("ActionShape:Destroy", -1, self.data.remoteId)
+        else
+            self.RemoveStream()
+        end
+
+        API.Utils.Debug.Print("^3Removed ActionShape with remoteId: " .. self.data.remoteId)
+    end
+
     self.GetPositionVector3 = function()
         return vector3(self.data.position.x, self.data.position.y, self.data.position.z)
     end
@@ -92,6 +107,22 @@ API.ActionShapeManager.new = function(data)
     API.Utils.Debug.Print("^3Created new actionshape with remoteId: " .. self.data.remoteId)
 
     return self
+end
+
+API.ActionShapeManager.exists = function(remoteId)
+    if API.ActionShapeManager.Entities[remoteId] then
+        return true
+    end
+end
+
+API.ActionShapeManager.get = function(remoteId)
+    if API.ActionShapeManager.exists(remoteId) then
+        return API.ActionShapeManager.Entities[remoteId]
+    end
+end
+
+API.ActionShapeManager.getAll = function()
+    return API.ActionShapeManager.Entities
 end
 
 if API.IsServer then
@@ -106,13 +137,28 @@ if API.IsServer then
             end
         end)
     end)
+
+    AddEventHandler("onResourceStop", function(resourceName)
+        for k, v in pairs(API.ActionShapeManager.Entities) do
+            if v.server.invokedFromResource == resourceName then
+                v.Destroy()
+            end
+        end
+    end)
 else
     AddEventHandler("onClientResourceStart", function(resourceName)
         if GetCurrentResourceName() ~= resourceName then return end
 
-        API.EventManager.AddLocalEvent("ActionShape:Create", function(data)
-            API.ActionShapeManager.new(data)
-        end)
+        API.EventManager.AddLocalEvent({
+            ["ActionShape:Create"] = function(data)
+                API.ActionShapeManager.new(data)
+            end,
+            ["ActionShape:Destroy"] = function(remoteId)
+                local ActionShapeEntity = API.ActionShapeManager.get(remoteId)
+                if not ActionShapeEntity then return end
+                ActionShapeEntity.Destroy()
+            end,
+        })
 
         Citizen.CreateThread(function()
             while true do
