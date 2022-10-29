@@ -28,7 +28,7 @@ API.BlipManager.new = function(data)
     if API.IsServer then
         self.server = {}
 
-        API.EventManager.TriggerClientLocalEvent("Blip:Create", -1, self.data)
+        TriggerClientEvent("AQUIVER:Blip:Create", -1, self.data)
     else
         self.client = {}
         self.client.blipHandle = nil
@@ -54,7 +54,7 @@ API.BlipManager.new = function(data)
                 SetBlipColour(self.client.blipHandle, color)
             end
         else
-            API.EventManager.TriggerClientLocalEvent("Blip:Update:Color", -1, self.data.blipUid, color)
+            TriggerClientEvent("AQUIVER:Blip:Update:Color", -1, self.data.blipUid, color)
         end
     end
 
@@ -66,7 +66,7 @@ API.BlipManager.new = function(data)
                 SetBlipAlpha(self.client.blipHandle, alpha)
             end
         else
-            API.EventManager.TriggerClientLocalEvent("Blip:Update:Alpha", -1, self.data.blipUid, alpha)
+            TriggerClientEvent("AQUIVER:Blip:Update:Alpha", -1, self.data.blipUid, alpha)
         end
     end
 
@@ -78,7 +78,7 @@ API.BlipManager.new = function(data)
                 SetBlipSprite(self.client.blipHandle, sprite)
             end
         else
-            API.EventManager.TriggerClientLocalEvent("Blip:Update:Sprite", -1, self.data.blipUid, sprite)
+            TriggerClientEvent("AQUIVER:Blip:Update:Sprite", -1, self.data.blipUid, sprite)
         end
 
     end
@@ -91,7 +91,7 @@ API.BlipManager.new = function(data)
                 SetBlipDisplay(self.client.blipHandle, displayId)
             end
         else
-            API.EventManager.TriggerClientLocalEvent("Blip:Update:Display", -1, self.data.blipUid, displayId)
+            TriggerClientEvent("AQUIVER:Blip:Update:Display", -1, self.data.blipUid, displayId)
         end
     end
 
@@ -103,7 +103,7 @@ API.BlipManager.new = function(data)
                 SetBlipAsShortRange(self.client.blipHandle, state)
             end
         else
-            API.EventManager.TriggerClientLocalEvent("Blip:Update:ShortRange", -1, self.data.blipUid, state)
+            TriggerClientEvent("AQUIVER:Blip:Update:ShortRange", -1, self.data.blipUid, state)
         end
     end
 
@@ -115,7 +115,7 @@ API.BlipManager.new = function(data)
                 SetBlipScale(self.client.blipHandle, scale)
             end
         else
-            API.EventManager.TriggerClientLocalEvent("Blip:Update:Scale", -1, self.data.blipUid, scale)
+            TriggerClientEvent("AQUIVER:Blip:Update:Scale", -1, self.data.blipUid, scale)
         end
     end
 
@@ -129,7 +129,7 @@ API.BlipManager.new = function(data)
                 EndTextCommandSetBlipName(blip)
             end
         else
-            API.EventManager.TriggerClientLocalEvent("Blip:Update:Name", -1, self.data.blipUid, name)
+            TriggerClientEvent("AQUIVER:Blip:Update:Name", -1, self.data.blipUid, name)
         end
     end
 
@@ -141,7 +141,7 @@ API.BlipManager.new = function(data)
                 SetBlipCoords(self.client.blipHandle, position.x, position.y, position.z)
             end
         else
-            API.EventManager.TriggerClientLocalEvent("Blip:Update:Position", -1, self.data.blipUid, position)
+            TriggerClientEvent("AQUIVER:Blip:Update:Position", -1, self.data.blipUid, position)
         end
     end
 
@@ -152,7 +152,7 @@ API.BlipManager.new = function(data)
         end
 
         if API.IsServer then
-            API.EventManager.TriggerClientLocalEvent("Blip:Destroy", -1, self.data.blipUid)
+            TriggerClientEvent("AQUIVER:Blip:Destroy", -1, self.data.blipUid)
         else
             if DoesBlipExist(self.client.blipHandle) then
                 RemoveBlip(self.client.blipHandle)
@@ -188,75 +188,73 @@ if API.IsServer then
     AddEventHandler("onResourceStart", function(resourceName)
         if GetCurrentResourceName() ~= resourceName then return end
 
-        API.EventManager.AddLocalEvent("Blip:RequestData", function()
+        RegisterNetEvent("AQUIVER:Blip:RequestData", function()
             local source = source
 
             for k, v in pairs(API.BlipManager.Entities) do
-                API.EventManager.TriggerClientLocalEvent("Blip:Create", source, v.blip.data)
-            end
+                TriggerClientEvent("AQUIVER:Blip:Create", source, v.blip.data)
+            end 
         end)
     end)
 else
     AddEventHandler("onClientResourceStart", function(resourceName)
         if GetCurrentResourceName() ~= resourceName then return end
 
-        API.EventManager.AddLocalEvent({
-            ["Blip:Create"] = function(data)
-                API.BlipManager.new(data)
-            end,
-            ["Blip:Update:Color"] = function(uid, color)
-                local BlipEntity = API.BlipManager.get(uid)
-                if not BlipEntity then return end
-                BlipEntity.SetColor(color)
-            end,
-            ["Blip:Update:Alpha"] = function(uid, alpha)
-                local BlipEntity = API.BlipManager.get(uid)
-                if not BlipEntity then return end
-                BlipEntity.SetAlpha(alpha)
-            end,
-            ["Blip:Update:Sprite"] = function(uid, sprite)
-                local BlipEntity = API.BlipManager.get(uid)
-                if not BlipEntity then return end
-                BlipEntity.SetSprite(sprite)
-            end,
-            ["Blip:Update:Display"] = function(uid, displayId)
-                local BlipEntity = API.BlipManager.get(uid)
-                if not BlipEntity then return end
-                BlipEntity.SetDisplay(displayId)
-            end,
-            ["Blip:Update:ShortRange"] = function(uid, state)
-                local BlipEntity = API.BlipManager.get(uid)
-                if not BlipEntity then return end
-                BlipEntity.SetShortRange(state)
-            end,
-            ["Blip:Update:Scale"] = function(uid, scale)
-                local BlipEntity = API.BlipManager.get(uid)
-                if not BlipEntity then return end
-                BlipEntity.SetScale(scale)
-            end,
-            ["Blip:Update:Name"] = function(uid, name)
-                local BlipEntity = API.BlipManager.get(uid)
-                if not BlipEntity then return end
-                BlipEntity.SetName(name)
-            end,
-            ["Blip:Update:Position"] = function(uid, position)
-                local BlipEntity = API.BlipManager.get(uid)
-                if not BlipEntity then return end
-                BlipEntity.SetPosition(position)
-            end,
-            ["Blip:Destroy"] = function(uid)
-                local BlipEntity = API.BlipManager.get(uid)
-                if not BlipEntity then return end
-                BlipEntity.Destroy()
-            end
-        })
+        RegisterNetEvent("AQUIVER:Blip:Create", function(data)
+            API.BlipManager.new(data)
+        end)
+        RegisterNetEvent("AQUIVER:Blip:Update:Color", function(uid, color)
+            local BlipEntity = API.BlipManager.get(uid)
+            if not BlipEntity then return end
+            BlipEntity.SetColor(color)
+        end)
+        RegisterNetEvent("AQUIVER:Blip:Update:Alpha", function(uid, alpha)
+            local BlipEntity = API.BlipManager.get(uid)
+            if not BlipEntity then return end
+            BlipEntity.SetAlpha(alpha)
+        end)
+        RegisterNetEvent("AQUIVER:Blip:Update:Sprite", function(uid, sprite)
+            local BlipEntity = API.BlipManager.get(uid)
+            if not BlipEntity then return end
+            BlipEntity.SetSprite(sprite)
+        end)
+        RegisterNetEvent("AQUIVER:Blip:Update:Display", function(uid, displayId)
+            local BlipEntity = API.BlipManager.get(uid)
+            if not BlipEntity then return end
+            BlipEntity.SetDisplay(displayId)
+        end)
+        RegisterNetEvent("AQUIVER:Blip:Update:ShortRange", function(uid, state)
+            local BlipEntity = API.BlipManager.get(uid)
+            if not BlipEntity then return end
+            BlipEntity.SetShortRange(state)
+        end)
+        RegisterNetEvent("AQUIVER:Blip:Update:Scale", function(uid,scale)
+            local BlipEntity = API.BlipManager.get(uid)
+            if not BlipEntity then return end
+            BlipEntity.SetScale(scale)
+        end)
+        RegisterNetEvent("AQUIVER:Blip:Update:Name", function(uid, name)
+            local BlipEntity = API.BlipManager.get(uid)
+            if not BlipEntity then return end
+            BlipEntity.SetName(name)
+        end)
+        RegisterNetEvent("AQUIVER:Blip:Update:Position", function(uid, position)
+            local BlipEntity = API.BlipManager.get(uid)
+            if not BlipEntity then return end
+            BlipEntity.SetPosition(position)
+        end)
+        RegisterNetEvent("AQUIVER:Blip:Destroy", function(uid)
+            local BlipEntity = API.BlipManager.get(uid)
+            if not BlipEntity then return end
+            BlipEntity.Destroy()
+        end)
 
         Citizen.CreateThread(function()
             while true do
 
                 if NetworkIsPlayerActive(PlayerId()) then
                     -- Request Data from server.
-                    API.EventManager.TriggerServerLocalEvent("Blip:RequestData")
+                    TriggerServerEvent("AQUIVER:Blip:RequestData")
                     break
                 end
 

@@ -70,14 +70,14 @@ if API.IsServer then
             if self.HasAttachment(attachmentName) then return end
 
             self.attachments[attachmentName] = true
-            API.EventManager.TriggerClientLocalEvent("Player:Attachment:Add", self.srcID, attachmentName)
+            TriggerClientEvent("AQUIVER:Player:Attachment:Add", self.srcID, attachmentName)
         end
 
         self.RemoveAttachment = function(attachmentName)
             if not self.HasAttachment(attachmentName) then return end
 
             self.attachments[attachmentName] = nil
-            API.EventManager.TriggerClientLocalEvent("Player:Attachment:Remove", self.srcID, attachmentName)
+            TriggerClientEvent("AQUIVER:Player:Attachment:Remove", self.srcID, attachmentName)
         end
 
         self.HasAttachment = function(attachmentName)
@@ -88,32 +88,32 @@ if API.IsServer then
 
         self.RemoveAllAttachments = function()
             self.attachments = {}
-            API.EventManager.TriggerClientLocalEvent("Player:Attachment:RemoveAll", self.srcID)
+            TriggerClientEvent("AQUIVER:Player:Attachment:RemoveAll", self.srcID)
         end
 
         self.Freeze = function(state)
             self.variables.isFreezed = state
-            API.EventManager.TriggerClientLocalEvent("Player:Freeze:State", self.srcID, state)
+            TriggerClientEvent("AQUIVER:Player:Freeze:State", self.srcID, state)
         end
 
         self.PlayAnimation = function(dict, name, flag)
-            API.EventManager.TriggerClientLocalEvent("Player:Animation:Play", self.srcID, dict, name, flag)
+            TriggerClientEvent("AQUIVER:Player:Animation:Play", self.srcID, dict, name, flag)
         end
 
         self.StopAnimation = function()
-            API.EventManager.TriggerClientLocalEvent("Player:Animation:Stop", self.srcID)
+            TriggerClientEvent("AQUIVER:Player:Animation:Stop", self.srcID)
         end
 
         self.ForceAnimation = function(dict, name, flag)
-            API.EventManager.TriggerClientLocalEvent("Player:ForceAnimation:Play", self.srcID, dict, name, flag)
+            TriggerClientEvent("AQUIVER:Player:ForceAnimation:Play", self.srcID, dict, name, flag)
         end
 
         self.StopForceAnimation = function()
-            API.EventManager.TriggerClientLocalEvent("Player:ForceAnimation:Stop", self.srcID)
+            TriggerClientEvent("AQUIVER:Player:ForceAnimation:Stop", self.srcID)
         end
 
         self.DisableMovement = function(state)
-            API.EventManager.TriggerClientLocalEvent("Player:DisableMovement:State", self.srcID, state)
+            TriggerClientEvent("AQUIVER:Player:DisableMovement:State", self.srcID, state)
         end
 
         ---@param type "error" | "success" | "info" | "warning"
@@ -128,7 +128,7 @@ if API.IsServer then
 
         self.SetDimension = function(dimension)
             SetPlayerRoutingBucket(self.srcID, dimension)
-            API.EventManager.TriggerClientLocalEvent("Player:Set:Dimension", self.srcID, dimension)
+            TriggerClientEvent("AQUIVER:Player:Set:Dimension", self.srcID, dimension)
         end
 
         --- Start progress for player.
@@ -161,7 +161,7 @@ if API.IsServer then
 
         ---@param jsonContent table
         self.SendNUIMessage = function(jsonContent)
-            API.EventManager.TriggerClientLocalEvent("Player:SendNUIMessage", self.srcID, jsonContent)
+            TriggerClientEvent("AQUIVER:Player:SendNUIMessage", self.srcID, jsonContent)
         end
 
         self.Destroy = function()
@@ -244,134 +244,132 @@ else
     AddEventHandler("onClientResourceStart", function(resourceName)
         if GetCurrentResourceName() ~= resourceName then return end
 
-        API.EventManager.AddLocalEvent({
-            ["Player:Attachment:Add"] = function(attachmentName)
-                -- Return if already exists.
-                if API.LocalPlayer.HasAttachment(attachmentName) then return end
+        RegisterNetEvent("AQUIVER:Player:Attachment:Add", function(attachmentName)
+            -- Return if already exists.
+            if API.LocalPlayer.HasAttachment(attachmentName) then return end
 
-                local aData = API.AttachmentManager.get(attachmentName)
-                if not aData then return end
+            local aData = API.AttachmentManager.get(attachmentName)
+            if not aData then return end
 
-                local modelHash = GetHashKey(aData.model)
-                API.Utils.Client.requestModel(modelHash)
+            local modelHash = GetHashKey(aData.model)
+            API.Utils.Client.requestModel(modelHash)
 
-                local localPlayer = PlayerPedId()
-                local playerCoords = GetEntityCoords(localPlayer)
-                local obj = CreateObject(modelHash, playerCoords, true, true, true)
+            local localPlayer = PlayerPedId()
+            local playerCoords = GetEntityCoords(localPlayer)
+            local obj = CreateObject(modelHash, playerCoords, true, true, true)
 
-                AttachEntityToEntity(
-                    obj,
-                    localPlayer,
-                    GetPedBoneIndex(localPlayer, aData.boneId),
-                    aData.x, aData.y, aData.z,
-                    aData.rx, aData.ry, aData.rz,
-                    true, true, false, false, 2, true
-                )
+            AttachEntityToEntity(
+                obj,
+                localPlayer,
+                GetPedBoneIndex(localPlayer, aData.boneId),
+                aData.x, aData.y, aData.z,
+                aData.rx, aData.ry, aData.rz,
+                true, true, false, false, 2, true
+            )
 
-                API.LocalPlayer.attachments[attachmentName] = obj
-            end,
-            ["Player:Attachment:Remove"] = function(attachmentName)
-                if not API.LocalPlayer.HasAttachment(attachmentName) then return end
+            API.LocalPlayer.attachments[attachmentName] = obj
+        end)
+        RegisterNetEvent("AQUIVER:Player:Attachment:Remove", function(attachmentName)
+            if not API.LocalPlayer.HasAttachment(attachmentName) then return end
 
-                DeleteEntity(API.LocalPlayer.attachments[attachmentName])
+            DeleteEntity(API.LocalPlayer.attachments[attachmentName])
 
-                API.LocalPlayer.attachments[attachmentName] = nil
-            end,
-            ["Player:Attachment:RemoveAll"] = function()
-                for attachmentName, objectHandle in pairs(API.LocalPlayer.attachments) do
-                    if DoesEntityExist(objectHandle) then
-                        DeleteEntity(objectHandle)
-                    end
+            API.LocalPlayer.attachments[attachmentName] = nil
+        end)
+        RegisterNetEvent("AQUIVER:Player:Attachment:RemoveAll", function()
+            for attachmentName, objectHandle in pairs(API.LocalPlayer.attachments) do
+                if DoesEntityExist(objectHandle) then
+                    DeleteEntity(objectHandle)
                 end
+            end
 
-                API.LocalPlayer.attachments = {}
-            end,
-            ["Player:Freeze:State"] = function(state)
-                API.LocalPlayer.isFreezed = state
-                FreezeEntityPosition(PlayerPedId(), state)
-            end,
-            ["Player:Animation:Play"] = function(dict, name, flag)
-                RequestAnimDict(dict)
-                while not HasAnimDictLoaded(dict) do
-                    Citizen.Wait(10)
-                end
-                TaskPlayAnim(PlayerPedId(), dict, name, 4.0, 4.0, -1, tonumber(flag), 1.0, false, false, false)
-            end,
-            ["Player:Animation:Stop"] = function()
-                ClearPedTasks(PlayerPedId())
-            end,
-            ["Player:ForceAnimation:Play"] = function(dict, name, flag)
-                RequestAnimDict(dict)
+            API.LocalPlayer.attachments = {}
+        end)
+        RegisterNetEvent("AQUIVER:Player:Freeze:State", function(state)
+            API.LocalPlayer.isFreezed = state
+            FreezeEntityPosition(PlayerPedId(), state)
+        end)
+        RegisterNetEvent("AQUIVER:Player:Animation:Play", function(dict, name, flag)
+            RequestAnimDict(dict)
+            while not HasAnimDictLoaded(dict) do
+                Citizen.Wait(10)
+            end
+            TaskPlayAnim(PlayerPedId(), dict, name, 4.0, 4.0, -1, tonumber(flag), 1.0, false, false, false)
+        end)
+        RegisterNetEvent("AQUIVER:Player:Animation:Stop", function()
+            ClearPedTasks(PlayerPedId())
+        end)
+        RegisterNetEvent("AQUIVER:Player:ForceAnimation:Play", function(dict, name, flag)
+            RequestAnimDict(dict)
 
-                while not HasAnimDictLoaded(dict) do
-                    Citizen.Wait(10)
-                end
+            while not HasAnimDictLoaded(dict) do
+                Citizen.Wait(10)
+            end
 
-                API.LocalPlayer.forceAnimationData = {
-                    dict = dict,
-                    name = name,
-                    flag = flag
-                }
+            API.LocalPlayer.forceAnimationData = {
+                dict = dict,
+                name = name,
+                flag = flag
+            }
 
-                Citizen.CreateThread(function()
-                    while API.LocalPlayer.forceAnimationData.dict ~= nil do
+            Citizen.CreateThread(function()
+                while API.LocalPlayer.forceAnimationData.dict ~= nil do
 
-                        local localPlayer = PlayerPedId()
+                    local localPlayer = PlayerPedId()
 
-                        if not IsEntityPlayingAnim(
+                    if not IsEntityPlayingAnim(
+                        localPlayer,
+                        API.LocalPlayer.forceAnimationData.dict,
+                        API.LocalPlayer.forceAnimationData.name,
+                        API.LocalPlayer.forceAnimationData.flag
+                    ) then
+                        TaskPlayAnim(
                             localPlayer,
                             API.LocalPlayer.forceAnimationData.dict,
                             API.LocalPlayer.forceAnimationData.name,
-                            API.LocalPlayer.forceAnimationData.flag
-                        ) then
-                            TaskPlayAnim(
-                                localPlayer,
-                                API.LocalPlayer.forceAnimationData.dict,
-                                API.LocalPlayer.forceAnimationData.name,
-                                4.0,
-                                4.0,
-                                -1,
-                                tonumber(API.LocalPlayer.forceAnimationData.flag),
-                                1.0,
-                                false, false, false
-                            )
-                        end
+                            4.0,
+                            4.0,
+                            -1,
+                            tonumber(API.LocalPlayer.forceAnimationData.flag),
+                            1.0,
+                            false, false, false
+                        )
+                    end
 
-                        Citizen.Wait(CONFIG.FORCE_ANIMATION_INTERVAL)
+                    Citizen.Wait(CONFIG.FORCE_ANIMATION_INTERVAL)
+                end
+            end)
+        end)
+        RegisterNetEvent("AQUIVER:Player:ForceAnimation:Stop", function()
+            API.LocalPlayer.forceAnimationData = {
+                dict = nil,
+                name = nil,
+                flag = nil
+            }
+            ClearPedTasks(PlayerPedId())
+        end)
+        RegisterNetEvent("AQUIVER:Player:DisableMovement:State", function(state)
+            if state then
+                if state == API.LocalPlayer.isMovementDisabled then return end
+
+                API.LocalPlayer.isMovementDisabled = state
+
+                Citizen.CreateThread(function()
+                    while API.LocalPlayer.isMovementDisabled do
+
+                        DisableAllControlActions(0)
+                        EnableControlAction(0, 1, true)
+                        EnableControlAction(0, 2, true)
+
+                        Citizen.Wait(0)
                     end
                 end)
-            end,
-            ["Player:ForceAnimation:Stop"] = function()
-                API.LocalPlayer.forceAnimationData = {
-                    dict = nil,
-                    name = nil,
-                    flag = nil
-                }
-                ClearPedTasks(PlayerPedId())
-            end,
-            ["Player:DisableMovement:State"] = function(state)
-                if state then
-                    if state == API.LocalPlayer.isMovementDisabled then return end
-
-                    API.LocalPlayer.isMovementDisabled = state
-
-                    Citizen.CreateThread(function()
-                        while API.LocalPlayer.isMovementDisabled do
-
-                            DisableAllControlActions(0)
-                            EnableControlAction(0, 1, true)
-                            EnableControlAction(0, 2, true)
-
-                            Citizen.Wait(0)
-                        end
-                    end)
-                else
-                    API.LocalPlayer.isMovementDisabled = state
-                end
-            end,
-            ["Player:Set:Dimension"] = function(dimension)
-                API.LocalPlayer.dimension = dimension
+            else
+                API.LocalPlayer.isMovementDisabled = state
             end
-        })
+        end)
+        RegisterNetEvent("AQUIVER:Player:Set:Dimension", function(dimension)
+            API.LocalPlayer.dimension = dimension
+        end)
     end)
 end

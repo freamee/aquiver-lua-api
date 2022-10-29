@@ -72,7 +72,7 @@ API.ObjectManager.new = function(data)
     end
 
     if API.IsServer then
-        API.EventManager.TriggerClientLocalEvent("Object:Create", -1, self.data)
+        TriggerClientEvent("AQUIVER:Object:Create", -1, self.data)
 
         ---@param cb fun(Player:CPlayer, Object:CObject)
         self.AddPressFunction = function(cb)
@@ -111,8 +111,7 @@ API.ObjectManager.new = function(data)
                 end
             end
 
-            API.EventManager.TriggerClientLocalEvent("Object:Update:Variables", -1, self.data.remoteId,
-                self.data.variables)
+            TriggerClientEvent("AQUIVER:Object:Update:Variables", -1, self.data.remoteId, self.data.variables)
 
             if GetResourceState("oxmysql") == "started" then
                 exports.oxmysql:query(
@@ -149,7 +148,7 @@ API.ObjectManager.new = function(data)
 
             self.client.objectHandle = obj
 
-            API.EventManager.TriggerClientGlobalEvent("onObjectStreamIn", self)
+            TriggerEvent("onObjectStreamIn", self)
 
             API.Utils.Debug.Print(string.format("^3Object streamed in (%d, %s)", self.data.remoteId, self.data.model))
         end
@@ -163,7 +162,7 @@ API.ObjectManager.new = function(data)
 
             self.client.isStreamed = false
 
-            API.EventManager.TriggerClientGlobalEvent("onObjectStreamOut", self)
+            TriggerEvent("onObjectStreamOut", self)
 
             API.Utils.Debug.Print(string.format("^3Object streamed out (%d, %s)", self.data.remoteId, self.data.model))
         end
@@ -185,7 +184,7 @@ API.ObjectManager.new = function(data)
         self.data.z = z
 
         if API.IsServer then
-            API.EventManager.TriggerClientLocalEvent("Object:Update:Position", -1, self.data.remoteId, x, y, z)
+            TriggerClientEvent("AQUIVER:Object:Update:Position", -1, self.data.remoteId, x, y, z)
 
             if GetResourceState("oxmysql") == "started" then
                 exports.oxmysql:query(
@@ -213,7 +212,7 @@ API.ObjectManager.new = function(data)
         self.data.rz = rz
 
         if API.IsServer then
-            API.EventManager.TriggerClientLocalEvent("Object:Update:Rotation", -1, self.data.remoteId, rx, ry, rz)
+            TriggerClientEvent("AQUIVER:Object:Update:Rotation", -1, self.data.remoteId, rx, ry, rz)
 
             if GetResourceState("oxmysql") == "started" then
                 exports.oxmysql:query(
@@ -239,7 +238,7 @@ API.ObjectManager.new = function(data)
         self.data.model = model
 
         if API.IsServer then
-            API.EventManager.TriggerClientLocalEvent("Object:Update:Model", -1, self.data.remoteId, model)
+            TriggerClientEvent("AQUIVER:Object:Update:Model", -1, self.data.remoteId, model)
 
             if GetResourceState("oxmysql") == "started" then
                 exports.oxmysql:query(
@@ -263,7 +262,7 @@ API.ObjectManager.new = function(data)
         self.data.alpha = alpha
 
         if API.IsServer then
-            API.EventManager.TriggerClientLocalEvent("Object:Update:Alpha", -1, self.data.remoteId, alpha)
+            TriggerClientEvent("AQUIVER:Object:Update:Alpha", -1, self.data.remoteId, alpha)
         else
             if DoesEntityExist(self.client.objectHandle) then
                 SetEntityAlpha(self.client.objectHandle, alpha, false)
@@ -277,7 +276,7 @@ API.ObjectManager.new = function(data)
         self.data.hide = state
 
         if API.IsServer then
-            API.EventManager.TriggerClientLocalEvent("Object:Update:Hide", -1, self.data.remoteId, state)
+            TriggerClientEvent("AQUIVER:Object:Update:Hide", -1, self.data.remoteId, state)
         else
             if DoesEntityExist(self.client.objectHandle) then
                 SetEntityVisible(self.client.objectHandle, not state, 0)
@@ -292,7 +291,7 @@ API.ObjectManager.new = function(data)
         self.data.dimension = dimension
 
         if API.IsServer then
-            API.EventManager.TriggerClientLocalEvent("Object:Update:Dimension", -1, self.data.remoteId, dimension)
+            TriggerClientEvent("AQUIVER:Object:Update:Dimension", -1, self.data.remoteId, dimension)
 
             if GetResourceState("oxmysql") == "started" then
                 exports.oxmysql:query(
@@ -325,7 +324,8 @@ API.ObjectManager.new = function(data)
         end
 
         if API.IsServer then
-            API.EventManager.TriggerClientLocalEvent("Object:Destroy", -1, self.data.remoteId)
+            TriggerClientEvent("AQUIVER:Object:Destroy", -1, self.data.remoteId)
+            TriggerEvent("onObjectDestroyed", self)
         else
             if DoesEntityExist(self.client.objectHandle) then
                 DeleteEntity(self.client.objectHandle)
@@ -339,6 +339,10 @@ API.ObjectManager.new = function(data)
     API.ObjectManager.Entities[self.data.remoteId] = self
 
     API.Utils.Debug.Print("^3Created new object with remoteId: " .. self.data.remoteId)
+
+    if API.IsServer then
+        TriggerEvent("onObjectCreated", self)
+    end
 
     return self
 end
@@ -478,12 +482,12 @@ if API.IsServer then
     AddEventHandler("onResourceStart", function(resourceName)
         if GetCurrentResourceName() ~= resourceName then return end
 
-        API.EventManager.AddLocalEvent("Object:RequestData", function()
+        RegisterNetEvent("AQUIVER:Object:RequestData", function()
             local source = source
 
             for k, v in pairs(API.ObjectManager.Entities) do
-                API.EventManager.TriggerClientLocalEvent("Object:Create", source, v.data)
-            end
+                TriggerClientEvent("AQUIVER:Object:Create", source, v.data)
+            end   
         end)
 
         API.ObjectManager.AddVariableValidator("avp_wooden_barrel", function(Object)
@@ -532,58 +536,56 @@ else
     AddEventHandler("onClientResourceStart", function(resourceName)
         if GetCurrentResourceName() ~= resourceName then return end
 
-        API.EventManager.AddLocalEvent({
-            ["Object:Create"] = function(data)
-                API.ObjectManager.new(data)
-            end,
-            ["Object:Update:Position"] = function(remoteId, x, y, z)
-                local ObjectEntity = API.ObjectManager.get(remoteId)
-                if not ObjectEntity then return end
-                ObjectEntity.SetPosition(x, y, z)
-            end,
-            ["Object:Update:Rotation"] = function(remoteId, rx, ry, rz)
-                local ObjectEntity = API.ObjectManager.get(remoteId)
-                if not ObjectEntity then return end
-                ObjectEntity.SetRotation(rx, ry, rz)
-            end,
-            ["Object:Update:Model"] = function(remoteId, model)
-                local ObjectEntity = API.ObjectManager.get(remoteId)
-                if not ObjectEntity then return end
-                ObjectEntity.SetModel(model)
-            end,
-            ["Object:Update:Alpha"] = function(remoteId, alpha)
-                local ObjectEntity = API.ObjectManager.get(remoteId)
-                if not ObjectEntity then return end
-                ObjectEntity.SetAlpha(alpha)
-            end,
-            ["Object:Update:Variables"] = function(remoteId, variables)
-                local ObjectEntity = API.ObjectManager.get(remoteId)
-                if not ObjectEntity then return end
-                ObjectEntity.data.variables = variables
-            end,
-            ["Object:Update:Hide"] = function(remoteId, state)
-                local ObjectEntity = API.ObjectManager.get(remoteId)
-                if not ObjectEntity then return end
-                ObjectEntity.SetHide(state)
-            end,
-            ["Object:Update:Dimension"] = function(remoteId, dimension)
-                local ObjectEntity = API.ObjectManager.get(remoteId)
-                if not ObjectEntity then return end
-                ObjectEntity.SetDimension(dimension)
-            end,
-            ["Object:Destroy"] = function(remoteId)
-                local ObjectEntity = API.ObjectManager.get(remoteId)
-                if not ObjectEntity then return end
-                ObjectEntity.Destroy()
-            end
-        })
+        RegisterNetEvent("AQUIVER:Object:Create", function(data)
+            API.ObjectManager.new(data)
+        end)
+        RegisterNetEvent("AQUIVER:Object:Update:Position", function(remoteId, x, y, z)
+            local ObjectEntity = API.ObjectManager.get(remoteId)
+            if not ObjectEntity then return end
+            ObjectEntity.SetPosition(x, y, z)
+        end)
+        RegisterNetEvent("AQUIVER:Object:Update:Rotation", function(remoteId, rx, ry, rz)
+            local ObjectEntity = API.ObjectManager.get(remoteId)
+            if not ObjectEntity then return end
+            ObjectEntity.SetRotation(rx, ry, rz)
+        end)
+        RegisterNetEvent("AQUIVER:Object:Update:Model", function(remoteId, model)
+            local ObjectEntity = API.ObjectManager.get(remoteId)
+            if not ObjectEntity then return end
+            ObjectEntity.SetModel(model)
+        end)
+        RegisterNetEvent("AQUIVER:Object:Update:Alpha", function(remoteId, alpha)
+            local ObjectEntity = API.ObjectManager.get(remoteId)
+            if not ObjectEntity then return end
+            ObjectEntity.SetAlpha(alpha)
+        end)
+        RegisterNetEvent("AQUIVER:Object:Update:Variables", function(remoteId, variables)
+            local ObjectEntity = API.ObjectManager.get(remoteId)
+            if not ObjectEntity then return end
+            ObjectEntity.data.variables = variables   
+        end)
+        RegisterNetEvent("AQUIVER:Object:Update:Hide", function(remoteId, state)
+            local ObjectEntity = API.ObjectManager.get(remoteId)
+            if not ObjectEntity then return end
+            ObjectEntity.SetHide(state) 
+        end)
+        RegisterNetEvent("AQUIVER:Object:Update:Dimension", function(remoteId, dimension)
+            local ObjectEntity = API.ObjectManager.get(remoteId)
+            if not ObjectEntity then return end
+            ObjectEntity.SetDimension(dimension)
+        end)
+        RegisterNetEvent("AQUIVER:Object:Destroy", function(remoteId)
+            local ObjectEntity = API.ObjectManager.get(remoteId)
+            if not ObjectEntity then return end
+            ObjectEntity.Destroy()
+        end)
 
         Citizen.CreateThread(function()
             while true do
 
                 if NetworkIsPlayerActive(PlayerId()) then
                     -- Request Data from server.
-                    API.EventManager.TriggerServerLocalEvent("Object:RequestData")
+                    TriggerServerEvent("AQUIVER:Object:RequestData")
                     break
                 end
 

@@ -29,7 +29,7 @@ API.ParticleManager.new = function(data)
         self.data.remoteId = API.ParticleManager.remoteIdCount
         API.ParticleManager.remoteIdCount = (API.ParticleManager.remoteIdCount or 0) + 1
 
-        API.EventManager.TriggerClientLocalEvent("Particle:Create", -1, self.data)
+        TriggerClientEvent("AQUIVER:Particle:Create", -1, self.data)
     else
         self.client = {}
         self.client.particleHandle = nil
@@ -129,7 +129,7 @@ API.ParticleManager.new = function(data)
         end
 
         if API.IsServer then
-            API.EventManager.TriggerClientLocalEvent("Particle:Destroy", -1, self.data.remoteId)
+            TriggerClientEvent("AQUIVER:Particle:Destroy", -1, self.data.remoteId)
         else
             if DoesEntityExist(self.client.particleHandle) then
                 DeleteEntity(self.client.particleHandle)
@@ -173,11 +173,11 @@ if API.IsServer then
     AddEventHandler("onResourceStart", function(resourceName)
         if GetCurrentResourceName() ~= resourceName then return end
 
-        API.EventManager.AddLocalEvent("Particle:RequestData", function()
+        RegisterNetEvent("AQUIVER:Particle:RequestData", function()
             local source = source
 
             for k, v in pairs(API.ParticleManager.Entities) do
-                API.EventManager.TriggerClientLocalEvent("Particle:Create", source, v.data)
+                TriggerClientEvent("AQUIVER:Particle:Create", source, v.data)
             end
         end)
     end)
@@ -201,42 +201,37 @@ else
     AddEventHandler("onClientResourceStart", function(resourceName)
         if GetCurrentResourceName() ~= resourceName then return end
 
-        API.EventManager.AddLocalEvent({
-            ["Particle:Create"] = function(data)
-                API.ParticleManager.new(data)
-            end,
-            ["Particle:Destroy"] = function(remoteId)
-                local ParticleEntity = API.ParticleManager.get(remoteId)
-                if not ParticleEntity then return end
-                ParticleEntity.Destroy()
-            end
-        })
+        RegisterNetEvent("AQUIVER:Particle:Create", function(data)
+            API.ParticleManager.new(data)
+        end)
+        RegisterNetEvent("AQUIVER:Particle:Destroy", function(remoteId)
+            local ParticleEntity = API.ParticleManager.get(remoteId)
+            if not ParticleEntity then return end
+            ParticleEntity.Destroy()
+        end)
 
-        API.EventManager.AddGlobalEvent({
-            ---@param ObjectEntity CObject
-            ["onObjectStreamIn"] = function(ObjectEntity)
-                for k, v in pairs(API.ParticleManager.Entities) do
-                    if v.data.toObjectRemoteId == ObjectEntity.data.remoteId then
-                        v.AddStream()
-                    end
-                end
-            end,
-            ---@param ObjectEntity CObject
-            ["onObjectStreamOut"] = function(ObjectEntity)
-                for k, v in pairs(API.ParticleManager.Entities) do
-                    if v.data.toObjectRemoteId == ObjectEntity.data.remoteId then
-                        v.RemoveStream()
-                    end
+        AddEventHandler("onObjectStreamIn", function(ObjectEntity)
+            for k, v in pairs(API.ParticleManager.Entities) do
+                if v.data.toObjectRemoteId == ObjectEntity.data.remoteId then
+                    v.AddStream()
                 end
             end
-        })
+        end)
+
+        AddEventHandler("onObjectStreamOut", function(ObjectEntity)
+            for k, v in pairs(API.ParticleManager.Entities) do
+                if v.data.toObjectRemoteId == ObjectEntity.data.remoteId then
+                    v.RemoveStream()
+                end
+            end
+        end)
 
         Citizen.CreateThread(function()
             while true do
 
                 if NetworkIsPlayerActive(PlayerId()) then
                     -- Request Data from server.
-                    API.EventManager.TriggerServerLocalEvent("Particle:RequestData")
+                    TriggerServerEvent("AQUIVER:Particle:RequestData")
                     break
                 end
 

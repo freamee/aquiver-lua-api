@@ -15,7 +15,6 @@ shared_scripts {
     'utils.lua',
     'radarblips.lua',
     'blips.lua',
-    'eventhandler.lua',
     'versionchecker.lua',
     'player.lua',
     'attachments.lua',

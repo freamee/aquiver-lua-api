@@ -5,9 +5,17 @@
 - onObjectRaycast (Object: CObject)
 - onNullRaycast ()
 
+## Server global events
+- onObjectInteractionPress (remoteId: CObject remote ID)
+- onPedInteractionPress (uid: CPed uid)
+- onObjectCreated (Object: CObject)
+- onObjectDestroyed (Object: CObject)
+- onPedDestroyed (Ped: CPed)
+- onPedCreated (Ped: CPed)
+
 Register them on clientside with the api via:
 ```lua
-api.EventManager.AddGlobalEvent("onPedRaycast", function(Ped)
+AddEventHandler("onPedRaycast", (Ped)
     print(json.encode(Ped.data))
 end)
 ```
@@ -81,23 +89,5 @@ api.ObjectManager.AddVariableValidator("avp_wooden_barrel", function(Object)
     local vars = Object.data.variables
 
     vars.grinderItemAmount = API.Utils.RoundNumber(vars.grinderItemAmount or 0, 0)
-end)
-```
-
-## Adding local event listeners.
-```lua
-API.EventManager.AddLocalEvent({
-    ["EVENT_ONE"] = function(arg1)
-        print(arg1)
-    end,
-    ["EVENT_TWO"] = function(arg1, arg2)
-        print(arg1, arg2)
-    end
-})
-
--- OR
-
-api.EventManager.AddLocalEvent("EVENT_ONE", function(arg1)
-    print(arg1)
 end)
 ```

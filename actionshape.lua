@@ -24,7 +24,7 @@ API.ActionShapeManager.new = function(data)
         self.data.remoteId = API.ActionShapeManager.remoteIdCount
         API.ActionShapeManager.remoteIdCount = (API.ActionShapeManager.remoteIdCount or 0) + 1
 
-        API.EventManager.TriggerClientLocalEvent("ActionShape:Create", -1, self.data)
+        TriggerClientEvent("AQUIVER:ActionShape:Create", -1, self.data)
     else
         self.client = {}
         self.client.isStreamed = false
@@ -68,8 +68,8 @@ API.ActionShapeManager.new = function(data)
 
             self.client.isEntered = true
 
-            API.EventManager.TriggerClientGlobalEvent("onActionShapeEnter", v)
-            API.EventManager.TriggerServerGlobalEvent("onActionShapeEnter", v)
+            TriggerEvent("onActionShapeEnter", self)
+            TriggerServerEvent("onActionShapeEnter", self)
         end
 
         self.onLeave = function()
@@ -77,8 +77,8 @@ API.ActionShapeManager.new = function(data)
 
             self.client.isEntered = false
 
-            API.EventManager.TriggerClientLocalEvent("onActionShapeLeave", v)
-            API.EventManager.TriggerServerGlobalEvent("onActionShapeLeave", v)
+            TriggerEvent("onActionShapeLeave", self)
+            TriggerServerEvent("onActionShapeLeave", self)
         end
 
     end
@@ -90,7 +90,7 @@ API.ActionShapeManager.new = function(data)
         end
 
         if API.IsServer then
-            API.EventManager.TriggerClientLocalEvent("ActionShape:Destroy", -1, self.data.remoteId)
+            TriggerClientEvent("AQUIVER:ActionShape:Destroy", -1, self.data.remoteId)
         else
             self.RemoveStream()
         end
@@ -129,11 +129,11 @@ if API.IsServer then
     AddEventHandler("onResourceStart", function(resourceName)
         if GetCurrentResourceName() ~= resourceName then return end
 
-        API.EventManager.AddLocalEvent("ActionShape:RequestData", function()
+        RegisterNetEvent("AQUIVER:ActionShape:RequestData", function()
             local source = source
 
             for k, v in pairs(API.ActionShapeManager.Entities) do
-                API.EventManager.TriggerClientLocalEvent("ActionShape:Create", source, v.data)
+                TriggerClientEvent("AQUIVER:ActionShape:Create", source, v.data)
             end
         end)
     end)
@@ -149,23 +149,21 @@ else
     AddEventHandler("onClientResourceStart", function(resourceName)
         if GetCurrentResourceName() ~= resourceName then return end
 
-        API.EventManager.AddLocalEvent({
-            ["ActionShape:Create"] = function(data)
-                API.ActionShapeManager.new(data)
-            end,
-            ["ActionShape:Destroy"] = function(remoteId)
-                local ActionShapeEntity = API.ActionShapeManager.get(remoteId)
-                if not ActionShapeEntity then return end
-                ActionShapeEntity.Destroy()
-            end,
-        })
+        RegisterNetEvent("AQUIVER:ActionShape:Create", function(data)
+            API.ActionShapeManager.new(data)
+        end)
+        RegisterNetEvent("AQUIVER:ActionShape:Destroy", function(remoteId)
+            local ActionShapeEntity = API.ActionShapeManager.get(remoteId)
+            if not ActionShapeEntity then return end
+            ActionShapeEntity.Destroy()
+        end)
 
         Citizen.CreateThread(function()
             while true do
 
                 if NetworkIsPlayerActive(PlayerId()) then
                     -- Request Data from server.
-                    API.EventManager.TriggerServerLocalEvent("ActionShape:RequestData")
+                    TriggerServerEvent("AQUIVER:ActionShape:RequestData")
                     break
                 end
 

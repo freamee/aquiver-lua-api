@@ -32,7 +32,7 @@ API.PedManager.new = function(data)
         self.server = {}
         self.server.invokedFromResource = API.InvokeResourceName()
 
-        API.EventManager.TriggerClientLocalEvent("Ped:Create", -1, self.data)
+        TriggerClientEvent("AQUIVER:Ped:Create", -1, self.data)
 
         ---@param cb fun(Player:CPlayer, Ped:CPed)
         self.AddPressFunction = function(cb)
@@ -100,7 +100,7 @@ API.PedManager.new = function(data)
         self.data.position = position
 
         if API.IsServer then
-            API.EventManager.TriggerClientLocalEvent("Ped:Update:Position", -1, self.data.uid, position)
+            TriggerClientEvent("AQUIVER:Ped:Update:Position", -1, self.data.uid, position)
         else
             if DoesEntityExist(self.client.pedHandle) then
                 SetEntityCoordsNoOffset(self.client.pedHandle, self.GetPositionVector3(), false, false, false)
@@ -112,7 +112,7 @@ API.PedManager.new = function(data)
         self.data.heading = heading
 
         if API.IsServer then
-            API.EventManager.TriggerClientLocalEvent("Ped:Update:Heading", -1, self.data.uid, heading)
+            TriggerClientEvent("AQUIVER:Ped:Update:Heading", -1, self.data.uid, heading)
         else
             if DoesEntityExist(self.client.pedHandle) then
                 SetEntityHeading(self.client.pedHandle, heading)
@@ -124,7 +124,7 @@ API.PedManager.new = function(data)
         self.data.model = model
 
         if API.IsServer then
-            API.EventManager.TriggerClientLocalEvent("Ped:Update:Model", -1, self.data.uid, model)
+            TriggerClientEvent("AQUIVER:Ped:Update:Model", -1, self.data.uid, model)
         else
             if self.client.isStreamed then
                 self.RemoveStream()
@@ -139,13 +139,7 @@ API.PedManager.new = function(data)
         self.data.animFlag = flag
 
         if API.IsServer then
-            API.EventManager.TriggerClientLocalEvent("Ped:Update:Animation",
-                -1,
-                self.data.uid,
-                self.data.animDict,
-                self.data.animName,
-                self.data.animFlag
-            )
+            TriggerClientEvent("AQUIVER:Ped:Update:Animation", -1, self.data.uid, self.data.animDict, self.data.animName, self.data.animFlag)
         else
             if DoesEntityExist(self.client.pedHandle) then
                 RequestAnimDict(self.data.animDict)
@@ -166,7 +160,7 @@ API.PedManager.new = function(data)
         self.data.dimension = dimension
 
         if API.IsServer then
-            API.EventManager.TriggerClientLocalEvent("Ped:Update:Dimension", -1, self.data.uid, dimension)
+            TriggerClientEvent("AQUIVER:Ped:Update:Dimension", -1, self.data.uid, dimension)
         else
             if DoesEntityExist(self.client.pedHandle) and API.LocalPlayer.dimension ~= dimension then
                 self.RemoveStream()
@@ -181,7 +175,8 @@ API.PedManager.new = function(data)
         end
 
         if API.IsServer then
-            API.EventManager.TriggerClientLocalEvent("Ped:Destroy", -1, self.data.uid)
+            TriggerClientEvent("AQUIVER:Ped:Destroy", -1, self.data.uid)
+            TriggerEvent("onPedDestroyed", self)
         else
             if DoesEntityExist(self.client.pedHandle) then
                 DeleteEntity(self.client.pedHandle)
@@ -195,6 +190,10 @@ API.PedManager.new = function(data)
     API.PedManager.Entities[self.data.uid] = self
 
     API.Utils.Debug.Print("^3Created new ped with uid: " .. self.data.uid)
+
+    if API.IsServer then
+        TriggerEvent("onPedCreated", self)
+    end
 
     return self
 end
@@ -219,11 +218,11 @@ if API.IsServer then
     AddEventHandler("onResourceStart", function(resourceName)
         if GetCurrentResourceName() ~= resourceName then return end
 
-        API.EventManager.AddLocalEvent("Ped:RequestData", function()
+        RegisterNetEvent("AQUIVER:Ped:RequestData", function()
             local source = source
 
             for k, v in pairs(API.PedManager.Entities) do
-                API.EventManager.TriggerClientLocalEvent("Ped:Create", source, v.data)
+                TriggerClientEvent("AQUIVER:Ped:Create", source, v.data)
             end
         end)
     end)
@@ -256,48 +255,46 @@ else
     AddEventHandler("onClientResourceStart", function(resourceName)
         if GetCurrentResourceName() ~= resourceName then return end
 
-        API.EventManager.AddLocalEvent({
-            ["Ped:Create"] = function(data)
-                API.PedManager.new(data)
-            end,
-            ["Ped:Update:Animation"] = function(id, dict, name, flag)
-                local PedEntity = API.PedManager.get(id)
-                if not PedEntity then return end
-                PedEntity.SetAnimation(dict, name, flag)
-            end,
-            ["Ped:Update:Model"] = function(id, model)
-                local PedEntity = API.PedManager.get(id)
-                if not PedEntity then return end
-                PedEntity.SetModel(model)
-            end,
-            ["Ped:Update:Heading"] = function(id, heading)
-                local PedEntity = API.PedManager.get(id)
-                if not PedEntity then return end
-                PedEntity.SetHeading(heading)
-            end,
-            ["Ped:Update:Position"] = function(id, position)
-                local PedEntity = API.PedManager.get(id)
-                if not PedEntity then return end
-                PedEntity.SetPosition(position)
-            end,
-            ["Ped:Update:Dimension"] = function(id, dimension)
-                local PedEntity = API.PedManager.get(id)
-                if not PedEntity then return end
-                PedEntity.SetDimension(dimension)
-            end,
-            ["Ped:Destroy"] = function(id)
-                local PedEntity = API.PedManager.get(id)
-                if not PedEntity then return end
-                PedEntity.Destroy()
-            end
-        })
+        RegisterNetEvent("AQUIVER:Ped:Create", function(data)
+            API.PedManager.new(data)
+        end)
+        RegisterNetEvent("AQUIVER:Ped:Update:Animation", function(id, dict, name, flag)
+            local PedEntity = API.PedManager.get(id)
+            if not PedEntity then return end
+            PedEntity.SetAnimation(dict, name, flag)
+        end)
+        RegisterNetEvent("AQUIVER:Ped:Update:Model", function(id,model)
+            local PedEntity = API.PedManager.get(id)
+            if not PedEntity then return end
+            PedEntity.SetModel(model)
+        end)
+        RegisterNetEvent("AQUIVER:Ped:Update:Heading", function(id, heading)
+            local PedEntity = API.PedManager.get(id)
+            if not PedEntity then return end
+            PedEntity.SetHeading(heading)
+        end)
+        RegisterNetEvent("AQUIVER:Ped:Update:Position", function(id, position)
+            local PedEntity = API.PedManager.get(id)
+            if not PedEntity then return end
+            PedEntity.SetPosition(position)
+        end)
+        RegisterNetEvent("AQUIVER:Ped:Update:Dimension", function(id, dimension)
+            local PedEntity = API.PedManager.get(id)
+            if not PedEntity then return end
+            PedEntity.SetDimension(dimension)
+        end)
+        RegisterNetEvent("AQUIVER:Ped:Destroy", function(id)
+            local PedEntity = API.PedManager.get(id)
+            if not PedEntity then return end
+            PedEntity.Destroy()
+        end)
 
         Citizen.CreateThread(function()
             while true do
 
                 if NetworkIsPlayerActive(PlayerId()) then
                     -- Request Data from server.
-                    API.EventManager.TriggerServerLocalEvent("Ped:RequestData")
+                    TriggerServerEvent("AQUIVER:Ped:RequestData")
                     break
                 end
 

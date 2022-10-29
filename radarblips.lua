@@ -25,7 +25,7 @@ API.RadarBlipManager.new = function(data)
     if API.IsServer then
         self.server = {}
 
-        API.EventManager.TriggerClientLocalEvent("RadarBlip:Create", -1, self.data)
+        TriggerClientEvent("AQUIVER:RadarBlip:Create", -1, self.data)
     else
         self.client = {}
         self.client.blipHandle = nil
@@ -47,7 +47,7 @@ API.RadarBlipManager.new = function(data)
                 SetBlipScale(self.client.blipHandle, radius)
             end
         else
-            API.EventManager.TriggerClientLocalEvent("RadarBlip:Update:Radius", -1, self.data.blipUid, radius)
+            TriggerClientEvent("AQUIVER:RadarBlip:Update:Radius", -1, self.data.blipUid, radius)
         end
     end
 
@@ -59,7 +59,7 @@ API.RadarBlipManager.new = function(data)
                 SetBlipColour(self.client.blipHandle, color)
             end
         else
-            API.EventManager.TriggerClientLocalEvent("RadarBlip:Update:Color", -1, self.data.blipUid, color)
+            TriggerClientEvent("AQUIVER:RadarBlip:Update:Color", -1, self.data.blipUid, color)
         end
     end
 
@@ -71,7 +71,7 @@ API.RadarBlipManager.new = function(data)
                 SetBlipAlpha(self.client.blipHandle, alpha)
             end
         else
-            API.EventManager.TriggerClientLocalEvent("RadarBlip:Update:Alpha", -1, self.data.blipUid, alpha)
+            TriggerClientEvent("AQUIVER:RadarBlip:Update:Alpha", -1, self.data.blipUid, alpha)
         end
     end
 
@@ -83,7 +83,7 @@ API.RadarBlipManager.new = function(data)
                 SetBlipFlashes(self.client.blipHandle, state)
             end
         else
-            API.EventManager.TriggerClientLocalEvent("RadarBlip:Update:Flasing", -1, self.data.blipUid, state)
+            TriggerClientEvent("AQUIVER:RadarBlip:Update:Flashing", -1, self.data.blipUid, state)
         end
     end
 
@@ -94,7 +94,7 @@ API.RadarBlipManager.new = function(data)
         end
 
         if API.IsServer then
-            API.EventManager.TriggerClientLocalEvent("RadarBlip:Destroy", -1, self.data.blipUid)
+            TriggerClientEvent("AQUIVER:RadarBlip:Destroy", -1, self.data.blipUid)
         else
             if DoesBlipExist(self.client.blipHandle) then
                 RemoveBlip(self.client.blipHandle)
@@ -130,11 +130,11 @@ if API.IsServer then
     AddEventHandler("onResourceStart", function(resourceName)
         if GetCurrentResourceName() ~= resourceName then return end
 
-        API.EventManager.AddLocalEvent("RadarBlip:RequestData", function()
+        RegisterNetEvent("AQUIVER:RadarBlip:RequestData", function()
             local source = source
 
             for k, v in pairs(API.RadarBlipManager.Entities) do
-                API.EventManager.TriggerClientLocalEvent("RadarBlip:Create", source, v.blip.data)
+                TriggerClientEvent("AQUIVER:RadarBlip:Create", source, v.blip.data)
             end
         end)
     end)
@@ -142,43 +142,41 @@ else
     AddEventHandler("onClientResourceStart", function(resourceName)
         if GetCurrentResourceName() ~= resourceName then return end
 
-        API.EventManager.AddLocalEvent({
-            ["RadarBlip:Create"] = function(data)
-                API.RadarBlipManager.new(data)
-            end,
-            ["RadarBlip:Update:Color"] = function(uid, color)
-                local RadarBlipEntity = API.RadarBlipManager.get(uid)
-                if not RadarBlipEntity then return end
-                RadarBlipEntity.SetColor(color)
-            end,
-            ["RadarBlip:Update:Radius"] = function(uid, radius)
-                local RadarBlipEntity = API.RadarBlipManager.get(uid)
-                if not RadarBlipEntity then return end
-                RadarBlipEntity.SetRadius(radius)
-            end,
-            ["RadarBlip:Update:Alpha"] = function(uid, alpha)
-                local RadarBlipEntity = API.RadarBlipManager.get(uid)
-                if not RadarBlipEntity then return end
-                RadarBlipEntity.SetAlpha(alpha)
-            end,
-            ["RadarBlip:Update:Flashing"] = function(uid, state)
-                local RadarBlipEntity = API.RadarBlipManager.get(uid)
-                if not RadarBlipEntity then return end
-                RadarBlipEntity.SetFlashing(state)
-            end,
-            ["RadarBlip:Destroy"] = function(uid)
-                local RadarBlipEntity = API.RadarBlipManager.get(uid)
-                if not RadarBlipEntity then return end
-                RadarBlipEntity.Destroy()
-            end
-        })
+        RegisterNetEvent("AQUIVER:RadarBlip:Create", function(data)
+            API.RadarBlipManager.new(data)
+        end)
+        RegisterNetEvent("AQUIVER:RadarBlip:Update:Color", function(uid,color)
+            local RadarBlipEntity = API.RadarBlipManager.get(uid)
+            if not RadarBlipEntity then return end
+            RadarBlipEntity.SetColor(color)
+        end)
+        RegisterNetEvent("AQUIVER:RadarBlip:Update:Radius", function(uid,radius)
+            local RadarBlipEntity = API.RadarBlipManager.get(uid)
+            if not RadarBlipEntity then return end
+            RadarBlipEntity.SetRadius(radius)
+        end)
+        RegisterNetEvent("AQUIVER:RadarBlip:Update:Alpha", function(uid,alpha)
+            local RadarBlipEntity = API.RadarBlipManager.get(uid)
+            if not RadarBlipEntity then return end
+            RadarBlipEntity.SetAlpha(alpha)
+        end)
+        RegisterNetEvent("AQUIVER:RadarBlip:Update:Flashing", function(uid,state)
+            local RadarBlipEntity = API.RadarBlipManager.get(uid)
+            if not RadarBlipEntity then return end
+            RadarBlipEntity.SetFlashing(state)
+        end)
+        RegisterNetEvent("AQUIVER:RadarBlip:Destroy", function(uid)
+            local RadarBlipEntity = API.RadarBlipManager.get(uid)
+            if not RadarBlipEntity then return end
+            RadarBlipEntity.Destroy()
+        end)
 
         Citizen.CreateThread(function()
             while true do
 
                 if NetworkIsPlayerActive(PlayerId()) then
                     -- Request Data from server.
-                    API.EventManager.TriggerServerLocalEvent("RadarBlip:RequestData")
+                    TriggerServerEvent("AQUIVER:RadarBlip:RequestData")
                     break
                 end
 
