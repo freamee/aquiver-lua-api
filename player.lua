@@ -201,6 +201,10 @@ if API.IsServer then
         return API.PlayerManager.Entities[srcID]
     end
 
+    API.PlayerManager.getAll = function()
+        return API.PlayerManager.Entities
+    end
+
     API.PlayerManager.exists = function(srcID)
         if API.PlayerManager.Entities[srcID] then
             return true

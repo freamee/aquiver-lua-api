@@ -340,6 +340,15 @@ API.ObjectManager.new = function(data)
         if API.IsServer then
             TriggerClientEvent("AQUIVER:Object:Destroy", -1, self.data.remoteId)
             TriggerEvent("onObjectDestroyed", self)
+
+            if GetResourceState("oxmysql") == "started" then
+                exports.oxmysql:query(
+                    "DELETE FROM av_module_objects WHERE id = @id",
+                    {
+                        ["@id"] = self.data.id
+                    }
+                )
+            end
         else
             if DoesEntityExist(self.client.objectHandle) then
                 DeleteEntity(self.client.objectHandle)

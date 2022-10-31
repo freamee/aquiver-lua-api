@@ -209,6 +209,15 @@ if API.IsServer then
             end
         end
     end)
+
+    AddEventHandler("onObjectDestroyed", function(Object)
+        -- Destroy particle if the object got destroyed.
+        for k,v in pairs(API.ParticleManager.Entities) do
+            if v.data.toObjectRemoteId == Object.data.remoteId then
+                v.Destroy()
+            end
+        end
+    end)   
 else
     AddEventHandler("onResourceStop", function(resourceName)
         if resourceName ~= GetCurrentResourceName() then return end
