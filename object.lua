@@ -1,7 +1,7 @@
 API.ObjectManager = {}
 ---@type table<string, CObject>
 API.ObjectManager.Entities = {}
----@type table<string, table<string, fun(Object:CObject)>>
+---@type table<string, { invokedFromResource: string; cb: fun(Object:CObject) }[]>
 API.ObjectManager.VariableValidators = {}
 API.ObjectManager.remoteIdCount = 1
 
@@ -124,7 +124,7 @@ API.ObjectManager.new = function(data)
             local validators = API.ObjectManager.GetVariableValidator(self.data.model)
             if validators then
                 for i = 1, #validators, 1 do
-                    validators[i](self)
+                    validators[i].cb(self)
                 end
             end
 
@@ -496,7 +496,10 @@ if API.IsServer then
             API.ObjectManager.VariableValidators[model] = {}
         end
 
-        table.insert(API.ObjectManager.VariableValidators[model], validatorFunction)
+        table.insert(API.ObjectManager.VariableValidators[model], {
+            cb = validatorFunction,
+            invokedFromResource = API.InvokeResourceName()
+        })
 
         for k,v in pairs(API.ObjectManager.Entities) do
             if v.data.model == model then
@@ -527,6 +530,15 @@ if API.IsServer then
         for k, v in pairs(API.ObjectManager.Entities) do
             if v.server.invokedFromResource == resourceName then
                 v.Destroy()
+            end
+        end
+
+        -- Remove variable validators when the specified resource is stopped.
+        for k,v in pairs(API.ObjectManager.VariableValidators) do
+            for i = 1, #v, 1 do
+                if v[i].invokedFromResource == resourceName then
+                    table.remove(API.ObjectManager.VariableValidators[k], i)
+                end
             end
         end
     end)
