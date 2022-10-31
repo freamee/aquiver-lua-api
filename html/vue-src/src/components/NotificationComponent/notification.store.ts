@@ -1,4 +1,5 @@
 import { playAudio } from '@/plugins/audioPlugin';
+import eventhandler from '@/plugins/eventhandler';
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
@@ -13,7 +14,7 @@ interface DataState {
     Notifications: Array<INotification>;
 }
 
-export const useNotifications = defineStore("notifications", () => {
+export const useNotifications = defineStore("NotificationStore", () => {
     const store = ref<DataState>({
         Notifications: []
     });
@@ -69,12 +70,7 @@ export const useNotifications = defineStore("notifications", () => {
     return { store, sendNotification }
 });
 
-window.addEventListener("message", (e) => {
-    const d = e.data;
-
-    if (d.event == "Send-Notification") {
-        const { sendNotification } = useNotifications();
-
-        sendNotification(d.type, d.message);
-    }
+eventhandler.on("Send-Notification", ({type, message}) => {
+    const { sendNotification } = useNotifications();
+    sendNotification(type, message);
 });

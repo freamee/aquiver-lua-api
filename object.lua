@@ -103,6 +103,32 @@ API.ObjectManager.new = function(data)
             self.SyncVariables()
         end
 
+
+        self.RemoveVariable = function(key)
+            self.data.variables[key] = nil
+
+            self.SyncVariables()
+        end
+
+        self.SetVar = function(key,value)
+            self.data.variables[key] = value
+        end
+
+        self.SetVars = function(vars)
+            if type(vars) ~= "table" then
+                API.Utils.Debug.Print("^1Object SetVars failed: vars should be a key-value table.")
+                return
+            end
+
+            for k, v in pairs(vars) do
+                self.data.variables[k] = v
+            end
+        end
+
+        self.RemoveVar = function(key)
+            self.data.variables[key] = nil
+        end
+
         self.SyncVariables = function()
             local validators = API.ObjectManager.GetVariableValidator(self.data.model)
             if validators then
@@ -123,9 +149,6 @@ API.ObjectManager.new = function(data)
                 )
             end
         end
-
-        -- Sync variables immediately here. This is a double query after it created, so yeah here we can increase performance if we want.
-        self.SyncVariables()
     else
         self.client = {}
         self.client.isStreamed = false
@@ -342,6 +365,9 @@ API.ObjectManager.new = function(data)
 
     if API.IsServer then
         TriggerEvent("onObjectCreated", self)
+
+        -- Sync variables immediately here. This is a double query after it created, so yeah here we can increase performance if we want.
+        self.SyncVariables()
     end
 
     return self
@@ -461,16 +487,22 @@ if API.IsServer then
 
     ---@param validatorFunction fun(Object:CObject)
     API.ObjectManager.AddVariableValidator = function(model, validatorFunction)
-        if type(validatorFunction) ~= "function" then
+        if not Citizen.GetFunctionReference(validatorFunction) then
             API.Utils.Debug.Print("^1Object validator should be a function.")
             return
         end
 
-        if not API.ObjectManager.VariableValidators[model] then
+        if type(API.ObjectManager.VariableValidators[model]) ~= "table" then
             API.ObjectManager.VariableValidators[model] = {}
         end
 
         table.insert(API.ObjectManager.VariableValidators[model], validatorFunction)
+
+        for k,v in pairs(API.ObjectManager.Entities) do
+            if v.data.model == model then
+                v.SyncVariables()
+            end
+        end
     end
 
     API.ObjectManager.GetVariableValidator = function(model)
@@ -488,21 +520,6 @@ if API.IsServer then
             for k, v in pairs(API.ObjectManager.Entities) do
                 TriggerClientEvent("AQUIVER:Object:Create", source, v.data)
             end   
-        end)
-
-        API.ObjectManager.AddVariableValidator("avp_wooden_barrel", function(Object)
-            local vars = Object.data.variables
-
-            vars.woodenBarrelLitre = API.Utils.RoundNumber((vars.woodenBarrelLitre or 0), 1)
-            vars.woodenBarrelAlcoholPercentage = API.Utils.RoundNumber((vars.woodenBarrelAlcoholPercentage or 0), 1)
-            vars.woodenBarrelAge = API.Utils.RoundNumber((vars.woodenBarrelAge or 0), 0)
-
-            -- Reset if the litre is less then zero.
-            if vars.woodenBarrelLitre <= 0 then
-                vars.woodenBarrelItem = nil
-                vars.woodenBarrelAlcoholPercentage = 0
-                vars.woodenBarrelAge = 0
-            end
         end)
     end)
 
@@ -562,7 +579,11 @@ else
         RegisterNetEvent("AQUIVER:Object:Update:Variables", function(remoteId, variables)
             local ObjectEntity = API.ObjectManager.get(remoteId)
             if not ObjectEntity then return end
-            ObjectEntity.data.variables = variables   
+            ObjectEntity.data.variables = variables
+
+            if API.RaycastManager.AimedObjectEntity == ObjectEntity then
+                TriggerEvent("onObjectRaycast", ObjectEntity)
+            end
         end)
         RegisterNetEvent("AQUIVER:Object:Update:Hide", function(remoteId, state)
             local ObjectEntity = API.ObjectManager.get(remoteId)

@@ -1,3 +1,4 @@
+import eventhandler from '@/plugins/eventhandler';
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
@@ -10,7 +11,7 @@ interface DataState {
     percent: number;
 }
 
-export const useProgressStore = defineStore("playerProgress", () => {
+export const useProgressStore = defineStore("ProgressStore", () => {
     const store = ref<DataState>({
         opened: false,
 
@@ -53,13 +54,7 @@ export const useProgressStore = defineStore("playerProgress", () => {
     return { store, StartProgress }
 });
 
-
-window.addEventListener("message", (e) => {
-    const d = e.data;
-
-    if (d.event == "Progress-Start") {
-        const { StartProgress } = useProgressStore();
-
-        StartProgress(d.text, d.time);
-    }
+eventhandler.on("Progress-Start", ({text, time}) => {
+    const { StartProgress } = useProgressStore();
+    StartProgress(text, time);
 });

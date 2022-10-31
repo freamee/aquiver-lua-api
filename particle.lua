@@ -131,8 +131,8 @@ API.ParticleManager.new = function(data)
         if API.IsServer then
             TriggerClientEvent("AQUIVER:Particle:Destroy", -1, self.data.remoteId)
         else
-            if DoesEntityExist(self.client.particleHandle) then
-                DeleteEntity(self.client.particleHandle)
+            if DoesParticleFxLoopedExist(self.client.particleHandle) then
+                StopParticleFxLooped(self.client.particleHandle, false)
             end
         end
 
@@ -144,6 +144,10 @@ API.ParticleManager.new = function(data)
         Citizen.SetTimeout(data.timeMS, function()
             if self then self.Destroy() end
         end)
+    end
+
+    if not API.IsServer and self.IsObjectParticle() then
+        self.AddStream()
     end
 
     API.ParticleManager.Entities[self.data.remoteId] = self
@@ -167,6 +171,22 @@ end
 
 API.ParticleManager.getAll = function()
     return API.ParticleManager.Entities
+end
+
+API.ParticleManager.ObjectHasParticleUid = function(remoteId, uid)
+    for k, v in pairs(API.ParticleManager.Entities) do
+        if v.data.toObjectRemoteId == remoteId and v.data.particleUid == uid then
+            return true
+        end
+    end
+end
+
+API.ParticleManager.ObjectGetParticleByUid =function(remoteId, uid)
+    for k, v in pairs(API.ParticleManager.Entities) do
+        if v.data.toObjectRemoteId == remoteId and v.data.particleUid == uid then
+            return v
+        end
+    end
 end
 
 if API.IsServer then

@@ -159,6 +159,21 @@ if API.IsServer then
             end)
         end
 
+        ---@class IClickMenuEntry
+        ---@field name string
+        ---@field icon string
+        ---@field eventName? string
+        ---@field eventArgs any
+
+        ---@param menuData IClickMenuEntry[]
+        self.ClickMenuOpen = function(menuHeader, menuData)
+            self.SendNUIMessage({
+                event = "ClickMenu-Open",
+                menuHeader = menuHeader,
+                menuData = menuData
+            })
+        end
+
         ---@param jsonContent table
         self.SendNUIMessage = function(jsonContent)
             TriggerClientEvent("AQUIVER:Player:SendNUIMessage", self.srcID, jsonContent)
