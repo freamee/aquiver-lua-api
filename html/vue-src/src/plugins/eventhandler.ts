@@ -31,7 +31,17 @@ export default {
     },
 
     FocusNui(state: boolean) {
-        this.TriggerClient("focusNUI", state);
+        // @ts-ignore
+        if (typeof GetParentResourceName === 'function') {
+            // @ts-ignore
+            fetch(`https://${GetParentResourceName()}/focusNUI`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json; charset=UTF-8',
+                },
+                body: JSON.stringify(state),
+            });
+        }
     },
 
     on(eventName:string, cb: (...args:any) => void) {

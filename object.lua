@@ -103,15 +103,10 @@ API.ObjectManager.new = function(data)
             self.SyncVariables()
         end
 
-
         self.RemoveVariable = function(key)
             self.data.variables[key] = nil
 
             self.SyncVariables()
-        end
-
-        self.SetVar = function(key,value)
-            self.data.variables[key] = value
         end
 
         self.SetVars = function(vars)
@@ -123,10 +118,6 @@ API.ObjectManager.new = function(data)
             for k, v in pairs(vars) do
                 self.data.variables[k] = v
             end
-        end
-
-        self.RemoveVar = function(key)
-            self.data.variables[key] = nil
         end
 
         self.SyncVariables = function()

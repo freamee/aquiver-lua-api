@@ -11,15 +11,12 @@ else
         TriggerServerEvent(event, args)
     end)
 
-    AddEventHandler("onClientResourceStart", function(resourceName)
-        if GetCurrentResourceName() ~= resourceName then return end
+    RegisterNUICallback("focusNUI", function(state, cb)
+        SetNuiFocus(state, state)
+        cb("")
+    end)
 
-        AddEventHandler("focusNUI", function(state)
-            SetNuiFocus(state, state)
-        end)
-
-        RegisterNetEvent("AQUIVER:Player:SendNUIMessage", function(jsonContent)
-            SendNUIMessage(jsonContent)
-        end)
+    RegisterNetEvent("AQUIVER:Player:SendNUIMessage", function(jsonContent)
+        SendNUIMessage(jsonContent)
     end)
 end

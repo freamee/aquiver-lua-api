@@ -29,7 +29,7 @@ API.AttachmentManager.exists = function(attachmentName)
 end
 
 ---@param d IAttachment
-API.AttachmentManager.register = function(attachmentName, d)
+API.AttachmentManager.registerOne = function(attachmentName, d)
     if API.AttachmentManager.exists(attachmentName) then
         API.Utils.Debug.Print("^1AttachmentManager register failed, already exists: " .. attachmentName)
         return
@@ -43,17 +43,16 @@ API.AttachmentManager.register = function(attachmentName, d)
     API.Utils.Debug.Print("^3Registered new attachment: " .. attachmentName)
 end
 
--- Default examples
-API.AttachmentManager.register("bucket", {
-    model = "prop_bucket_02a",
-    boneId = 57005,
-    x = 0.65,
-    y = -0.1,
-    z = 0.0,
-    rx = 208.0,
-    ry = -85.0,
-    rz = -7.0
-})
+API.AttachmentManager.registerMany = function(d)
+    if type(d) ~= "table" then
+        API.Utils.Debug.Print("^1AttachmentManager registerMany should be a key-pair table.")
+        return
+    end
+
+    for k, v in pairs(d) do
+        API.AttachmentManager.registerOne(k, v)
+    end
+end
 
 -- Delete if another resource is restarted which has connections to this.
 AddEventHandler("onResourceStop", function(resourceName)
