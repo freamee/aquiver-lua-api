@@ -101,12 +101,16 @@ API.ObjectManager.new = function(data)
             self.data.variables[key] = value
 
             self.SyncVariables()
+
+            TriggerEvent("onObjectVariableChange", self, key, value)
         end
 
         self.RemoveVariable = function(key)
             self.data.variables[key] = nil
 
             self.SyncVariables()
+
+            TriggerEvent("onObjectVariableChange", self, key)
         end
 
         self.SetVars = function(vars)
@@ -117,6 +121,7 @@ API.ObjectManager.new = function(data)
 
             for k, v in pairs(vars) do
                 self.data.variables[k] = v
+                TriggerEvent("onObjectVariableChange", self, k, v)
             end
         end
 
@@ -299,6 +304,10 @@ API.ObjectManager.new = function(data)
         end
     end
 
+    self.GetDimension = function()
+        return self.data.dimension
+    end
+
     self.SetDimension = function(dimension)
         if self.data.dimension == dimension then return end
 
@@ -412,7 +421,16 @@ API.ObjectManager.GetNearestObject = function(vec3, model, range)
     if type(vec3) ~= "vector3" then return end
 
     for k, v in pairs(API.ObjectManager.Entities) do
-        if v.data.model == model then
+        if model then
+            if v.data.model == model then
+                local dist = #(v.GetPositionVector3() - vec3)
+
+                if dist < rangeMeter then
+                    rangeMeter = dist
+                    closest = v
+                end
+            end
+        else
             local dist = #(v.GetPositionVector3() - vec3)
 
             if dist < rangeMeter then

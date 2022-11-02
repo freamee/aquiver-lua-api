@@ -26,6 +26,21 @@ if API.IsServer then
             return self.variables
         end
 
+        self.RemoveVariable = function(key)
+            self.variables[key] = nil
+        end
+
+        self.RemoveVariables = function(vars)
+            if type(vars) ~= "table" then
+                API.Utils.Debug.Print("^Player SetVariables failed: vars should be a array table.")
+                return
+            end
+
+            for i = 1, #vars, 1 do
+                self.variables[vars[i]] = nil
+            end
+        end
+
         self.SetVariables = function(vars)
             if type(vars) ~= "table" then
                 API.Utils.Debug.Print("^Player SetVariables failed: vars should be a key-value table.")
@@ -124,6 +139,10 @@ if API.IsServer then
                 type = type,
                 message = message
             })
+        end
+
+        self.GetDimension = function()
+            return GetPlayerRoutingBucket(self.srcID)
         end
 
         self.SetDimension = function(dimension)

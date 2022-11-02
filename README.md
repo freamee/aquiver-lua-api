@@ -12,6 +12,7 @@
 - onObjectDestroyed (Object: CObject)
 - onPedDestroyed (Ped: CPed)
 - onPedCreated (Ped: CPed)
+- onObjectVariableChange (Object: CObject, key: string, newValue?: any)
 
 Register them on clientside with the api via:
 ```lua

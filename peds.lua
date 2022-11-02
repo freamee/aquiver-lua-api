@@ -12,6 +12,8 @@ API.PedManager.Entities = {}
 ---@field animName? string
 ---@field animFlag? number
 
+local dialogueCamera = nil
+
 ---@param data IPed
 API.PedManager.new = function(data)
     ---@class CPed
@@ -139,7 +141,8 @@ API.PedManager.new = function(data)
         self.data.animFlag = flag
 
         if API.IsServer then
-            TriggerClientEvent("AQUIVER:Ped:Update:Animation", -1, self.data.uid, self.data.animDict, self.data.animName, self.data.animFlag)
+            TriggerClientEvent("AQUIVER:Ped:Update:Animation", -1, self.data.uid, self.data.animDict, self.data.animName
+                , self.data.animFlag)
         else
             if DoesEntityExist(self.client.pedHandle) then
                 RequestAnimDict(self.data.animDict)
@@ -153,6 +156,9 @@ API.PedManager.new = function(data)
         end
     end
 
+    self.GetDimension = function()
+        return self.data.dimension
+    end
 
     self.SetDimension = function(dimension)
         if self.data.dimension == dimension then return end
@@ -164,6 +170,30 @@ API.PedManager.new = function(data)
         else
             if DoesEntityExist(self.client.pedHandle) and API.LocalPlayer.dimension ~= dimension then
                 self.RemoveStream()
+            end
+        end
+    end
+
+    self.StartDialogue = function(Player, DialoguesData)
+        if API.IsServer then
+            TriggerClientEvent("AQUIVER:Ped:Start:Dialogue", Player.srcID, self.data.uid, DialoguesData)
+        else
+            if DoesEntityExist(self.client.pedHandle) then
+                local pedOffset = GetOffsetFromEntityInWorldCoords(self.client.pedHandle, 0.0, 1.6, 0.2)
+        
+                dialogueCamera = CreateCam("DEFAULT_SCRIPTED_CAMERA", false)
+                SetCamCoord(dialogueCamera, pedOffset)
+                PointCamAtEntity(dialogueCamera, self.client.pedHandle, -1.0, 0, 0, true)
+                SetCamRot(dialogueCamera, 10.0, 0.0, 0.0, 2)
+                SetCamFov(dialogueCamera, 85.0)
+                SetCamActive(dialogueCamera, true)
+                ShakeCam(dialogueCamera, "HAND_SHAKE", 0.2)
+                RenderScriptCams(true, true, 900, true, true)
+
+                SendNUIMessage({
+                    event = "StartDialogue",
+                    dialoguesData = DialoguesData
+                })
             end
         end
     end
@@ -244,6 +274,13 @@ else
         end
     end
 
+    AddEventHandler("DialogueClosed", function()
+        if DoesCamExist(dialogueCamera) then
+            RenderScriptCams(false, true, 900, true, true);
+            DestroyCam(dialogueCamera, false)
+        end
+    end)
+
     AddEventHandler("onResourceStop", function(resourceName)
         if resourceName ~= GetCurrentResourceName() then return end
 
@@ -263,7 +300,7 @@ else
             if not PedEntity then return end
             PedEntity.SetAnimation(dict, name, flag)
         end)
-        RegisterNetEvent("AQUIVER:Ped:Update:Model", function(id,model)
+        RegisterNetEvent("AQUIVER:Ped:Update:Model", function(id, model)
             local PedEntity = API.PedManager.get(id)
             if not PedEntity then return end
             PedEntity.SetModel(model)
@@ -282,6 +319,11 @@ else
             local PedEntity = API.PedManager.get(id)
             if not PedEntity then return end
             PedEntity.SetDimension(dimension)
+        end)
+        RegisterNetEvent("AQUIVER:Ped:Start:Dialogue", function(id, dialoguesData)
+            local PedEntity = API.PedManager.get(id)
+            if not PedEntity then return end
+            PedEntity.StartDialogue(nil, dialoguesData)
         end)
         RegisterNetEvent("AQUIVER:Ped:Destroy", function(id)
             local PedEntity = API.PedManager.get(id)

@@ -10,10 +10,10 @@ CONFIG.STREAM_INTERVALS = {
 
 -- Streaming distances
 CONFIG.STREAM_DISTANCES = {
-    OBJECT = 20.0,
-    PED = 20.0,
-    PARTICLE = 20.0,
-    ACTIONSHAPE = 20.0
+    OBJECT = 100.0,
+    PED = 100.0,
+    PARTICLE = 100.0,
+    ACTIONSHAPE = 100.0
 }
 
 -- How often check if the player plays the animation or not. (MS)
