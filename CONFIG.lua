@@ -26,3 +26,6 @@ CONFIG.CLIENT_DEBUG_ENABLED = true
 
 -- Named as RoutingBucket on FiveM.
 CONFIG.DEFAULT_DIMENSION = 0
+
+-- How often cache the player position with GetEntityCoords.
+CONFIG.CACHE_PLAYER_POSITION_INTERVAL = 500

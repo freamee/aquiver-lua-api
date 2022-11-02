@@ -262,6 +262,7 @@ else
     }
     API.LocalPlayer.isMovementDisabled = false
     API.LocalPlayer.dimension = CONFIG.DEFAULT_DIMENSION
+    API.LocalPlayer.CachedPosition = GetEntityCoords(PlayerPedId())
 
     API.LocalPlayer.HasAttachment = function(attachmentName)
         if API.LocalPlayer.attachments[attachmentName] and DoesEntityExist(API.LocalPlayer.attachments[attachmentName]) then
@@ -409,5 +410,14 @@ else
         RegisterNetEvent("AQUIVER:Player:Set:Dimension", function(dimension)
             API.LocalPlayer.dimension = dimension
         end)
+    end)
+
+    Citizen.CreateThread(function()
+        while true do
+            
+            API.LocalPlayer.CachedPosition = GetEntityCoords(PlayerPedId())
+
+            Citizen.Wait(CONFIG.CACHE_PLAYER_POSITION_INTERVAL)
+        end
     end)
 end

@@ -45,6 +45,7 @@ export const useDialogueStore = defineStore("DialogueStore", () => {
         if (newState) {
             window.addEventListener("keyup", keyupHandler);
             selectSound();
+            eventhandler.TriggerClient("DialogueOpened", null);
         }
         else {
             window.removeEventListener("keyup", keyupHandler);

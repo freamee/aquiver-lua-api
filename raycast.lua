@@ -134,7 +134,7 @@ API.RaycastManager.Enable = function(state)
                     if entityType == 3 then
                         local Object = API.ObjectManager.atHandle(hitHandle)
                         if Object then
-                            local objDistance = #(Object.GetPositionVector3() - GetEntityCoords(PlayerPedId()))
+                            local objDistance = #(Object.GetPositionVector3() - API.LocalPlayer.CachedPosition)
                             if objDistance < 2.5 then
                                 API.RaycastManager.SetEntityHandle(hitHandle)
                                 goto nextTick
@@ -143,7 +143,7 @@ API.RaycastManager.Enable = function(state)
                     elseif entityType == 1 then
                         local Ped = API.PedManager.atHandle(hitHandle)
                         if Ped then
-                            local pedDistance = #(Ped.GetPositionVector3() - GetEntityCoords(PlayerPedId()))
+                            local pedDistance = #(Ped.GetPositionVector3() - API.LocalPlayer.CachedPosition)
                             if pedDistance < 2.5 then
                                 API.RaycastManager.SetEntityHandle(hitHandle)
                                 goto nextTick
@@ -159,6 +159,8 @@ API.RaycastManager.Enable = function(state)
                 Citizen.Wait(CONFIG.RAYCAST_INTERVAL)
             end
         end)
+    else
+        API.RaycastManager.SetEntityHandle(nil)
     end
 end
 

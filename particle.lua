@@ -271,15 +271,13 @@ else
         Citizen.CreateThread(function()
             while true do
 
-                local playerPos = GetEntityCoords(PlayerPedId())
-
                 for k, v in pairs(API.ParticleManager.Entities) do
                     if not v.IsObjectParticle() then
 
                         if API.LocalPlayer.dimension ~= v.data.dimension then
                             v.RemoveStream()
                         else
-                            local dist = #(playerPos - v.GetPositionVector3())
+                            local dist = #(API.LocalPlayer.CachedPosition - v.GetPositionVector3())
                             if dist < CONFIG.STREAM_DISTANCES.PARTICLE then
                                 v.AddStream()
                             else

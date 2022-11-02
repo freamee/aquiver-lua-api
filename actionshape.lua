@@ -175,15 +175,13 @@ else
         Citizen.CreateThread(function()
             while true do
 
-                local playerPos = GetEntityCoords(PlayerPedId())
-
                 for k, v in pairs(API.ActionShapeManager.Entities) do
 
                     -- If dimension is not equals.
                     if API.LocalPlayer.dimension ~= v.data.dimension then
                         v.RemoveStream()
                     else
-                        local dist = #(playerPos - v.GetPositionVector3())
+                        local dist = #(API.LocalPlayer.CachedPosition - v.GetPositionVector3())
                         if dist < CONFIG.STREAM_DISTANCES.ACTIONSHAPE then
                             v.AddStream()
 

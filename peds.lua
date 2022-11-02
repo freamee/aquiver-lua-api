@@ -11,6 +11,8 @@ API.PedManager.Entities = {}
 ---@field animDict? string
 ---@field animName? string
 ---@field animFlag? number
+---@field questionMark? boolean
+---@field name? string
 
 local dialogueCamera = nil
 
@@ -81,6 +83,49 @@ API.PedManager.new = function(data)
             self.SetAnimation(self.data.animDict, self.data.animName, self.data.animFlag)
 
             self.client.pedHandle = ped
+
+            if self.data.questionMark or self.data.name then
+                Citizen.CreateThread(function()
+                    while self.client.isStreamed do
+                        local dist = #(API.LocalPlayer.CachedPosition - self.GetPositionVector3())
+    
+                        local onScreen = false
+                        if dist < 5.0 then
+                            onScreen = IsEntityOnScreen(self.client.pedHandle)
+
+                            if self.data.questionMark then
+                                DrawMarker(
+                                    32,
+                                    self.data.position.x, self.data.position.y, self.data.position.z + 1.35,
+                                    0,0,0,
+                                    0,0,0,
+                                    0.35, 0.35, 0.35,
+                                    255,255,0,200,
+                                    true, false, 2, true, nil, nil, false
+                                )
+                            end
+            
+                            if self.data.name then
+                                API.Utils.Client.DrawText3D(
+                                    self.data.position.x,
+                                    self.data.position.y,
+                                    self.data.position.z + 1,
+                                    self.data.name,
+                                    0.28
+                                )
+                            end
+                        else
+                            Citizen.Wait(500)
+                        end
+
+                        if not onScreen then
+                            Citizen.Wait(500)
+                        end
+
+                        Citizen.Wait(1)
+                    end
+                end)
+            end
         end
 
         self.RemoveStream = function()
@@ -274,7 +319,12 @@ else
         end
     end
 
+    AddEventHandler("DialogueOpened", function()
+        API.RaycastManager.Enable(false)
+    end)
+
     AddEventHandler("DialogueClosed", function()
+        API.RaycastManager.Enable(true)
         if DoesCamExist(dialogueCamera) then
             RenderScriptCams(false, true, 900, true, true);
             DestroyCam(dialogueCamera, false)
@@ -348,14 +398,11 @@ else
         Citizen.CreateThread(function()
             while true do
 
-                local playerPos = GetEntityCoords(PlayerPedId())
-
                 for k, v in pairs(API.PedManager.Entities) do
-
                     if API.LocalPlayer.dimension ~= v.data.dimension then
                         v.RemoveStream()
                     else
-                        local dist = #(playerPos - v.GetPositionVector3())
+                        local dist = #(API.LocalPlayer.CachedPosition - v.GetPositionVector3())
                         if dist < CONFIG.STREAM_DISTANCES.PED then
                             v.AddStream()
                         else
