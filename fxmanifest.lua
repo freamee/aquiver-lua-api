@@ -29,6 +29,14 @@ shared_scripts {
     'main.lua'
 }
 
+server_scripts {
+    'modules/helps/server.lua'
+}
+
+client_scripts {
+    'modules/helps/client.lua'
+}
+
 ui_page 'html/compiled/index.html'
 
 files {

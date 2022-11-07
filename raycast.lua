@@ -67,8 +67,6 @@ API.RaycastManager.SetEntityHandle = function(handle)
 
                 local Ped = API.RaycastManager.AimedPedEntity
                 if Ped then
-                    API.Utils.Client.DrawText2D(0.5, 0.505, Ped.data.model)
-
                     if IsDisabledControlJustPressed(0, API.RaycastManager.Config.interactionKey) then
                         TriggerServerEvent("Ped:Interaction:Press", Ped.data.uid)
                         TriggerServerEvent("onPedInteractionPress", Ped.data.uid)
@@ -77,8 +75,6 @@ API.RaycastManager.SetEntityHandle = function(handle)
 
                 local Object = API.RaycastManager.AimedObjectEntity
                 if Object then
-                    API.Utils.Client.DrawText2D(0.5, 0.505, Object.data.model)
-
                     if IsDisabledControlJustPressed(0, API.RaycastManager.Config.interactionKey) then
                         TriggerServerEvent("Object:Interaction:Press", Object.data.remoteId)
                         TriggerServerEvent("onObjectInteractionPress", Object.data.remoteId)
