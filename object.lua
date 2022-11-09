@@ -60,6 +60,7 @@ API.ObjectManager.new = function(data)
     self.data = data
 
     if API.IsServer then
+        self.data.variables.hasAction = false
         self.server = {}
         self.server.invokedFromResource = API.InvokeResourceName()
         self.data.remoteId = API.ObjectManager.remoteIdCount
@@ -414,6 +415,30 @@ API.ObjectManager.atMysqlId = function(mysqlId)
     end
 end
 
+API.ObjectManager.GetObjectsInRange = function(vec3, model, range)
+    local collectedObjects = {}
+
+    if type(vec3) ~= "vector3" then return end
+
+    for k,v in pairs(API.ObjectManager.Entities) do
+        if model then
+            if v.data.model == model then
+                local dist = #(v.GetPositionVector3() - vec3)
+                if dist < range then
+                    collectedObjects[#collectedObjects+1] = v
+                end
+            end
+        else
+            local dist = #(v.GetPositionVector3() - vec3)
+            if dist < range then
+                collectedObjects[#collectedObjects+1] = v
+            end
+        end
+    end
+
+    return collectedObjects
+end
+
 API.ObjectManager.GetNearestObject = function(vec3, model, range)
     local rangeMeter = range
     local closest
@@ -454,17 +479,17 @@ if API.IsServer then
 
         if GetResourceState("oxmysql") == "started" then
             local insertId = exports.oxmysql:insert_async(
-                "INSERT INTO av_module_objects (model,x,y,z,rx,ry,rz,variables) VALUES (@model,@x,@y,@z,@rx,@ry,@rz,@variables)"
+                "INSERT INTO av_module_objects (model,x,y,z,rx,ry,rz,dimension,variables) VALUES (@model,@x,@y,@z,@rx,@ry,@rz,@dimension,@variables)"
                 ,
                 {
                     ["@model"] = data.model,
                     ["@x"] = data.x,
                     ["@y"] = data.y,
                     ["@z"] = data.z,
-                    ["@rx"] = data.rx or 0,
-                    ["@ry"] = data.ry or 0,
-                    ["@rz"] = data.rz or 0,
-                    ["@dimension"] = data.dimension or CONFIG.DEFAULT_DIMENSION,
+                    ["@rx"] = type(data.rx) == "number" and data.rx or 0,
+                    ["@ry"] = type(data.ry) == "number" and data.ry or 0,
+                    ["@rz"] = type(data.rz) == "number" and data.rz or 0,
+                    ["@dimension"] = type(data.dimension) == "number" and data.dimension or CONFIG.DEFAULT_DIMENSION,
                     ["@variables"] = json.encode(data.variables) or {}
                 }
             )

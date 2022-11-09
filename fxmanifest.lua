@@ -30,11 +30,19 @@ shared_scripts {
 }
 
 server_scripts {
-    'modules/helps/server.lua'
+    'modules/helps/server.lua',
+    -- 'modules/objects/shared.lua',
+    -- 'modules/objects/server.lua',
+
+    'modules/player/server.lua'
 }
 
 client_scripts {
-    'modules/helps/client.lua'
+    'modules/helps/client.lua',
+    -- 'modules/objects/shared.lua',
+    -- 'modules/objects/client.lua',
+
+    'modules/player/client.lua'
 }
 
 ui_page 'html/compiled/index.html'

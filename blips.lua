@@ -7,9 +7,9 @@ API.BlipManager.Entities = {}
 ---@field alpha number
 ---@field color number
 ---@field sprite number
----@field display number
----@field shortRange boolean
----@field scale number
+---@field display? number
+---@field shortRange? boolean
+---@field scale? number
 ---@field name string
 ---@field blipUid string
 
@@ -19,6 +19,10 @@ API.BlipManager.new = function(data)
     local self = {}
 
     self.data = data
+    self.data.display = type(self.data.display) == "number" and self.data.display or 4
+    self.data.shortRange = type(self.data.shortRange) == "boolean" and self.data.shortRange or true
+    self.data.scale = type(self.data.scale) == "number" and self.data.scale or 1.0
+    self.data.alpha = type(self.data.alpha) == "number" and self.data.alpha or 255
 
     if API.BlipManager.exists(self.data.blipUid) then
         API.Utils.Debug.Print("^1Blip already exists with uid: " .. self.data.blipUid)
@@ -34,11 +38,12 @@ API.BlipManager.new = function(data)
         self.client.blipHandle = nil
 
         local blip = AddBlipForCoord(self.data.position.x, self.data.position.y, self.data.position.z)
-        SetBlipColour(blip, self.data.color)
         SetBlipSprite(blip, self.data.sprite)
         SetBlipDisplay(blip, self.data.display)
         SetBlipScale(blip, self.data.scale)
+        SetBlipAlpha(blip, self.data.alpha)
         SetBlipAsShortRange(blip, self.data.shortRange)
+        SetBlipColour(blip, self.data.color)
         BeginTextCommandSetBlipName("STRING")
         AddTextComponentString(self.data.name)
         EndTextCommandSetBlipName(blip)

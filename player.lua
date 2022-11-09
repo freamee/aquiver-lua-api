@@ -146,8 +146,32 @@ if API.IsServer then
         end
 
         self.SetDimension = function(dimension)
+            local attaches = json.decode(json.encode(self.attachments))
+
+            self:RemoveAllAttachments()
+
             SetPlayerRoutingBucket(self.srcID, dimension)
             TriggerClientEvent("AQUIVER:Player:Set:Dimension", self.srcID, dimension)
+
+            TriggerEvent("onPlayerDimensionChange", self.srcID, dimension)
+            TriggerClientEvent("onPlayerDimensionChange", self.srcID, dimension)
+
+            for k, v in pairs(attaches) do
+                self.AddAttachment(k)
+            end
+        end
+
+        self.GetIdentifier = function()
+            for k, v in pairs(GetPlayerIdentifiers(self.srcID)) do
+                if string.sub(v, 1, string.len('license:')) == 'license:' then
+                    return v
+                end
+            end
+            return nil
+        end
+
+        self.GetName = function()
+            return GetPlayerName(self.srcID)
         end
 
         --- Start progress for player.
@@ -414,7 +438,7 @@ else
 
     Citizen.CreateThread(function()
         while true do
-            
+
             API.LocalPlayer.CachedPosition = GetEntityCoords(PlayerPedId())
 
             Citizen.Wait(CONFIG.CACHE_PLAYER_POSITION_INTERVAL)

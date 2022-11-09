@@ -9,6 +9,7 @@ API.ActionShapeManager.remoteIdCount = 1
 ---@field sprite number
 ---@field range number
 ---@field dimension number
+---@field variables table
 
 ---@param data IActionShape
 API.ActionShapeManager.new = function(data)
@@ -16,6 +17,7 @@ API.ActionShapeManager.new = function(data)
     local self = {}
 
     self.data = data
+    self.data.variables = self.data.variables or {}
 
     if API.IsServer then
         self.server = {}
@@ -60,6 +62,9 @@ API.ActionShapeManager.new = function(data)
 
             self.client.isStreamed = false
 
+            -- Need to trigger the onLeave here.
+            self.onLeave()
+
             API.Utils.Debug.Print(string.format("^3ActionShape streamed out (%d)", self.data.remoteId))
         end
 
@@ -68,8 +73,8 @@ API.ActionShapeManager.new = function(data)
 
             self.client.isEntered = true
 
-            TriggerEvent("onActionShapeEnter", self)
-            TriggerServerEvent("onActionShapeEnter", self)
+            TriggerEvent("onActionShapeEnter", self.data.remoteId)
+            TriggerServerEvent("onActionShapeEnter", self.data.remoteId)
         end
 
         self.onLeave = function()
@@ -77,10 +82,29 @@ API.ActionShapeManager.new = function(data)
 
             self.client.isEntered = false
 
-            TriggerEvent("onActionShapeLeave", self)
-            TriggerServerEvent("onActionShapeLeave", self)
+            TriggerEvent("onActionShapeLeave", self.data.remoteId)
+            TriggerServerEvent("onActionShapeLeave", self.data.remoteId)
         end
+    end
 
+    self.SetPosition = function(vec3)
+        self.data.position = vec3
+
+        if API.IsServer then
+            TriggerClientEvent("AQUIVER:ActionShape:Update:Position", -1, self.data.remoteId, self.data.position)
+        end
+    end
+
+    self.SetVariable = function(key, value)
+        self.data.variables[key] = value
+
+        if API.IsServer then
+            TriggerClientEvent("AQUIVER:ActionShape:Update:Variable", -1, self.data.remoteId, key, value)
+        end
+    end
+
+    self.GetVariable = function(key)
+        return self.data.variables[key]
     end
 
     self.Destroy = function()
@@ -151,6 +175,16 @@ else
 
         RegisterNetEvent("AQUIVER:ActionShape:Create", function(data)
             API.ActionShapeManager.new(data)
+        end)
+        RegisterNetEvent("AQUIVER:ActionShape:Update:Variable", function(remoteId, key, value)
+            local ActionShapeEntity = API.ActionShapeManager.get(remoteId)
+            if not ActionShapeEntity then return end
+            ActionShapeEntity.SetVariable(key, value)
+        end)
+        RegisterNetEvent("AQUIVER:ActionShape:Update:Position", function(remoteId, vec3)
+            local ActionShapeEntity = API.ActionShapeManager.get(remoteId)
+            if not ActionShapeEntity then return end
+            ActionShapeEntity.SetPosition(vec3)
         end)
         RegisterNetEvent("AQUIVER:ActionShape:Destroy", function(remoteId)
             local ActionShapeEntity = API.ActionShapeManager.get(remoteId)
