@@ -1,0 +1,2 @@
+---@class AQUIVER_CLIENT
+AQUIVER_CLIENT = {}

@@ -1,0 +1,2 @@
+---@class AQUIVER_SERVER
+AQUIVER_SERVER = {}

@@ -1,3 +1,4 @@
+---@class AQUIVER_API
 API = {}
 API.IsServer = IsDuplicityVersion()
 

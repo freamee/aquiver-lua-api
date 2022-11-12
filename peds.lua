@@ -2,18 +2,6 @@ API.PedManager = {}
 ---@type table<string, CPed>
 API.PedManager.Entities = {}
 
----@class IPed
----@field uid string
----@field position { x:number; y:number; z:number; }
----@field heading number
----@field model string
----@field dimension number
----@field animDict? string
----@field animName? string
----@field animFlag? number
----@field questionMark? boolean
----@field name? string
-
 local dialogueCamera = nil
 
 ---@param data IPed
@@ -88,7 +76,7 @@ API.PedManager.new = function(data)
                 Citizen.CreateThread(function()
                     while self.client.isStreamed do
                         local dist = #(API.LocalPlayer.CachedPosition - self.GetPositionVector3())
-    
+
                         local onScreen = false
                         if dist < 5.0 then
                             onScreen = IsEntityOnScreen(self.client.pedHandle)
@@ -97,14 +85,14 @@ API.PedManager.new = function(data)
                                 DrawMarker(
                                     32,
                                     self.data.position.x, self.data.position.y, self.data.position.z + 1.35,
-                                    0,0,0,
-                                    0,0,0,
+                                    0, 0, 0,
+                                    0, 0, 0,
                                     0.35, 0.35, 0.35,
-                                    255,255,0,200,
+                                    255, 255, 0, 200,
                                     true, false, 2, true, nil, nil, false
                                 )
                             end
-            
+
                             if self.data.name then
                                 API.Utils.Client.DrawText3D(
                                     self.data.position.x,
@@ -225,7 +213,7 @@ API.PedManager.new = function(data)
         else
             if DoesEntityExist(self.client.pedHandle) then
                 local pedOffset = GetOffsetFromEntityInWorldCoords(self.client.pedHandle, 0.0, 1.6, 0.2)
-        
+
                 dialogueCamera = CreateCam("DEFAULT_SCRIPTED_CAMERA", false)
                 SetCamCoord(dialogueCamera, pedOffset)
                 PointCamAtEntity(dialogueCamera, self.client.pedHandle, -1.0, 0, 0, true)

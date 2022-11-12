@@ -13,36 +13,42 @@ shared_scripts {
 
     'api.lua',
     'utils.lua',
-    'radarblips.lua',
-    'blips.lua',
     'versionchecker.lua',
     'player.lua',
     'attachments.lua',
     'peds.lua',
     'nui.lua',
-    'object.lua',
-    'raycast.lua',
-    'particle.lua',
-    'actionshape.lua',
-
-    -- This one should start the last.
-    'main.lua'
+    'raycast.lua'
 }
 
 server_scripts {
-    'modules/helps/server.lua',
-    -- 'modules/objects/shared.lua',
-    -- 'modules/objects/server.lua',
+    'modules/server.lua',
 
-    'modules/player/server.lua'
+    'modules/helps/server.lua',
+    'modules/newobject/server.lua',
+    'modules/particle/server.lua',
+    'modules/blips/server.lua',
+    'modules/radarblips/server.lua',
+    'modules/actionshape/server.lua',
+    'modules/peds/server.lua',
+
+    -- This one should start the last.
+    'main.lua',
 }
 
 client_scripts {
-    'modules/helps/client.lua',
-    -- 'modules/objects/shared.lua',
-    -- 'modules/objects/client.lua',
+    'modules/client.lua',
 
-    'modules/player/client.lua'
+    'modules/helps/client.lua',
+    'modules/newobject/client.lua',
+    'modules/particle/client.lua',
+    'modules/blips/client.lua',
+    'modules/radarblips/client.lua',
+    'modules/actionshape/client.lua',
+    'modules/peds/client.lua',
+
+    -- This one should start the last.
+    'main.lua'
 }
 
 ui_page 'html/compiled/index.html'

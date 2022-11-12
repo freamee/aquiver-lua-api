@@ -1,16 +1,14 @@
-API.Helps = {}
----@type table<string, { uid:string, message:string, key?:string, image?:string; icon?:string; }>
-API.Helps.CachedHelps = {}
-API.Helps.Config = {}
-API.Helps.Config.hasSound = true
+local Manager = {}
+---@type { [string]: { uid:string, message:string, key?:string, image?:string; icon?:string; } }
+Manager.CachedHelps = {}
+Manager.Config = {}
+Manager.Config.hasSound = true
 
 ---@param helpData { uid:string; message:string; key?:string; image?:string; icon?:string; }
-API.Helps.Add = function(helpData)
-    local self = API.Helps
-
+Manager.Add = function(helpData)
     -- If help entry not exists add it.
-    if not self.CachedHelps[helpData.uid] then
-        self.CachedHelps[helpData.uid] = {
+    if not Manager.CachedHelps[helpData.uid] then
+        Manager.CachedHelps[helpData.uid] = {
             image = helpData.image,
             key = helpData.key,
             message = helpData.message,
@@ -27,21 +25,21 @@ API.Helps.Add = function(helpData)
             icon = helpData.icon
         })
 
-        if self.Config.hasSound then
+        if Manager.Config.hasSound then
             PlaySoundFrontend(-1, "SELECT", "HUD_FREEMODE_SOUNDSET", true)
         end
     else
         -- If help Entry exists, we update it if it differs.
-        if self.CachedHelps[helpData.uid].message ~= helpData.message or
-            self.CachedHelps[helpData.uid].key ~= helpData.key or
-            self.CachedHelps[helpData.uid].image ~= helpData.image or
-            self.CachedHelps[helpData.uid].icon ~= helpData.icon
-            then
+        if Manager.CachedHelps[helpData.uid].message ~= helpData.message or
+            Manager.CachedHelps[helpData.uid].key ~= helpData.key or
+            Manager.CachedHelps[helpData.uid].image ~= helpData.image or
+            Manager.CachedHelps[helpData.uid].icon ~= helpData.icon
+        then
 
-            self.CachedHelps[helpData.uid].message = helpData.message
-            self.CachedHelps[helpData.uid].key = helpData.key
-            self.CachedHelps[helpData.uid].image = helpData.image
-            self.CachedHelps[helpData.uid].icon = helpData.icon
+            Manager.CachedHelps[helpData.uid].message = helpData.message
+            Manager.CachedHelps[helpData.uid].key = helpData.key
+            Manager.CachedHelps[helpData.uid].image = helpData.image
+            Manager.CachedHelps[helpData.uid].icon = helpData.icon
 
             SendNUIMessage({
                 event = "Help-Update",
@@ -55,12 +53,10 @@ API.Helps.Add = function(helpData)
     end
 end
 
-API.Helps.Remove = function(uid)
-    local self = API.Helps
+Manager.Remove = function(uid)
+    if not Manager.CachedHelps[uid] then return end
 
-    if not self.CachedHelps[uid] then return end
-
-    self.CachedHelps[uid] = nil
+    Manager.CachedHelps[uid] = nil
 
     SendNUIMessage({
         event = "Help-Remove",
@@ -69,8 +65,10 @@ API.Helps.Remove = function(uid)
 end
 
 RegisterNetEvent("rpc-Help-Add", function(helpData)
-    API.Helps.Add(helpData)
+    Manager.Add(helpData)
 end)
 RegisterNetEvent("rpc-Help-Remove", function(uid)
-    API.Helps.Remove(uid)
+    Manager.Remove(uid)
 end)
+
+AQUIVER_CLIENT.HelpManager = Manager

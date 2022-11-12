@@ -130,7 +130,7 @@ API.RaycastManager.Enable = function(state)
                     if entityType == 3 then
                         local Object = API.ObjectManager.atHandle(hitHandle)
                         if Object then
-                            local objDistance = #(Object.GetPositionVector3() - API.LocalPlayer.CachedPosition)
+                            local objDistance = #(Object.Get.Position() - API.LocalPlayer.CachedPosition)
                             if objDistance < 2.5 then
                                 API.RaycastManager.SetEntityHandle(hitHandle)
                                 goto nextTick
@@ -167,14 +167,14 @@ if API.IsServer then
         RegisterNetEvent("Object:Interaction:Press", function(remoteId)
             local srcID = source
 
-            local ObjectEntity = API.ObjectManager.get(remoteId)
+            local ObjectEntity = API.ObjectManager.get(remoteId) --[[@as ServerObject]]
             if not ObjectEntity then return end
 
             local Player = API.PlayerManager.get(srcID)
             if not Player then return end
 
-            if Citizen.GetFunctionReference(ObjectEntity.server.onPress) then
-                ObjectEntity.server.onPress(Player, ObjectEntity)
+            if Citizen.GetFunctionReference(ObjectEntity.onPress) then
+                ObjectEntity.onPress(Player, ObjectEntity)
             end
         end)
 
