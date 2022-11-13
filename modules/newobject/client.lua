@@ -266,7 +266,7 @@ RegisterNetEvent("AQUIVER:Object:Update:Variables", function(remoteId, variables
     ObjectEntity.data.variables = variables
 
     -- Update the raycast & variables which is shown in the interface.
-    if API.RaycastManager.AimedObjectEntity == ObjectEntity then
+    if AQUIVER_CLIENT.RaycastManager.AimedObjectEntity == ObjectEntity then
         TriggerEvent("onObjectRaycast", ObjectEntity)
     end
 end)

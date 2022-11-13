@@ -31,6 +31,7 @@ server_scripts {
     'modules/radarblips/server.lua',
     'modules/actionshape/server.lua',
     'modules/peds/server.lua',
+    'modules/raycast/server.lua',
 
     -- This one should start the last.
     'main.lua',
@@ -46,6 +47,7 @@ client_scripts {
     'modules/radarblips/client.lua',
     'modules/actionshape/client.lua',
     'modules/peds/client.lua',
+    'modules/raycast/client.lua',
 
     -- This one should start the last.
     'main.lua'

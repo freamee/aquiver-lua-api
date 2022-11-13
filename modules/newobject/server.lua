@@ -59,16 +59,6 @@ Manager.new = function(data)
         return
     end
 
-    ---@param cb fun(Player: CPlayer, Object: ServerObject)
-    self.AddPressFunction = function(cb)
-        if not Citizen.GetFunctionReference(cb) then
-            API.Utils.Debug.Print("^1Object AddPressFunction failed, cb should be a function reference.")
-            return
-        end
-
-        self.onPress = cb
-    end
-
     self.Destroy = function()
         -- Delete from table.
         if Manager.exists(self.data.remoteId) then

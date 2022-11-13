@@ -1,5 +1,5 @@
 if API.IsServer then
     AQUIVER_SERVER.ObjectManager.LoadObjectsFromSQL()
 else
-    API.RaycastManager.Enable(true)
+    AQUIVER_CLIENT.RaycastManager.Enable(true)
 end
