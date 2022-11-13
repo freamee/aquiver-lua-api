@@ -53,6 +53,8 @@ Manager.new = function(data)
     self.data.remoteId = remoteIdCount
     self.data.variables.hasAction = false
     remoteIdCount = remoteIdCount + 1
+    ---@type fun(Player: ServerPlayer, Object: ServerObject)
+    self.onPress = nil
 
     if Manager.exists(self.data.remoteId) then
         API.Utils.Debug.Print("^1Object already exists with remoteId: " .. self.data.remoteId)

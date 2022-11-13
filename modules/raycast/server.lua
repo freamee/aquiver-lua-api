@@ -4,7 +4,7 @@ RegisterNetEvent("Object:Interaction:Press", function(remoteId)
     local ObjectEntity = AQUIVER_SERVER.ObjectManager.get(remoteId)
     if not ObjectEntity then return end
 
-    local Player = API.PlayerManager.get(source)
+    local Player = AQUIVER_SERVER.PlayerManager.get(source)
     if not Player then return end
 
     if Citizen.GetFunctionReference(ObjectEntity.onPress) then
@@ -18,7 +18,7 @@ RegisterNetEvent("Ped:Interaction:Press", function(remoteId)
     local PedEntity = AQUIVER_SERVER.PedManager.get(remoteId)
     if not PedEntity then return end
 
-    local Player = API.PlayerManager.get(source)
+    local Player = AQUIVER_SERVER.PlayerManager.get(source)
     if not Player then return end
 
     if Citizen.GetFunctionReference(PedEntity.onPress) then

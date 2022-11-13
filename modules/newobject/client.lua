@@ -255,7 +255,8 @@ RegisterNetEvent("AQUIVER:Object:Update:Dimension", function(remoteId, dimension
 
     ObjectEntity.data.dimension = dimension
 
-    if DoesEntityExist(ObjectEntity.objectHandle) and API.LocalPlayer.dimension ~= ObjectEntity.Get.Dimension() then
+    if DoesEntityExist(ObjectEntity.objectHandle) and
+        AQUIVER_CLIENT.LocalPlayer.dimension ~= ObjectEntity.Get.Dimension() then
         ObjectEntity.RemoveStream()
     end
 end)
@@ -305,10 +306,10 @@ Citizen.CreateThread(function()
         for k, v in pairs(Manager.Entities) do
 
             -- If dimension is not equals.
-            if API.LocalPlayer.dimension ~= v.Get.Dimension() then
+            if AQUIVER_CLIENT.LocalPlayer.dimension ~= v.Get.Dimension() then
                 v.RemoveStream()
             else
-                local dist = #(API.LocalPlayer.CachedPosition - v.Get.Position())
+                local dist = #(AQUIVER_CLIENT.LocalPlayer.CachedPosition - v.Get.Position())
                 if dist < CONFIG.STREAM_DISTANCES.OBJECT then
                     v.AddStream()
                 else

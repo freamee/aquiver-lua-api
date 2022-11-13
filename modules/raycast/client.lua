@@ -120,7 +120,7 @@ Manager.Enable = function(state)
                     if entityType == 3 then
                         local findObject = AQUIVER_CLIENT.ObjectManager.atHandle(hitHandle)
                         if findObject then
-                            local dist = #(findObject.Get.Position() - API.LocalPlayer.CachedPosition)
+                            local dist = #(findObject.Get.Position() - AQUIVER_CLIENT.LocalPlayer.CachedPosition)
                             if dist < 2.5 then
                                 Manager.SetEntityHandle(hitHandle)
                                 goto nextTick
@@ -129,7 +129,7 @@ Manager.Enable = function(state)
                     elseif entityType == 1 then
                         local findPed = AQUIVER_CLIENT.PedManager.atHandle(hitHandle)
                         if findPed then
-                            local dist = #(findPed.Get.PositionVector3() - API.LocalPlayer.CachedPosition)
+                            local dist = #(findPed.Get.PositionVector3() - AQUIVER_CLIENT.LocalPlayer.CachedPosition)
                             if dist < 2.5 then
                                 Manager.SetEntityHandle(hitHandle)
                                 goto nextTick

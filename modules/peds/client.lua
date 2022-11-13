@@ -48,7 +48,7 @@ Manager.new = function(data)
         if self.data.questionMark or self.data.name then
             Citizen.CreateThread(function()
                 while self.isStreamed do
-                    local dist = #(API.LocalPlayer.CachedPosition - self.Get.PositionVector3())
+                    local dist = #(AQUIVER_CLIENT.LocalPlayer.CachedPosition - self.Get.PositionVector3())
 
                     local onScreen = false
                     if dist < 5.0 then
@@ -241,7 +241,7 @@ RegisterNetEvent("AQUIVER:Ped:Update:Dimension", function(id, dimension)
 
     PedEntity.data.dimension = dimension
 
-    if DoesEntityExist(PedEntity.pedHandle) and API.LocalPlayer.dimension ~= PedEntity.data.dimension then
+    if DoesEntityExist(PedEntity.pedHandle) and AQUIVER_CLIENT.LocalPlayer.dimension ~= PedEntity.data.dimension then
         PedEntity.RemoveStream()
     end
 end)
@@ -290,10 +290,10 @@ Citizen.CreateThread(function()
     while true do
 
         for k, v in pairs(Manager.Entities) do
-            if API.LocalPlayer.dimension ~= v.data.dimension then
+            if AQUIVER_CLIENT.LocalPlayer.dimension ~= v.data.dimension then
                 v.RemoveStream()
             else
-                local dist = #(API.LocalPlayer.CachedPosition - v.Get.PositionVector3())
+                local dist = #(AQUIVER_CLIENT.LocalPlayer.CachedPosition - v.Get.PositionVector3())
                 if dist < CONFIG.STREAM_DISTANCES.PED then
                     v.AddStream()
                 else

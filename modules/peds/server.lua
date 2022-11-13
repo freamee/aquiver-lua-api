@@ -29,6 +29,8 @@ Manager.new = function(data)
     self.invokedFromResource = API.InvokeResourceName()
     self.data.remoteId = remoteIdCount
     remoteIdCount = remoteIdCount + 1
+    ---@type fun(Player: ServerPlayer, Ped: ServerPed)
+    self.onPress = nil
 
     self.Set = {
         Position = function(vec3)
@@ -89,9 +91,9 @@ Manager.new = function(data)
         end
     }
 
-    ---@param Player CPlayer
+    ---@param Player ServerPlayer
     self.StartDialogue = function(Player, DialoguesData)
-        TriggerClientEvent("AQUIVER:Ped:Start:Dialogue", Player.srcID, self.data.remoteId, DialoguesData)
+        TriggerClientEvent("AQUIVER:Ped:Start:Dialogue", Player.source, self.data.remoteId, DialoguesData)
     end
 
     self.Destroy = function()

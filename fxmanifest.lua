@@ -9,20 +9,16 @@ dependencies {
 }
 
 shared_scripts {
-    'CONFIG.lua',
-
     'api.lua',
     'utils.lua',
-    'versionchecker.lua',
-    'player.lua',
     'attachments.lua',
-    'peds.lua',
-    'nui.lua',
-    'raycast.lua'
 }
 
 server_scripts {
-    'modules/server.lua',
+    'CONFIG.lua',
+
+    -- This api should start first.
+    'modules/server_api.lua',
 
     'modules/helps/server.lua',
     'modules/newobject/server.lua',
@@ -32,13 +28,18 @@ server_scripts {
     'modules/actionshape/server.lua',
     'modules/peds/server.lua',
     'modules/raycast/server.lua',
+    'modules/player/server.lua',
+    'modules/versionchecker/server.lua',
 
     -- This one should start the last.
-    'main.lua',
+    'modules/server_main.lua'
 }
 
 client_scripts {
-    'modules/client.lua',
+    'CONFIG.lua',
+
+    -- This api should start first.
+    'modules/client_api.lua',
 
     'modules/helps/client.lua',
     'modules/newobject/client.lua',
@@ -48,9 +49,11 @@ client_scripts {
     'modules/actionshape/client.lua',
     'modules/peds/client.lua',
     'modules/raycast/client.lua',
+    'modules/player/client.lua',
+    'modules/nui/client.lua',
 
     -- This one should start the last.
-    'main.lua'
+    'modules/client_main.lua'
 }
 
 ui_page 'html/compiled/index.html'

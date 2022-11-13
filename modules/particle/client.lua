@@ -184,10 +184,10 @@ Citizen.CreateThread(function()
         for k, v in pairs(Manager.Entities) do
             if not v.IsObjectParticle() then
 
-                if API.LocalPlayer.dimension ~= v.data.dimension then
+                if AQUIVER_CLIENT.LocalPlayer.dimension ~= v.data.dimension then
                     v.RemoveStream()
                 else
-                    local dist = #(API.LocalPlayer.CachedPosition - v.Get.Position())
+                    local dist = #(AQUIVER_CLIENT.LocalPlayer.CachedPosition - v.Get.Position())
                     if dist < CONFIG.STREAM_DISTANCES.PARTICLE then
                         v.AddStream()
                     else

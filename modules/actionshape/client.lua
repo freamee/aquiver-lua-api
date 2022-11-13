@@ -138,10 +138,10 @@ Citizen.CreateThread(function()
         for k, v in pairs(Manager.Entities) do
 
             -- If dimension is not equals.
-            if API.LocalPlayer.dimension ~= v.data.dimension then
+            if AQUIVER_CLIENT.LocalPlayer.dimension ~= v.data.dimension then
                 v.RemoveStream()
             else
-                local dist = #(API.LocalPlayer.CachedPosition - v.data.position)
+                local dist = #(AQUIVER_CLIENT.LocalPlayer.CachedPosition - v.data.position)
                 if dist < CONFIG.STREAM_DISTANCES.ACTIONSHAPE then
                     v.AddStream()
 
