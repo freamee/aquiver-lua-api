@@ -18,60 +18,61 @@ Manager.new = function(data)
     ---@class ServerActionShape
     local self = {}
 
-    self.data = data
-    self.data.variables = type(self.data.variables) == "table" and self.data.variables or {}
-    self.invokedFromResource = AQUIVER_SHARED.Utils.GetInvokingResource()
-    self.data.remoteId = remoteIdCount
+    local _data = data
+    _data.variables = type(_data.variables) == "table" and _data.variables or {}
+    _data.remoteId = remoteIdCount
     remoteIdCount = remoteIdCount + 1
+
+    self.invokedFromResource = AQUIVER_SHARED.Utils.GetInvokingResource()
+
+    local Sync = {
+        Position = function()
+            TriggerClientEvent("AQUIVER:ActionShape:Update:Position", -1, _data.remoteId, _data.position)
+        end,
+        Variables = function()
+            TriggerClientEvent("AQUIVER:ActionShape:Update:Variables", -1, _data.remoteId, _data.variables)
+        end
+    }
 
     self.Set = {
         Position = function(vec3)
-            self.data.position = vec3
-            self.Sync.Position()
+            _data.position = vec3
+            Sync.Position()
         end,
         Variable = function(key, value)
-            self.data.variables[key] = value
-            self.Sync.Variables()
+            _data.variables[key] = value
+            Sync.Variables()
         end
     }
 
     self.Get = {
         Position = function()
-            return vector3(self.data.position.x, self.data.position.y, self.data.position.z)
+            return vector3(_data.position.x, _data.position.y, _data.position.z)
         end,
         Variable = function(key)
-            return self.data.variables[key]
+            return _data.variables[key]
         end,
-        GetData = function()
-            return self.data
-        end
-    }
-
-    self.Sync = {
-        Position = function()
-            TriggerClientEvent("AQUIVER:ActionShape:Update:Position", -1, self.data.remoteId, self.data.position)
-        end,
-        Variables = function()
-            TriggerClientEvent("AQUIVER:ActionShape:Update:Variable", -1, self.data.remoteId, self.data.variables)
+        Data = function()
+            return _data
         end
     }
 
     self.Destroy = function()
         -- Delete from table.
-        if Manager.exists(self.data.remoteId) then
-            Manager.Entities[self.data.remoteId] = nil
+        if Manager.exists(_data.remoteId) then
+            Manager.Entities[_data.remoteId] = nil
         end
 
-        TriggerClientEvent("AQUIVER:ActionShape:Destroy", -1, self.data.remoteId)
+        TriggerClientEvent("AQUIVER:ActionShape:Destroy", -1, _data.remoteId)
 
-        AQUIVER_SHARED.Utils.Print("^3Removed ActionShape with remoteId: " .. self.data.remoteId)
+        AQUIVER_SHARED.Utils.Print("^3Removed ActionShape with remoteId: " .. _data.remoteId)
     end
 
-    TriggerClientEvent("AQUIVER:ActionShape:Create", -1, self.data)
+    TriggerClientEvent("AQUIVER:ActionShape:Create", -1, _data)
 
-    Manager.Entities[self.data.remoteId] = self
+    Manager.Entities[_data.remoteId] = self
 
-    AQUIVER_SHARED.Utils.Print("^3Created new actionshape with remoteId: " .. self.data.remoteId)
+    AQUIVER_SHARED.Utils.Print("^3Created new actionshape with remoteId: " .. _data.remoteId)
 
     return self
 end
@@ -92,7 +93,7 @@ RegisterNetEvent("AQUIVER:ActionShape:RequestData", function()
     local source = source
 
     for k, v in pairs(Manager.Entities) do
-        TriggerClientEvent("AQUIVER:ActionShape:Create", source, v.data)
+        TriggerClientEvent("AQUIVER:ActionShape:Create", source, v.Get.Data())
     end
 end)
 

@@ -20,94 +20,101 @@ Manager.new = function(data)
     ---@class ServerBlip
     local self = {}
 
-    self.data = data
-    self.data.display = type(self.data.display) == "number" and self.data.display or 4
-    self.data.shortRange = type(self.data.shortRange) == "boolean" and self.data.shortRange or true
-    self.data.scale = type(self.data.scale) == "number" and self.data.scale or 1.0
-    self.data.alpha = type(self.data.alpha) == "number" and self.data.alpha or 255
-    self.data.remoteId = remoteIdCount
+    local _data = data
+
+    _data.display = type(_data.display) == "number" and _data.display or 4
+    _data.shortRange = type(_data.shortRange) == "boolean" and _data.shortRange or true
+    _data.scale = type(_data.scale) == "number" and _data.scale or 1.0
+    _data.alpha = type(_data.alpha) == "number" and _data.alpha or 255
+    _data.remoteId = remoteIdCount
     remoteIdCount = remoteIdCount + 1
     self.invokedFromResource = AQUIVER_SHARED.Utils.GetInvokingResource()
 
-    if Manager.exists(self.data.remoteId) then
-        AQUIVER_SHARED.Utils.Print("^1Blip already exists with remoteId: " .. self.data.remoteId)
+    if Manager.exists(_data.remoteId) then
+        AQUIVER_SHARED.Utils.Print("^1Blip already exists with remoteId: " .. _data.remoteId)
         return
     end
 
-    self.Set = {
-        Position = function(position)
-            self.data.position = position
-            self.Sync.Position()
+    local Sync = {
+        Position = function()
+            TriggerClientEvent("AQUIVER:Blip:Update:Position", -1, _data.remoteId, position)
         end,
-        Name = function(name)
-            self.data.name = name
-            self.Sync.Name()
+        Name = function()
+            TriggerClientEvent("AQUIVER:Blip:Update:Name", -1, _data.remoteId, name)
         end,
-        Scale = function(scale)
-            self.data.scale = scale
-            self.Sync.Scale()
+        Scale = function()
+            TriggerClientEvent("AQUIVER:Blip:Update:Scale", -1, _data.remoteId, scale)
         end,
-        ShortRange = function(state)
-            self.data.shortRange = state
-            self.Sync.ShortRange()
+        ShortRange = function()
+            TriggerClientEvent("AQUIVER:Blip:Update:ShortRange", -1, _data.remoteId, state)
         end,
-        Display = function(displayId)
-            self.data.display = displayId
-            self.Sync.Display()
+        Display = function()
+            TriggerClientEvent("AQUIVER:Blip:Update:Display", -1, _data.remoteId, displayId)
         end,
-        Sprite = function(spriteId)
-            self.data.sprite = spriteId
-            self.Sync.Sprite()
+        Sprite = function()
+            TriggerClientEvent("AQUIVER:Blip:Update:Sprite", -1, _data.remoteId, sprite)
         end,
-        Alpha = function(alpha)
-            self.data.alpha = alpha
-            self.Sync.Alpha()
+        Alpha = function()
+            TriggerClientEvent("AQUIVER:Blip:Update:Alpha", -1, _data.remoteId, alpha)
         end,
-        Color = function(color)
-            self.data.color = color
-            self.Sync.Color()
+        Color = function()
+            TriggerClientEvent("AQUIVER:Blip:Update:Color", -1, _data.remoteId, color)
         end
     }
 
-    self.Sync = {
-        Position = function()
-            TriggerClientEvent("AQUIVER:Blip:Update:Position", -1, self.data.remoteId, position)
+    self.Set = {
+        Position = function(position)
+            _data.position = position
+            Sync.Position()
         end,
-        Name = function()
-            TriggerClientEvent("AQUIVER:Blip:Update:Name", -1, self.data.remoteId, name)
+        Name = function(name)
+            _data.name = name
+            Sync.Name()
         end,
-        Scale = function()
-            TriggerClientEvent("AQUIVER:Blip:Update:Scale", -1, self.data.remoteId, scale)
+        Scale = function(scale)
+            _data.scale = scale
+            Sync.Scale()
         end,
-        ShortRange = function()
-            TriggerClientEvent("AQUIVER:Blip:Update:ShortRange", -1, self.data.remoteId, state)
+        ShortRange = function(state)
+            _data.shortRange = state
+            Sync.ShortRange()
         end,
-        Display = function()
-            TriggerClientEvent("AQUIVER:Blip:Update:Display", -1, self.data.remoteId, displayId)
+        Display = function(displayId)
+            _data.display = displayId
+            Sync.Display()
         end,
-        Sprite = function()
-            TriggerClientEvent("AQUIVER:Blip:Update:Sprite", -1, self.data.remoteId, sprite)
+        Sprite = function(spriteId)
+            _data.sprite = spriteId
+            Sync.Sprite()
         end,
-        Alpha = function()
-            TriggerClientEvent("AQUIVER:Blip:Update:Alpha", -1, self.data.remoteId, alpha)
+        Alpha = function(alpha)
+            _data.alpha = alpha
+            Sync.Alpha()
         end,
-        Color = function()
-            TriggerClientEvent("AQUIVER:Blip:Update:Color", -1, self.data.remoteId, color)
+        Color = function(color)
+            _data.color = color
+            Sync.Color()
+        end
+    }
+
+    self.Get = {
+        Data = function()
+            return _data
         end
     }
 
     self.Destroy = function()
         -- Delete from table
-        if Manager.exists(self.data.remoteId) then
-            Manager.Entities[self.data.remoteId] = nil
+        if Manager.exists(_data.remoteId) then
+            Manager.Entities[_data.remoteId] = nil
         end
 
-        TriggerClientEvent("AQUIVER:Blip:Destroy", -1, self.data.remoteId)
+        TriggerClientEvent("AQUIVER:Blip:Destroy", -1, _data.remoteId)
     end
 
-    TriggerClientEvent("AQUIVER:Blip:Create", -1, self.data)
-    Manager.Entities[self.data.remoteId] = self
-    AQUIVER_SHARED.Utils.Print("^3Created new blip with remoteId: " .. self.data.remoteId)
+    TriggerClientEvent("AQUIVER:Blip:Create", -1, _data)
+    Manager.Entities[_data.remoteId] = self
+    AQUIVER_SHARED.Utils.Print("^3Created new blip with remoteId: " .. _data.remoteId)
     TriggerEvent("onBlipCreated", self)
 
     return self
@@ -129,7 +136,7 @@ RegisterNetEvent("AQUIVER:Blip:RequestData", function()
     local source = source
 
     for k, v in pairs(Manager.Entities) do
-        TriggerClientEvent("AQUIVER:Blip:Create", source, v.data)
+        TriggerClientEvent("AQUIVER:Blip:Create", source, v.Get.Data())
     end
 end)
 

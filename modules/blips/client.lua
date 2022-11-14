@@ -7,13 +7,13 @@ Manager.new = function(data)
     ---@class ClientBlip
     local self = {}
 
-    self.data = data
+    local _data = data
     self.blipHandle = nil
 
     self.Destroy = function()
         -- Delete from table
-        if Manager.exists(self.data.remoteId) then
-            Manager.Entities[self.data.remoteId] = nil
+        if Manager.exists(_data.remoteId) then
+            Manager.Entities[_data.remoteId] = nil
         end
 
         if DoesBlipExist(self.blipHandle) then
@@ -21,22 +21,83 @@ Manager.new = function(data)
         end
     end
 
+    self.Set = {
+        Color = function(color)
+            _data.color = color
+
+            if DoesEntityExist(self.blipHandle) then
+                SetBlipColour(self.blipHandle, color)
+            end
+        end,
+        Alpha = function(alpha)
+            _data.alpha = alpha
+
+            if DoesBlipExist(self.blipHandle) then
+                SetBlipAlpha(self.blipHandle, alpha)
+            end
+        end,
+        Sprite = function(sprite)
+            _data.sprite = sprite
+
+            if DoesBlipExist(self.blipHandle) then
+                SetBlipSprite(self.blipHandle, sprite)
+            end
+        end,
+        Display = function(displayId)
+            _data.display = displayId
+
+            if DoesBlipExist(self.blipHandle) then
+                SetBlipDisplay(self.blipHandle, displayId)
+            end
+        end,
+        ShortRange = function(state)
+            _data.shortRange = state
+
+            if DoesBlipExist(self.blipHandle) then
+                SetBlipAsShortRange(self.blipHandle, state)
+            end
+        end,
+        Scale = function(scale)
+            _data.scale = scale
+
+            if DoesBlipExist(self.blipHandle) then
+                SetBlipScale(self.blipHandle, scale)
+            end
+        end,
+        Name = function(name)
+            _data.name = name
+
+            if DoesBlipExist(self.blipHandle) then
+                BeginTextCommandSetBlipName("STRING")
+                AddTextComponentString(name)
+                EndTextCommandSetBlipName(self.blipHandle)
+            end
+        end,
+        Position = function(vec3)
+            _data.position = vec3
+
+            if DoesBlipExist(self.blipHandle) then
+                SetBlipCoords(self.blipHandle, vec3.x, vec3.y, vec3.z)
+            end
+        end
+    }
+
     -- Creating the blip here.
-    local blip = AddBlipForCoord(self.data.position.x, self.data.position.y, self.data.position.z)
-    SetBlipSprite(blip, self.data.sprite)
-    SetBlipDisplay(blip, self.data.display)
-    SetBlipScale(blip, self.data.scale)
-    SetBlipAlpha(blip, self.data.alpha)
-    SetBlipAsShortRange(blip, self.data.shortRange)
-    SetBlipColour(blip, self.data.color)
+    local blip = AddBlipForCoord(_data.position.x, _data.position.y, _data.position.z)
+    SetBlipSprite(blip, _data.sprite)
+    SetBlipDisplay(blip, _data.display)
+    SetBlipScale(blip, _data.scale)
+    SetBlipAlpha(blip, _data.alpha)
+    SetBlipAsShortRange(blip, _data.shortRange)
+    SetBlipColour(blip, _data.color)
     BeginTextCommandSetBlipName("STRING")
-    AddTextComponentString(self.data.name)
+    AddTextComponentString(_data.name)
     EndTextCommandSetBlipName(blip)
 
     self.blipHandle = blip
 
-    Manager.Entities[self.data.remoteId] = self
-    AQUIVER_SHARED.Utils.Print("^3Created new blip with remoteId: " .. self.data.remoteId)
+    Manager.Entities[_data.remoteId] = self
+    AQUIVER_SHARED.Utils.Print("^3Created new blip with remoteId: " .. _data.remoteId)
     TriggerEvent("onBlipCreated", self)
 
     return self
@@ -61,84 +122,50 @@ RegisterNetEvent("AQUIVER:Blip:Update:Color", function(remoteId, color)
     local BlipEntity = Manager.get(remoteId)
     if not BlipEntity then return end
 
-    BlipEntity.data.color = color
-
-    if DoesBlipExist(BlipEntity.blipHandle) then
-        SetBlipColour(BlipEntity.blipHandle, color)
-    end
+    BlipEntity.Set.Color(color)
 end)
 RegisterNetEvent("AQUIVER:Blip:Update:Alpha", function(remoteId, alpha)
     local BlipEntity = Manager.get(remoteId)
     if not BlipEntity then return end
 
-    BlipEntity.data.alpha = alpha
-
-    if DoesBlipExist(BlipEntity.blipHandle) then
-        SetBlipAlpha(BlipEntity.blipHandle, alpha)
-    end
+    BlipEntity.Set.Alpha(alpha)
 end)
 RegisterNetEvent("AQUIVER:Blip:Update:Sprite", function(remoteId, sprite)
     local BlipEntity = Manager.get(remoteId)
     if not BlipEntity then return end
 
-    BlipEntity.data.sprite = sprite
-
-    if DoesBlipExist(BlipEntity.blipHandle) then
-        SetBlipSprite(BlipEntity.blipHandle, sprite)
-    end
+    BlipEntity.Set.Sprite(sprite)
 end)
 RegisterNetEvent("AQUIVER:Blip:Update:Display", function(remoteId, displayId)
     local BlipEntity = Manager.get(remoteId)
     if not BlipEntity then return end
 
-    BlipEntity.data.display = displayId
-
-    if DoesBlipExist(BlipEntity.blipHandle) then
-        SetBlipDisplay(BlipEntity.blipHandle, displayId)
-    end
+    BlipEntity.Set.Display(displayId)
 end)
 RegisterNetEvent("AQUIVER:Blip:Update:ShortRange", function(remoteId, state)
     local BlipEntity = Manager.get(remoteId)
     if not BlipEntity then return end
 
-    BlipEntity.data.shortRange = state
-
-    if DoesBlipExist(BlipEntity.blipHandle) then
-        SetBlipAsShortRange(BlipEntity.blipHandle, state)
-    end
+    BlipEntity.Set.ShortRange(state)
 end)
 
 RegisterNetEvent("AQUIVER:Blip:Update:Scale", function(remoteId, scale)
     local BlipEntity = Manager.get(remoteId)
     if not BlipEntity then return end
 
-    BlipEntity.data.scale = scale
-
-    if DoesBlipExist(BlipEntity.blipHandle) then
-        SetBlipScale(BlipEntity.blipHandle, scale)
-    end
+    BlipEntity.Set.Scale(scale)
 end)
 RegisterNetEvent("AQUIVER:Blip:Update:Name", function(remoteId, name)
     local BlipEntity = Manager.get(remoteId)
     if not BlipEntity then return end
 
-    BlipEntity.data.name = name
-
-    if DoesBlipExist(BlipEntity.blipHandle) then
-        BeginTextCommandSetBlipName("STRING")
-        AddTextComponentString(name)
-        EndTextCommandSetBlipName(BlipEntity.blipHandle)
-    end
+    BlipEntity.Set.Name(name)
 end)
 RegisterNetEvent("AQUIVER:Blip:Update:Position", function(remoteId, position)
     local BlipEntity = Manager.get(remoteId)
     if not BlipEntity then return end
 
-    BlipEntity.data.position = position
-
-    if DoesBlipExist(BlipEntity.blipHandle) then
-        SetBlipCoords(BlipEntity.blipHandle, position.x, position.y, position.z)
-    end
+    BlipEntity.Set.Position(position)
 end)
 RegisterNetEvent("AQUIVER:Blip:Destroy", function(remoteId)
     local BlipEntity = Manager.get(remoteId)

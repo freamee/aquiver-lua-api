@@ -7,7 +7,8 @@ Manager.new = function(data)
     ---@class ClientActionShape
     local self = {}
 
-    self.data = data
+    local _data = data
+
     self.isStreamed = false
     self.isEntered = false
 
@@ -20,12 +21,12 @@ Manager.new = function(data)
             while self.isStreamed do
 
                 DrawMarker(
-                    self.data.sprite,
-                    self.data.position.x, self.data.position.y, self.data.position.z,
+                    _data.sprite,
+                    _data.position.x, _data.position.y, _data.position.z,
                     0.0, 0.0, 0.0,
                     0.0, 0.0, 0.0,
                     1.0, 1.0, 1.0,
-                    self.data.color.r, self.data.color.g, self.data.color.b, self.data.color.a,
+                    _data.color.r, _data.color.g, _data.color.b, _data.color.a,
                     false, false, 2, false, nil, nil, false
                 )
 
@@ -33,7 +34,7 @@ Manager.new = function(data)
             end
         end)
 
-        AQUIVER_SHARED.Utils.Print(string.format("^3ActionShape streamed in (%d)", self.data.remoteId))
+        AQUIVER_SHARED.Utils.Print(string.format("^3ActionShape streamed in (%d)", _data.remoteId))
     end
 
     self.RemoveStream = function()
@@ -44,7 +45,7 @@ Manager.new = function(data)
         -- Need to trigger the onLeave here.
         self.onLeave()
 
-        AQUIVER_SHARED.Utils.Print(string.format("^3ActionShape streamed out (%d)", self.data.remoteId))
+        AQUIVER_SHARED.Utils.Print(string.format("^3ActionShape streamed out (%d)", _data.remoteId))
     end
 
     self.onEnter = function()
@@ -52,8 +53,8 @@ Manager.new = function(data)
 
         self.isEntered = true
 
-        TriggerEvent("onActionShapeEnter", self.data.remoteId)
-        TriggerServerEvent("onActionShapeEnter", self.data.remoteId)
+        TriggerEvent("onActionShapeEnter", _data.remoteId)
+        TriggerServerEvent("onActionShapeEnter", _data.remoteId)
     end
 
     self.onLeave = function()
@@ -61,25 +62,49 @@ Manager.new = function(data)
 
         self.isEntered = false
 
-        TriggerEvent("onActionShapeLeave", self.data.remoteId)
-        TriggerServerEvent("onActionShapeLeave", self.data.remoteId)
+        TriggerEvent("onActionShapeLeave", _data.remoteId)
+        TriggerServerEvent("onActionShapeLeave", _data.remoteId)
     end
+
+    self.Set = {
+        Variables = function(vars)
+            _data.variables = vars
+        end,
+        Variable = function(key, value)
+            _data.variables[key] = value
+        end,
+        Position = function(vec3)
+            _data.position = vec3
+        end
+    }
+
+    self.Get = {
+        Dimension = function()
+            return _data.dimension
+        end,
+        PositionVector3 = function()
+            return vector3(_data.position.x, _data.position.y, _data.position.z)
+        end,
+        Data = function()
+            return _data
+        end
+    }
 
     self.Destroy = function()
         -- Delete from table.
-        if Manager.exists(self.data.remoteId) then
-            Manager.Entities[self.data.remoteId] = nil
+        if Manager.exists(_data.remoteId) then
+            Manager.Entities[_data.remoteId] = nil
         end
 
         -- Remove from stream when destroyed.
         self.RemoveStream()
 
-        AQUIVER_SHARED.Utils.Print("^3Removed ActionShape with remoteId: " .. self.data.remoteId)
+        AQUIVER_SHARED.Utils.Print("^3Removed ActionShape with remoteId: " .. _data.remoteId)
     end
 
-    Manager.Entities[self.data.remoteId] = self
+    Manager.Entities[_data.remoteId] = self
 
-    AQUIVER_SHARED.Utils.Print("^3Created new actionshape with remoteId: " .. self.data.remoteId)
+    AQUIVER_SHARED.Utils.Print("^3Created new actionshape with remoteId: " .. _data.remoteId)
 
     return self
 end
@@ -99,17 +124,17 @@ end
 RegisterNetEvent("AQUIVER:ActionShape:Create", function(data)
     Manager.new(data)
 end)
-RegisterNetEvent("AQUIVER:ActionShape:Update:Variable", function(remoteId, key, value)
+RegisterNetEvent("AQUIVER:ActionShape:Update:Variables", function(remoteId, vars)
     local ActionShapeEntity = Manager.get(remoteId)
     if not ActionShapeEntity then return end
 
-    ActionShapeEntity.data.variables[key] = value
+    ActionShapeEntity.Set.Variables(vars)
 end)
 RegisterNetEvent("AQUIVER:ActionShape:Update:Position", function(remoteId, vec3)
     local ActionShapeEntity = Manager.get(remoteId)
     if not ActionShapeEntity then return end
 
-    ActionShapeEntity.data.position = vec3
+    ActionShapeEntity.Set.Position(vec3)
 end)
 RegisterNetEvent("AQUIVER:ActionShape:Destroy", function(remoteId)
     local ActionShapeEntity = Manager.get(remoteId)
@@ -138,16 +163,16 @@ Citizen.CreateThread(function()
         for k, v in pairs(Manager.Entities) do
 
             -- If dimension is not equals.
-            if AQUIVER_CLIENT.LocalPlayer.dimension ~= v.data.dimension then
+            if AQUIVER_CLIENT.LocalPlayer.dimension ~= v.Get.Dimension() then
                 v.RemoveStream()
             else
-                local dist = #(AQUIVER_CLIENT.LocalPlayer.CachedPosition - v.data.position)
+                local dist = #(AQUIVER_CLIENT.LocalPlayer.CachedPosition - v.Get.PositionVector3())
                 if dist < CONFIG.STREAM_DISTANCES.ACTIONSHAPE then
                     v.AddStream()
 
-                    if dist <= v.data.range then
+                    if dist <= v.Get.Data().range then
                         v.onEnter()
-                    elseif dist > v.data.range then
+                    elseif dist > v.Get.Data().range then
                         v.onLeave()
                     end
                 else
