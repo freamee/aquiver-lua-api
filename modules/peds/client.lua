@@ -9,7 +9,8 @@ Manager.new = function(data)
     ---@class ClientPed
     local self = {}
 
-    self.data = data
+    local _data = data
+
     self.pedHandle = nil
     self.isStreamed = false
 
@@ -18,12 +19,12 @@ Manager.new = function(data)
 
         self.isStreamed = true
 
-        local modelHash = GetHashKey(self.data.model)
+        local modelHash = GetHashKey(_data.model)
         if not IsModelValid(modelHash) then return end
 
         AQUIVER_CLIENT.Utils.RequestModel(modelHash)
 
-        local ped = CreatePed(0, modelHash, self.Get.PositionVector3(), self.data.heading, false, false)
+        local ped = CreatePed(0, modelHash, self.Get.PositionVector3(), _data.heading, false, false)
         SetEntityCanBeDamaged(ped, false)
         SetPedAsEnemy(ped, false)
         SetBlockingOfNonTemporaryEvents(ped, true)
@@ -37,17 +38,17 @@ Manager.new = function(data)
         SetPedDefaultComponentVariation(ped)
 
         SetEntityCoordsNoOffset(ped, self.Get.PositionVector3(), false, false, false)
-        SetEntityHeading(ped, self.data.heading)
+        SetEntityHeading(ped, _data.heading)
         FreezeEntityPosition(ped, true)
 
         self.pedHandle = ped
 
         -- Resync animation here. This is basically a set again.
-        self.Set.Animation(self.data.animDict, self.data.animName, self.data.animFlag)
+        self.Set.Animation(_data.animDict, _data.animName, _data.animFlag)
 
-        AQUIVER_SHARED.Utils.Print(string.format("^3Ped streamed in (%d)", self.data.remoteId))
+        AQUIVER_SHARED.Utils.Print(string.format("^3Ped streamed in (%d)", _data.remoteId))
 
-        if self.data.questionMark or self.data.name then
+        if _data.questionMark or _data.name then
             Citizen.CreateThread(function()
                 while self.isStreamed do
                     local dist = #(AQUIVER_CLIENT.LocalPlayer.CachedPosition - self.Get.PositionVector3())
@@ -56,10 +57,10 @@ Manager.new = function(data)
                     if dist < 5.0 then
                         onScreen = IsEntityOnScreen(self.pedHandle)
 
-                        if self.data.questionMark then
+                        if _data.questionMark then
                             DrawMarker(
                                 32,
-                                self.data.position.x, self.data.position.y, self.data.position.z + 1.35,
+                                _data.position.x, _data.position.y, _data.position.z + 1.35,
                                 0, 0, 0,
                                 0, 0, 0,
                                 0.35, 0.35, 0.35,
@@ -68,12 +69,12 @@ Manager.new = function(data)
                             )
                         end
 
-                        if self.data.name then
+                        if _data.name then
                             AQUIVER_CLIENT.Utils.DrawText3D(
-                                self.data.position.x,
-                                self.data.position.y,
-                                self.data.position.z + 1,
-                                self.data.name,
+                                _data.position.x,
+                                _data.position.y,
+                                _data.position.z + 1,
+                                _data.name,
                                 0.28
                             )
                         end
@@ -100,40 +101,78 @@ Manager.new = function(data)
             DeleteEntity(self.pedHandle)
         end
 
-        AQUIVER_SHARED.Utils.Print(string.format("^3Ped streamed out (%d)", self.data.remoteId))
+        AQUIVER_SHARED.Utils.Print(string.format("^3Ped streamed out (%d)", _data.remoteId))
     end
 
     self.Get = {
         PositionVector3 = function()
-            return vector3(self.data.position.x, self.data.position.y, self.data.position.z)
+            return vector3(_data.position.x, _data.position.y, _data.position.z)
+        end,
+        Dimension = function()
+            return _data.dimension
+        end,
+        RemoteId = function()
+            return _data.remoteId
+        end,
+        Data = function()
+            return _data
         end
     }
 
     self.Set = {
         Animation = function(dict, anim, flag)
-            self.data.animDict = dict
-            self.data.animName = anim
-            self.data.animFlag = flag
+            _data.animDict = dict
+            _data.animName = anim
+            _data.animFlag = flag
 
             if DoesEntityExist(self.pedHandle) then
-                RequestAnimDict(self.data.animDict)
-                while not HasAnimDictLoaded(self.data.animDict) do
+                RequestAnimDict(_data.animDict)
+                while not HasAnimDictLoaded(_data.animDict) do
                     Citizen.Wait(10)
                 end
 
                 TaskPlayAnim(
                     self.pedHandle,
-                    self.data.animDict,
-                    self.data.animName,
+                    _data.animDict,
+                    _data.animName,
                     1.0,
                     1.0,
                     -1,
-                    tonumber(self.data.animFlag),
+                    tonumber(_data.animFlag),
                     1.0,
                     false,
                     false,
                     false
                 )
+            end
+        end,
+        Model = function(model)
+            _data.model = model
+
+            if self.isStreamed then
+                self.RemoveStream()
+                self.AddStream()
+            end
+        end,
+        Heading = function(heading)
+            _data.heading = heading
+
+            if DoesEntityExist(self.pedHandle) then
+                SetEntityHeading(self.pedHandle, _data.heading)
+            end
+        end,
+        Position = function(vec3)
+            _data.position = vec3
+
+            if DoesEntityExist(self.pedHandle) then
+                SetEntityCoords(self.pedHandle, self.Get.PositionVector3(), false, false, false, false)
+            end
+        end,
+        Dimension = function(dimension)
+            _data.dimension = dimension
+
+            if DoesEntityExist(self.pedHandle) and AQUIVER_CLIENT.LocalPlayer.dimension ~= dimension then
+                self.RemoveStream()
             end
         end
     }
@@ -160,20 +199,20 @@ Manager.new = function(data)
 
     self.Destroy = function()
         -- Delete from table.
-        if Manager.exists(self.data.remoteId) then
-            Manager.Entities[self.data.remoteId] = nil
+        if Manager.exists(_data.remoteId) then
+            Manager.Entities[_data.remoteId] = nil
         end
 
         if DoesEntityExist(self.pedHandle) then
             DeleteEntity(self.pedHandle)
         end
 
-        AQUIVER_SHARED.Utils.Print("^3Removed ped with remoteId: " .. self.data.remoteId)
+        AQUIVER_SHARED.Utils.Print("^3Removed ped with remoteId: " .. _data.remoteId)
     end
 
-    Manager.Entities[self.data.remoteId] = self
+    Manager.Entities[_data.remoteId] = self
 
-    AQUIVER_SHARED.Utils.Print("^3Created new ped with remoteId: " .. self.data.remoteId)
+    AQUIVER_SHARED.Utils.Print("^3Created new ped with remoteId: " .. _data.remoteId)
 
     return self
 end
@@ -212,42 +251,25 @@ RegisterNetEvent("AQUIVER:Ped:Update:Model", function(id, model)
     local PedEntity = Manager.get(id)
     if not PedEntity then return end
 
-    PedEntity.data.model = model
-
-    if PedEntity.isStreamed then
-        PedEntity.RemoveStream()
-        PedEntity.AddStream()
-    end
+    PedEntity.Set.Model(model)
 end)
 RegisterNetEvent("AQUIVER:Ped:Update:Heading", function(id, heading)
     local PedEntity = Manager.get(id)
     if not PedEntity then return end
 
-    PedEntity.data.heading = heading
-
-    if DoesEntityExist(PedEntity.pedHandle) then
-        SetEntityHeading(PedEntity.pedHandle, PedEntity.data.heading)
-    end
+    PedEntity.Set.Heading(heading)
 end)
 RegisterNetEvent("AQUIVER:Ped:Update:Position", function(id, position)
     local PedEntity = Manager.get(id)
     if not PedEntity then return end
 
-    PedEntity.data.position = position
-
-    if DoesEntityExist(PedEntity.pedHandle) then
-        SetEntityCoordsNoOffset(PedEntity.pedHandle, PedEntity.Get.PositionVector3(), false, false, false)
-    end
+    PedEntity.Set.Position(position)
 end)
 RegisterNetEvent("AQUIVER:Ped:Update:Dimension", function(id, dimension)
     local PedEntity = Manager.get(id)
     if not PedEntity then return end
 
-    PedEntity.data.dimension = dimension
-
-    if DoesEntityExist(PedEntity.pedHandle) and AQUIVER_CLIENT.LocalPlayer.dimension ~= PedEntity.data.dimension then
-        PedEntity.RemoveStream()
-    end
+    PedEntity.Set.Dimension(dimension)
 end)
 RegisterNetEvent("AQUIVER:Ped:Start:Dialogue", function(id, dialoguesData)
     local PedEntity = Manager.get(id)
@@ -294,7 +316,7 @@ Citizen.CreateThread(function()
     while true do
 
         for k, v in pairs(Manager.Entities) do
-            if AQUIVER_CLIENT.LocalPlayer.dimension ~= v.data.dimension then
+            if AQUIVER_CLIENT.LocalPlayer.dimension ~= v.Get.Dimension() then
                 v.RemoveStream()
             else
                 local dist = #(AQUIVER_CLIENT.LocalPlayer.CachedPosition - v.Get.PositionVector3())

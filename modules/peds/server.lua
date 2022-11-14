@@ -25,82 +25,82 @@ Manager.new = function(data)
     data.dimension = type(data.dimension) == "number" and data.dimension or CONFIG.DEFAULT_DIMENSION
     data.heading = type(data.heading) == "number" and data.heading or 0.0
 
-    self.data = data
-    self.invokedFromResource = AQUIVER_SHARED.Utils.GetInvokingResource()
-    self.data.remoteId = remoteIdCount
+    local _data = data
+    _data.remoteId = remoteIdCount
     remoteIdCount = remoteIdCount + 1
+    self.invokedFromResource = AQUIVER_SHARED.Utils.GetInvokingResource()
     ---@type fun(Player: ServerPlayer, Ped: ServerPed)
     self.onPress = nil
 
-    self.Set = {
-        Position = function(vec3)
-            self.data.position = vec3
-            self.Sync.Position()
-        end,
-        Heading = function(heading)
-            self.data.heading = heading
-            self.Sync.Heading()
-        end,
-        Model = function(model)
-            self.data.model = model
-            self.Sync.Model()
-        end,
-        Dimension = function(dimension)
-            self.data.dimension = dimension
-            self.Sync.Dimension()
-        end,
-        Animation = function(dict, anim, flag)
-            self.data.animDict = dict
-            self.data.animName = anim
-            self.data.animFlag = flag
-            self.Sync.Animation()
-        end
-    }
-
-    self.Sync = {
+    local Sync = {
         Position = function()
-            TriggerClientEvent("AQUIVER:Ped:Update:Position", -1, self.data.remoteId, self.data.position)
+            TriggerClientEvent("AQUIVER:Ped:Update:Position", -1, _data.remoteId, _data.position)
         end,
         Heading = function()
-            TriggerClientEvent("AQUIVER:Ped:Update:Heading", -1, self.data.remoteId, self.data.heading)
+            TriggerClientEvent("AQUIVER:Ped:Update:Heading", -1, _data.remoteId, _data.heading)
         end,
         Model = function()
-            TriggerClientEvent("AQUIVER:Ped:Update:Model", -1, self.data.remoteId, self.data.model)
+            TriggerClientEvent("AQUIVER:Ped:Update:Model", -1, _data.remoteId, _data.model)
         end,
         Dimension = function()
-            TriggerClientEvent("AQUIVER:Ped:Update:Dimension", -1, self.data.remoteId, self.data.dimension)
+            TriggerClientEvent("AQUIVER:Ped:Update:Dimension", -1, _data.remoteId, _data.dimension)
         end,
         Animation = function()
             TriggerClientEvent(
                 "AQUIVER:Ped:Update:Animation",
                 -1,
-                self.data.remoteId,
-                self.data.animDict,
-                self.data.animName,
-                self.data.animFlag
+                _data.remoteId,
+                _data.animDict,
+                _data.animName,
+                _data.animFlag
             )
+        end
+    }
+
+    self.Set = {
+        Position = function(vec3)
+            _data.position = vec3
+            Sync.Position()
+        end,
+        Heading = function(heading)
+            _data.heading = heading
+            Sync.Heading()
+        end,
+        Model = function(model)
+            _data.model = model
+            Sync.Model()
+        end,
+        Dimension = function(dimension)
+            _data.dimension = dimension
+            Sync.Dimension()
+        end,
+        Animation = function(dict, anim, flag)
+            _data.animDict = dict
+            _data.animName = anim
+            _data.animFlag = flag
+            Sync.Animation()
         end
     }
 
     self.Get = {
         Position = function()
-            return vector3(self.data.position.x, self.data.position.y, self.data.position.z)
+            return vector3(_data.position.x, _data.position.y, _data.position.z)
         end,
-        GetData = function()
-            return self.data
+        Data = function()
+            return _data
         end
     }
 
     ---@param Player ServerPlayer
     self.StartDialogue = function(Player, DialoguesData)
-        TriggerClientEvent("AQUIVER:Ped:Start:Dialogue", Player.source, self.data.remoteId, DialoguesData)
+        TriggerClientEvent("AQUIVER:Ped:Start:Dialogue", Player.source, _data.remoteId, DialoguesData)
     end
 
     ---@param cb fun(Player: ServerPlayer, Ped: ServerPed)
     self.AddPressFunction = function(cb)
         if Citizen.GetFunctionReference(self.onPress) then
             AQUIVER_SHARED.Utils.Print("^2Ped AddPressFunction already exists, it was overwritten. Ped: " ..
-                self.data.remoteId)
+                _data.remoteId)
         end
 
         self.onPress = cb
@@ -108,26 +108,26 @@ Manager.new = function(data)
 
     self.Destroy = function()
         -- Delete from table.
-        if Manager.exists(self.data.remoteId) then
-            Manager.Entities[self.data.remoteId] = nil
+        if Manager.exists(_data.remoteId) then
+            Manager.Entities[_data.remoteId] = nil
         end
 
-        TriggerClientEvent("AQUIVER:Ped:Destroy", -1, self.data.remoteId)
+        TriggerClientEvent("AQUIVER:Ped:Destroy", -1, _data.remoteId)
         TriggerEvent("onPedDestroyed", self)
 
-        AQUIVER_SHARED.Utils.Print("^3Removed ped with remoteId: " .. self.data.remoteId)
+        AQUIVER_SHARED.Utils.Print("^3Removed ped with remoteId: " .. _data.remoteId)
     end
 
-    if Manager.exists(self.data.remoteId) then
-        AQUIVER_SHARED.Utils.Print("^1Ped already exists with remoteId: " .. self.data.remoteId)
+    if Manager.exists(_data.remoteId) then
+        AQUIVER_SHARED.Utils.Print("^1Ped already exists with remoteId: " .. _data.remoteId)
         return
     end
 
-    Manager.Entities[self.data.remoteId] = self
+    Manager.Entities[_data.remoteId] = self
 
-    TriggerClientEvent("AQUIVER:Ped:Create", -1, self.data)
+    TriggerClientEvent("AQUIVER:Ped:Create", -1, _data)
 
-    AQUIVER_SHARED.Utils.Print("^3Created new ped with remoteId: " .. self.data.remoteId)
+    AQUIVER_SHARED.Utils.Print("^3Created new ped with remoteId: " .. _data.remoteId)
 
     TriggerEvent("onPedCreated", self)
 
@@ -150,7 +150,7 @@ RegisterNetEvent("AQUIVER:Ped:RequestData", function()
     local source = source
 
     for k, v in pairs(Manager.Entities) do
-        TriggerClientEvent("AQUIVER:Ped:Create", source, v.data)
+        TriggerClientEvent("AQUIVER:Ped:Create", source, v.Get.Data())
     end
 end)
 

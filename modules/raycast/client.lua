@@ -34,7 +34,7 @@ Manager.SetEntityHandle = function(handleId)
                 TriggerEvent("onPedRaycast", findPed)
 
                 AQUIVER_SHARED.Utils.Print(
-                    string.format("^3Raycast entity changed: Ped: (%d)", findPed.data.remoteId)
+                    string.format("^3Raycast entity changed: Ped: (%d)", findPed.Get.RemoteId())
                 )
             end
         elseif GetEntityType(Manager.currentHitHandle) == 3 then
@@ -67,8 +67,8 @@ Manager.SetEntityHandle = function(handleId)
 
                 if Manager.AimedPedEntity then
                     if IsDisabledControlJustPressed(0, CONFIG.RAYCAST.INTERACTION_KEY) then
-                        TriggerServerEvent("Ped:Interaction:Press", Manager.AimedPedEntity.data.remoteId)
-                        TriggerServerEvent("onPedInteractionPress", Manager.AimedPedEntity.data.remoteId)
+                        TriggerServerEvent("Ped:Interaction:Press", Manager.AimedPedEntity.Get.RemoteId())
+                        TriggerServerEvent("onPedInteractionPress", Manager.AimedPedEntity.Get.RemoteId())
                     end
                 end
 
