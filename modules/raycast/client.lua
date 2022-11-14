@@ -32,15 +32,20 @@ Manager.SetEntityHandle = function(handleId)
             if findPed then
                 Manager.AimedPedEntity = findPed
                 TriggerEvent("onPedRaycast", findPed)
-                AQUIVER_SHARED.Utils.Print(string.format("^3Raycast entity changed: Ped: (%d)", findPed.data.remoteId))
+
+                AQUIVER_SHARED.Utils.Print(
+                    string.format("^3Raycast entity changed: Ped: (%d)", findPed.data.remoteId)
+                )
             end
         elseif GetEntityType(Manager.currentHitHandle) == 3 then
             local findObject = AQUIVER_CLIENT.ObjectManager.atHandle(Manager.currentHitHandle)
             if findObject then
                 Manager.AimedObjectEntity = findObject
                 TriggerEvent("onObjectRaycast", findObject)
-                AQUIVER_SHARED.Utils.Print(string.format("^3Raycast entity changed: Object: (%d)",
-                    findObject.data.remoteId))
+
+                AQUIVER_SHARED.Utils.Print(
+                    string.format("^3Raycast entity changed: Object: (%d)", findObject.Get.RemoteId())
+                )
             end
         end
 
@@ -69,8 +74,8 @@ Manager.SetEntityHandle = function(handleId)
 
                 if Manager.AimedObjectEntity then
                     if IsDisabledControlJustPressed(0, CONFIG.RAYCAST.INTERACTION_KEY) then
-                        TriggerServerEvent("Object:Interaction:Press", Manager.AimedObjectEntity.data.remoteId)
-                        TriggerServerEvent("onObjectInteractionPress", Manager.AimedObjectEntity.data.remoteId)
+                        TriggerServerEvent("Object:Interaction:Press", Manager.AimedObjectEntity.Get.RemoteId())
+                        TriggerServerEvent("onObjectInteractionPress", Manager.AimedObjectEntity.Get.RemoteId())
                     end
                 end
 

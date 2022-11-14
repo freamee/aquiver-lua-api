@@ -113,10 +113,11 @@ AddEventHandler("onResourceStop", function(resourceName)
     end
 end)
 
+---@param Object ServerObject
 AddEventHandler("onObjectDestroyed", function(Object)
     -- Destroy particle if the object got destroyed.
     for k, v in pairs(Manager.Entities) do
-        if v.data.toObjectRemoteId == Object.data.remoteId then
+        if v.data.toObjectRemoteId == Object.Get.RemoteId() then
             v.Destroy()
         end
     end

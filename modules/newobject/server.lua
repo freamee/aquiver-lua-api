@@ -226,8 +226,6 @@ Manager.new = function(data)
 
             TriggerEvent("onObjectVariableChange", self, key, value)
 
-            print(json.encode(_data.variables))
-
             Sync.Variables()
             self.Save.Variables()
         end
