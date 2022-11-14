@@ -144,7 +144,7 @@ Manager.new = function(source)
     --- Callback passes the Player after the progress is finished: cb(Player)
     ---@param text string
     ---@param time number Time in milliseconds (MS) 1000ms-1second
-    ---@param cb fun(Player: ServerPlayer)
+    ---@param cb fun()
     self.Progress = function(text, time, cb)
         if self.variables.hasProgress then return end
 
@@ -163,7 +163,7 @@ Manager.new = function(source)
             self.variables.hasProgress = false
 
             if Citizen.GetFunctionReference(cb) then
-                cb(self)
+                cb()
             end
         end)
     end

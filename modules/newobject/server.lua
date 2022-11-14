@@ -86,9 +86,9 @@ Manager.new = function(data)
     self.RunValidators = function()
         local validators = Manager.GetVariableValidator(self.data.model)
 
-        if validators then
-            for i = 1, #validators, 1 do
-                validators[i].cb(self)
+        if type(validators) == "table" then
+            for k, v in pairs(validators) do
+                v.cb(self)
             end
         end
     end
@@ -123,6 +123,9 @@ Manager.new = function(data)
         end,
         MysqlId = function()
             return self.data.id
+        end,
+        Data = function()
+            return self.data
         end
     }
 
@@ -362,7 +365,6 @@ Manager.AddVariableValidator = function(model, cb)
     })
 
     for k, v in pairs(Manager.Entities) do
-
         if v.data.model == model then
             v.RunValidators()
         end
@@ -466,6 +468,15 @@ AddEventHandler("onResourceStop", function(resourceName)
     for k, v in pairs(Manager.Entities) do
         if v.invokedFromResource == resourceName then
             v.Destroy()
+        end
+    end
+
+    -- Remove variable validators when the specified resource is stopped.
+    for _k, _v in pairs(variableValidators) do
+        for k, v in pairs(_v) do
+            if v.invokedFromResource == resourceName then
+                table.remove(variableValidators[_k], k)
+            end
         end
     end
 end)

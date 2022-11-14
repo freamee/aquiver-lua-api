@@ -27,7 +27,7 @@ end
 ---@param d IAttachment
 Manager.registerOne = function(attachmentName, d)
     if Manager.exists(attachmentName) then
-        --         API.Utils.Debug.Print("^1AttachmentManager register failed, already exists: " .. attachmentName)
+        AQUIVER_SHARED.Utils.Print("^1AttachmentManager register failed, already exists: " .. attachmentName)
         return
     end
 
@@ -36,12 +36,13 @@ Manager.registerOne = function(attachmentName, d)
         data = d
     }
 
-    --     API.Utils.Debug.Print("^3Registered new attachment: " .. attachmentName)
+    AQUIVER_SHARED.Utils.Print("^3Registered new attachment: " .. attachmentName)
 end
 
+---@param d { [string]: IAttachment }
 Manager.registerMany = function(d)
     if type(d) ~= "table" then
-        --         API.Utils.Debug.Print("^1AttachmentManager registerMany should be a key-pair table.")
+        AQUIVER_SHARED.Utils.Print("^1AttachmentManager registerMany should be a key-pair table.")
         return
     end
 
