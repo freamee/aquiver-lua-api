@@ -7,7 +7,8 @@ Manager.new = function(data)
     ---@class ClientParticle
     local self = {}
 
-    self.data = data
+    local _data = data
+
     self.particleHandle = nil
     self.isStreamed = false
 
@@ -16,27 +17,27 @@ Manager.new = function(data)
 
         self.isStreamed = true
 
-        RequestNamedPtfxAsset(self.data.particleDict)
-        while not HasNamedPtfxAssetLoaded(self.data.particleDict) do
+        RequestNamedPtfxAsset(_data.particleDict)
+        while not HasNamedPtfxAssetLoaded(_data.particleDict) do
             Citizen.Wait(10)
         end
 
-        UseParticleFxAssetNextCall(self.data.particleDict)
+        UseParticleFxAssetNextCall(_data.particleDict)
 
         if self.IsObjectParticle() then
-            local findObject = AQUIVER_CLIENT.ObjectManager.get(self.data.toObjectRemoteId)
+            local findObject = AQUIVER_CLIENT.ObjectManager.get(_data.toObjectRemoteId)
             if findObject then
                 if DoesEntityExist(findObject.objectHandle) then
                     self.particleHandle = StartParticleFxLoopedOnEntity(
-                        self.data.particleName,
+                        _data.particleName,
                         findObject.objectHandle,
-                        self.data.offset.x,
-                        self.data.offset.y,
-                        self.data.offset.z,
-                        self.data.rotation.x,
-                        self.data.rotation.y,
-                        self.data.rotation.z,
-                        self.data.scale,
+                        _data.offset.x,
+                        _data.offset.y,
+                        _data.offset.z,
+                        _data.rotation.x,
+                        _data.rotation.y,
+                        _data.rotation.z,
+                        _data.scale,
                         false,
                         false,
                         false
@@ -49,14 +50,14 @@ Manager.new = function(data)
             end
         else
             self.particleHandle = StartParticleFxLoopedAtCoord(
-                self.data.particleName,
-                self.data.position.x,
-                self.data.position.y,
-                self.data.position.z,
-                self.data.rotation.x,
-                self.data.rotation.y,
-                self.data.rotation.z,
-                self.data.scale,
+                _data.particleName,
+                _data.position.x,
+                _data.position.y,
+                _data.position.z,
+                _data.rotation.x,
+                _data.rotation.y,
+                _data.rotation.z,
+                _data.scale,
                 false,
                 false,
                 false,
@@ -64,8 +65,8 @@ Manager.new = function(data)
             )
         end
 
-        AQUIVER_SHARED.Utils.Print(string.format("^3Particle streamed in (%d, %s, %s)", self.data.remoteId,
-            self.data.particleName, self.data.particleUid))
+        AQUIVER_SHARED.Utils.Print(string.format("^3Particle streamed in (%d, %s, %s)", _data.remoteId,
+            _data.particleName, _data.particleUid))
     end
 
     self.RemoveStream = function()
@@ -78,34 +79,37 @@ Manager.new = function(data)
             self.particleHandle = nil
         end
 
-        AQUIVER_SHARED.Utils.Print(string.format("^3Particle streamed out (%d, %s, %s)", self.data.remoteId,
-            self.data.particleName, self.data.particleUid))
+        AQUIVER_SHARED.Utils.Print(string.format("^3Particle streamed out (%d, %s, %s)", _data.remoteId,
+            _data.particleName, _data.particleUid))
     end
 
     self.IsObjectParticle = function()
-        return type(self.data.toObjectRemoteId) == "number" and true or false
+        return type(_data.toObjectRemoteId) == "number" and true or false
     end
 
     self.Get = {
         Position = function()
-            return vector3(self.data.position.x, self.data.position.y, self.data.position.z)
+            return vector3(_data.position.x, _data.position.y, _data.position.z)
         end,
         Rotation = function()
-            return vector3(self.data.rotation.x, self.data.rotation.y, self.data.rotation.z)
+            return vector3(_data.rotation.x, _data.rotation.y, _data.rotation.z)
+        end,
+        Data = function()
+            return _data
         end
     }
 
     self.Destroy = function()
         -- Delete from table.
-        if Manager.exists(self.data.remoteId) then
-            Manager.Entities[self.data.remoteId] = nil
+        if Manager.exists(_data.remoteId) then
+            Manager.Entities[_data.remoteId] = nil
         end
 
         if DoesParticleFxLoopedExist(self.particleHandle) then
             StopParticleFxLooped(self.particleHandle, false)
         end
 
-        AQUIVER_SHARED.Utils.Print("^3Removed particle with remoteId: " .. self.data.remoteId)
+        AQUIVER_SHARED.Utils.Print("^3Removed particle with remoteId: " .. _data.remoteId)
     end
 
 
@@ -114,9 +118,9 @@ Manager.new = function(data)
         self.AddStream()
     end
 
-    Manager.Entities[self.data.remoteId] = self
+    Manager.Entities[_data.remoteId] = self
 
-    AQUIVER_SHARED.Utils.Print("^3Created new particle with remoteId: " .. self.data.remoteId)
+    AQUIVER_SHARED.Utils.Print("^3Created new particle with remoteId: " .. _data.remoteId)
 
     return self
 end
@@ -151,7 +155,7 @@ RegisterNetEvent("AQUIVER:Particle:Destroy", function(remoteId)
 end)
 AddEventHandler("onObjectStreamIn", function(ObjectEntity)
     for k, v in pairs(Manager.Entities) do
-        if v.data.toObjectRemoteId == ObjectEntity.data.remoteId then
+        if v.Get.Data().toObjectRemoteId == ObjectEntity.data.remoteId then
             v.AddStream()
         end
     end
@@ -159,7 +163,7 @@ end)
 
 AddEventHandler("onObjectStreamOut", function(ObjectEntity)
     for k, v in pairs(Manager.Entities) do
-        if v.data.toObjectRemoteId == ObjectEntity.data.remoteId then
+        if v.Get.Data().toObjectRemoteId == ObjectEntity.data.remoteId then
             v.RemoveStream()
         end
     end
@@ -184,7 +188,7 @@ Citizen.CreateThread(function()
         for k, v in pairs(Manager.Entities) do
             if not v.IsObjectParticle() then
 
-                if AQUIVER_CLIENT.LocalPlayer.dimension ~= v.data.dimension then
+                if AQUIVER_CLIENT.LocalPlayer.dimension ~= v.Get.Data().dimension then
                     v.RemoveStream()
                 else
                     local dist = #(AQUIVER_CLIENT.LocalPlayer.CachedPosition - v.Get.Position())

@@ -7,12 +7,43 @@ Manager.new = function(data)
     ---@class ClientRadarBlip
     local self = {}
 
-    self.data = data
+    local _data = data
     self.blipHandle = nil
 
+    self.Set = {
+        Color = function(color)
+            _data.color = color
+
+            if DoesBlipExist(self.blipHandle) then
+                SetBlipColour(self.blipHandle, color)
+            end
+        end,
+        Radius = function(radius)
+            _data.radius = radius
+
+            if DoesBlipExist(self.blipHandle) then
+                SetBlipScale(self.blipHandle, radius)
+            end
+        end,
+        Alpha = function(alpha)
+            _data.alpha = alpha
+
+            if DoesBlipExist(self.blipHandle) then
+                SetBlipAlpha(self.blipHandle, alpha)
+            end
+        end,
+        Flashing = function(state)
+            _data.isFlashing = state
+
+            if DoesBlipExist(self.blipHandle) then
+                SetBlipFlashes(self.blipHandle, state)
+            end
+        end
+    }
+
     self.Destroy = function()
-        if Manager.exists(self.data.remoteId) then
-            Manager.Entities[self.data.remoteId] = nil
+        if Manager.exists(_data.remoteId) then
+            Manager.Entities[_data.remoteId] = nil
         end
 
         if DoesBlipExist(self.blipHandle) then
@@ -20,14 +51,14 @@ Manager.new = function(data)
         end
     end
 
-    local blip = AddBlipForRadius(self.data.position, self.data.radius)
+    local blip = AddBlipForRadius(_data.position, _data.radius)
     SetBlipRotation(blip, 0)
-    SetBlipAlpha(blip, self.data.alpha)
-    SetBlipColour(blip, self.data.color)
-    SetBlipFlashes(blip, self.data.isFlashing)
+    SetBlipAlpha(blip, _data.alpha)
+    SetBlipColour(blip, _data.color)
+    SetBlipFlashes(blip, _data.isFlashing)
     self.blipHandle = blip
 
-    Manager.Entities[self.data.remoteId] = self
+    Manager.Entities[_data.remoteId] = self
 
     return self
 end
@@ -51,41 +82,25 @@ RegisterNetEvent("AQUIVER:RadarBlip:Update:Color", function(remoteId, color)
     local RadarBlipEntity = Manager.get(remoteId)
     if not RadarBlipEntity then return end
 
-    RadarBlipEntity.data.color = color
-
-    if DoesBlipExist(RadarBlipEntity.blipHandle) then
-        SetBlipColour(RadarBlipEntity.blipHandle, color)
-    end
+    RadarBlipEntity.Set.Color(color)
 end)
 RegisterNetEvent("AQUIVER:RadarBlip:Update:Radius", function(remoteId, radius)
     local RadarBlipEntity = Manager.get(remoteId)
     if not RadarBlipEntity then return end
 
-    RadarBlipEntity.data.radius = radius
-
-    if DoesBlipExist(RadarBlipEntity.blipHandle) then
-        SetBlipScale(RadarBlipEntity.blipHandle, radius)
-    end
+    RadarBlipEntity.Set.Radius(radius)
 end)
 RegisterNetEvent("AQUIVER:RadarBlip:Update:Alpha", function(remoteId, alpha)
     local RadarBlipEntity = Manager.get(remoteId)
     if not RadarBlipEntity then return end
 
-    RadarBlipEntity.data.alpha = alpha
-
-    if DoesBlipExist(RadarBlipEntity.blipHandle) then
-        SetBlipAlpha(RadarBlipEntity.blipHandle, alpha)
-    end
+    RadarBlipEntity.Set.Alpha(alpha)
 end)
 RegisterNetEvent("AQUIVER:RadarBlip:Update:Flashing", function(remoteId, state)
     local RadarBlipEntity = Manager.get(remoteId)
     if not RadarBlipEntity then return end
 
-    RadarBlipEntity.data.isFlashing = state
-
-    if DoesBlipExist(RadarBlipEntity.blipHandle) then
-        SetBlipFlashes(RadarBlipEntity.blipHandle, state)
-    end
+    RadarBlipEntity.Set.Flashing(state)
 end)
 RegisterNetEvent("AQUIVER:RadarBlip:Destroy", function(uid)
     local RadarBlipEntity = Manager.get(remoteId)

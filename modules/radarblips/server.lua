@@ -17,61 +17,68 @@ Manager.new = function(data)
     ---@class ServerRadarBlip
     local self = {}
 
-    self.data = data
-    self.invokedFromResource = AQUIVER_SHARED.Utils.GetInvokingResource()
-    self.data.remoteId = remoteIdCount
+    local _data = data
+    _data.remoteId = remoteIdCount
     remoteIdCount = remoteIdCount + 1
 
-    self.Set = {
-        Radius = function(radius)
-            self.data.radius = radius
-            self.Sync.Radius()
+    self.invokedFromResource = AQUIVER_SHARED.Utils.GetInvokingResource()
+
+    local Sync = {
+        Radius = function()
+            TriggerClientEvent("AQUIVER:RadarBlip:Update:Radius", -1, _data.remoteId, radius)
         end,
-        Color = function(colorId)
-            self.data.color = colorId
-            self.Sync.Color()
+        Color = function()
+            TriggerClientEvent("AQUIVER:RadarBlip:Update:Color", -1, _data.remoteId, color)
         end,
-        Alpha = function(alpha)
-            self.data.alpha = alpha
-            self.Sync.Alpha()
+        Alpha = function()
+            TriggerClientEvent("AQUIVER:RadarBlip:Update:Alpha", -1, _data.remoteId, alpha)
         end,
-        Flashing = function(state)
-            self.data.isFlashing = state
-            self.Sync.Flashing()
+        Flashing = function()
+            TriggerClientEvent("AQUIVER:RadarBlip:Update:Flashing", -1, _data.remoteId, state)
         end
     }
 
-    self.Sync = {
-        Radius = function()
-            TriggerClientEvent("AQUIVER:RadarBlip:Update:Radius", -1, self.data.remoteId, radius)
+    self.Set = {
+        Radius = function(radius)
+            _data.radius = radius
+            Sync.Radius()
         end,
-        Color = function()
-            TriggerClientEvent("AQUIVER:RadarBlip:Update:Color", -1, self.data.remoteId, color)
+        Color = function(colorId)
+            _data.color = colorId
+            Sync.Color()
         end,
-        Alpha = function()
-            TriggerClientEvent("AQUIVER:RadarBlip:Update:Alpha", -1, self.data.remoteId, alpha)
+        Alpha = function(alpha)
+            _data.alpha = alpha
+            Sync.Alpha()
         end,
-        Flashing = function()
-            TriggerClientEvent("AQUIVER:RadarBlip:Update:Flashing", -1, self.data.remoteId, state)
+        Flashing = function(state)
+            _data.isFlashing = state
+            Sync.Flashing()
+        end
+    }
+
+    self.Get = {
+        Data = function()
+            return _data
         end
     }
 
     self.Destroy = function()
         -- Delete from table
-        if Manager.exists(self.data.remoteId) then
-            Manager.Entities[self.data.remoteId] = nil
+        if Manager.exists(_data.remoteId) then
+            Manager.Entities[_data.remoteId] = nil
         end
 
-        TriggerClientEvent("AQUIVER:RadarBlip:Destroy", -1, self.data.remoteId)
+        TriggerClientEvent("AQUIVER:RadarBlip:Destroy", -1, _data.remoteId)
     end
 
-    if Manager.exists(self.data.remoteId) then
-        AQUIVER_SHARED.Utils.Print("^1RadarBlip already exists with remoteId: " .. self.data.remoteId)
+    if Manager.exists(_data.remoteId) then
+        AQUIVER_SHARED.Utils.Print("^1RadarBlip already exists with remoteId: " .. _data.remoteId)
         return
     end
 
-    Manager.Entities[self.data.remoteId] = self
-    TriggerClientEvent("AQUIVER:RadarBlip:Create", -1, self.data)
+    Manager.Entities[_data.remoteId] = self
+    TriggerClientEvent("AQUIVER:RadarBlip:Create", -1, _data)
 
     return self
 end
@@ -92,7 +99,7 @@ RegisterNetEvent("AQUIVER:RadarBlip:RequestData", function()
     local source = source
 
     for k, v in pairs(Manager.Entities) do
-        TriggerClientEvent("AQUIVER:RadarBlip:Create", source, v.data)
+        TriggerClientEvent("AQUIVER:RadarBlip:Create", source, v.Get.Data())
     end
 end)
 

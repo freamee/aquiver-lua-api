@@ -22,44 +22,47 @@ Manager.new = function(data)
     ---@class ServerParticle
     local self = {}
 
-    self.data = data
+    local _data = data
+    _data.remoteId = remoteIdCount
     self.invokedFromResource = AQUIVER_SHARED.Utils.GetInvokingResource()
-    self.data.remoteId = remoteIdCount
     remoteIdCount = remoteIdCount + 1
 
-    if Manager.exists(self.data.remoteId) then
-        AQUIVER_SHARED.Utils.Print("^Particle already exists with remoteId: " .. self.data.remoteId)
+    if Manager.exists(_data.remoteId) then
+        AQUIVER_SHARED.Utils.Print("^Particle already exists with remoteId: " .. _data.remoteId)
         return
     end
 
     self.Get = {
         Position = function()
-            return vector3(self.data.position.x, self.data.position.y, self.data.position.z)
+            return vector3(_data.position.x, _data.position.y, _data.position.z)
         end,
         Rotation = function()
-            return vector3(self.data.rotation.x, self.data.rotation.y, self.data.rotation.z)
+            return vector3(_data.rotation.x, _data.rotation.y, _data.rotation.z)
+        end,
+        Data = function()
+            return _data
         end
     }
 
     self.Destroy = function()
         -- Delete from table.
-        if Manager.exists(self.data.remoteId) then
-            Manager.Entities[self.data.remoteId] = nil
+        if Manager.exists(_data.remoteId) then
+            Manager.Entities[_data.remoteId] = nil
         end
 
-        TriggerClientEvent("AQUIVER:Particle:Destroy", -1, self.data.remoteId)
+        TriggerClientEvent("AQUIVER:Particle:Destroy", -1, _data.remoteId)
 
-        AQUIVER_SHARED.Utils.Print("^3Removed particle with remoteId: " .. self.data.remoteId)
+        AQUIVER_SHARED.Utils.Print("^3Removed particle with remoteId: " .. _data.remoteId)
     end
 
-    TriggerClientEvent("AQUIVER:Particle:Create", -1, self.data)
+    TriggerClientEvent("AQUIVER:Particle:Create", -1, _data)
 
-    Manager.Entities[self.data.remoteId] = self
-    AQUIVER_SHARED.Utils.Print("^3Created new particle with remoteId: " .. self.data.remoteId)
+    Manager.Entities[_data.remoteId] = self
+    AQUIVER_SHARED.Utils.Print("^3Created new particle with remoteId: " .. _data.remoteId)
 
     -- Start timeout if the timeMS is specified.
-    if type(self.data.timeMS) == "number" then
-        Citizen.SetTimeout(self.data.timeMS, function()
+    if type(_data.timeMS) == "number" then
+        Citizen.SetTimeout(_data.timeMS, function()
             if self then self.Destroy() end
         end)
     end
@@ -81,7 +84,7 @@ end
 
 Manager.ObjectGetParticleByUid = function(remoteId, uid)
     for k, v in pairs(Manager.Entities) do
-        if v.data.toObjectRemoteId == remoteId and v.data.particleUid == uid then
+        if v.Get.Data().toObjectRemoteId == remoteId and v.Get.Data().particleUid == uid then
             return v
         end
     end
@@ -90,7 +93,7 @@ end
 
 Manager.ObjectHasParticleUid = function(remoteId, uid)
     for k, v in pairs(Manager.Entities) do
-        if v.data.toObjectRemoteId == remoteId and v.data.particleUid == uid then
+        if v.Get.Data().toObjectRemoteId == remoteId and v.Get.Data().particleUid == uid then
             return true
         end
     end
@@ -101,7 +104,7 @@ RegisterNetEvent("AQUIVER:Particle:RequestData", function()
     local source = source
 
     for k, v in pairs(Manager.Entities) do
-        TriggerClientEvent("AQUIVER:Particle:Create", source, v.data)
+        TriggerClientEvent("AQUIVER:Particle:Create", source, v.Get.Data())
     end
 end)
 
@@ -117,7 +120,7 @@ end)
 AddEventHandler("onObjectDestroyed", function(Object)
     -- Destroy particle if the object got destroyed.
     for k, v in pairs(Manager.Entities) do
-        if v.data.toObjectRemoteId == Object.Get.RemoteId() then
+        if v.Get.Data().toObjectRemoteId == Object.Get.RemoteId() then
             v.Destroy()
         end
     end
