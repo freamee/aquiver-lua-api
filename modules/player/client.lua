@@ -22,7 +22,7 @@ RegisterNetEvent("AQUIVER:Player:Attachment:Add", function(attachmentName)
     -- Return if already exists.
     if Manager.HasAttachment(attachmentName) then return end
 
-    local aData = API.AttachmentManager.get(attachmentName)
+    local aData = AQUIVER_SHARED.AttachmentManager.get(attachmentName)
     if not aData then return end
 
     local modelHash = GetHashKey(aData.model)

@@ -96,6 +96,16 @@ Manager.new = function(data)
         TriggerClientEvent("AQUIVER:Ped:Start:Dialogue", Player.source, self.data.remoteId, DialoguesData)
     end
 
+    ---@param cb fun(Player: ServerPlayer, Ped: ServerPed)
+    self.AddPressFunction = function(cb)
+        if Citizen.GetFunctionReference(self.onPress) then
+            AQUIVER_SHARED.Utils.Print("^2Ped AddPressFunction already exists, it was overwritten. Ped: " ..
+                self.data.remoteId)
+        end
+
+        self.onPress = cb
+    end
+
     self.Destroy = function()
         -- Delete from table.
         if Manager.exists(self.data.remoteId) then
@@ -114,6 +124,8 @@ Manager.new = function(data)
     end
 
     Manager.Entities[self.data.remoteId] = self
+
+    TriggerClientEvent("AQUIVER:Ped:Create", -1, self.data)
 
     AQUIVER_SHARED.Utils.Print("^3Created new ped with remoteId: " .. self.data.remoteId)
 

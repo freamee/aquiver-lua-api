@@ -48,43 +48,54 @@ Manager.new = function(data)
         data.variables = json.decode(data.variables) or {}
     end
 
-    self.data = data
-    self.invokedFromResource = AQUIVER_SHARED.Utils.GetInvokingResource()
-    self.data.remoteId = remoteIdCount
-    self.data.variables.hasAction = false
+    local _data = data
+    _data.remoteId = remoteIdCount
+    _data.variables.hasAction = false
+
     remoteIdCount = remoteIdCount + 1
+
+    self.invokedFromResource = AQUIVER_SHARED.Utils.GetInvokingResource()
     ---@type fun(Player: ServerPlayer, Object: ServerObject)
     self.onPress = nil
 
-    if Manager.exists(self.data.remoteId) then
-        AQUIVER_SHARED.Utils.Print("^1Object already exists with remoteId: " .. self.data.remoteId)
+    if Manager.exists(_data.remoteId) then
+        AQUIVER_SHARED.Utils.Print("^1Object already exists with remoteId: " .. _data.remoteId)
         return
+    end
+
+    ---@param cb fun(Player: ServerPlayer, Object: ServerObject)
+    self.AddPressFunction = function(cb)
+        if Citizen.GetFunctionReference(self.onPress) then
+            AQUIVER_SHARED.Utils.Print("^Object AddPressFunction already exists, it was overwritten.")
+        end
+
+        self.onPress = cb
     end
 
     self.Destroy = function()
         -- Delete from table.
-        if Manager.exists(self.data.remoteId) then
-            Manager.Entities[self.data.remoteId] = nil
+        if Manager.exists(_data.remoteId) then
+            Manager.Entities[_data.remoteId] = nil
         end
 
-        TriggerClientEvent("AQUIVER:Object:Destroy", -1, self.data.remoteId)
+        TriggerClientEvent("AQUIVER:Object:Destroy", -1, _data.remoteId)
         TriggerEvent("onObjectDestroyed", self)
-        AQUIVER_SHARED.Utils.Print("^3Removed object with remoteId: " .. self.data.remoteId)
+        AQUIVER_SHARED.Utils.Print("^3Removed object with remoteId: " .. _data.remoteId)
 
         if GetResourceState("oxmysql") == "started" then
             exports.oxmysql:query(
                 "DELETE FROM av_module_objects WHERE id = @id",
                 {
-                    ["@id"] = self.data.id
+                    ["@id"] = _data.id
                 }
             )
         end
 
-        AQUIVER_SHARED.Utils.Print("^3Removed object with remoteId: " .. self.data.remoteId)
+        AQUIVER_SHARED.Utils.Print("^3Removed object with remoteId: " .. _data.remoteId)
     end
 
     self.RunValidators = function()
-        local validators = Manager.GetVariableValidator(self.data.model)
+        local validators = Manager.GetVariableValidator(_data.model)
 
         if type(validators) == "table" then
             for k, v in pairs(validators) do
@@ -95,129 +106,130 @@ Manager.new = function(data)
 
     self.Get = {
         Position = function()
-            return vector3(self.data.x, self.data.y, self.data.z)
+            return vector3(_data.x, _data.y, _data.z)
         end,
         Rotation = function()
-            return vector3(self.data.rx, self.data.ry, self.data.rz)
+            return vector3(_data.rx, _data.ry, _data.rz)
         end,
         Model = function()
-            return self.data.model
+            return _data.model
         end,
         Alpha = function()
-            return self.data.alpha
+            return _data.alpha
         end,
         Hide = function()
-            return self.data.hide
+            return _data.hide
         end,
         Dimension = function()
-            return self.data.dimension
+            return _data.dimension
         end,
         Variables = function()
-            return self.data.variables
+            return _data.variables
         end,
         Variable = function(key)
-            return self.data.variables[key] or nil
+            return _data.variables[key] or nil
         end,
         RemoteId = function()
-            return self.data.remoteId
+            return _data.remoteId
         end,
         MysqlId = function()
-            return self.data.id
+            return _data.id
         end,
         Data = function()
-            return self.data
+            return _data
+        end
+    }
+
+    local Sync = {
+        Position = function()
+            TriggerClientEvent("AQUIVER:Object:Update:Position", -1, _data.remoteId, _data.x, _data.y, _data.z)
+        end,
+        Rotation = function()
+            TriggerClientEvent("AQUIVER:Object:Update:Rotation", -1, _data.remoteId, _data.rx, _data.ry, _data.rz)
+        end,
+        Model = function()
+            TriggerClientEvent("AQUIVER:Object:Update:Model", -1, _data.remoteId, _data.model)
+        end,
+        Alpha = function()
+            TriggerClientEvent("AQUIVER:Object:Update:Alpha", -1, _data.remoteId, _data.alpha)
+        end,
+        Hide = function()
+            TriggerClientEvent("AQUIVER:Object:Update:Hide", -1, _data.remoteId, _data.hide)
+        end,
+        Dimension = function()
+            TriggerClientEvent("AQUIVER:Object:Update:Dimension", -1, _data.remoteId, _data.dimension)
+        end,
+        Variables = function()
+            TriggerClientEvent("AQUIVER:Object:Update:Variables", -1, _data.remoteId, _data.variables)
         end
     }
 
     self.Set = {
         Position = function(x, y, z)
-            if self.data.x == x and self.data.y == y and self.data.z == z then return end
+            if _data.x == x and _data.y == y and _data.z == z then return end
 
-            self.data.x = x
-            self.data.y = y
-            self.data.z = z
+            _data.x = x
+            _data.y = y
+            _data.z = z
 
-            self.Sync.Position()
+            Sync.Position()
             self.Save.Position()
         end,
         Rotation = function(rx, ry, rz)
-            if self.data.rx == rx and self.data.ry == ry and self.data.rz == rz then return end
+            if _data.rx == rx and _data.ry == ry and _data.rz == rz then return end
 
-            self.data.rx = rx
-            self.data.ry = ry
-            self.data.rz = rz
+            _data.rx = rx
+            _data.ry = ry
+            _data.rz = rz
 
-            self.Sync.Rotation()
+            Sync.Rotation()
             self.Save.Rotation()
         end,
         Model = function(model)
-            if self.data.model == model then return end
+            if _data.model == model then return end
 
-            self.data.model = model
+            _data.model = model
 
-            self.Sync.Model()
+            Sync.Model()
             self.Save.Model()
         end,
         Alpha = function(alpha)
-            if self.data.alpha == alpha then return end
+            if _data.alpha == alpha then return end
 
-            self.data.alpha = alpha
+            _data.alpha = alpha
 
-            self.Sync.Alpha()
+            Sync.Alpha()
         end,
         Hide = function(state)
-            if self.data.hide == state then return end
+            if _data.hide == state then return end
 
-            self.data.hide = state
+            _data.hide = state
 
-            self.Sync.Hide()
+            Sync.Hide()
         end,
         Dimension = function(dimension)
-            if self.data.dimension == dimension then return end
+            if _data.dimension == dimension then return end
 
-            self.data.dimension = dimension
+            _data.dimension = dimension
 
-            self.Sync.Dimension()
+            Sync.Dimension()
             self.Save.Dimension()
         end,
         Variable = function(key, value)
             -- If its the same value do not trigger because stack overflow will happen.
-            if self.data.variables[key] == value then return end
+            if _data.variables[key] == value then return end
 
-            -- self.RunValidators()
+            _data.variables[key] = value
 
-            self.data.variables[key] = value
+            -- Very, very important to run it after the variable is set, otherwise it will cause a stack overflow.
+            self.RunValidators()
 
             TriggerEvent("onObjectVariableChange", self, key, value)
 
-            self.Sync.Variables()
-            self.Save.Variables()
-        end
-    }
+            print(json.encode(_data.variables))
 
-    self.Sync = {
-        Position = function()
-            TriggerClientEvent("AQUIVER:Object:Update:Position", -1, self.data.remoteId, self.data.x, self.data.y,
-                self.data.z)
-        end,
-        Rotation = function()
-            TriggerClientEvent("AQUIVER:Object:Update:Rotation", -1, self.data.remoteId, self.data.rx, self.data.ry,
-                self.data.rz)
-        end,
-        Model = function()
-            TriggerClientEvent("AQUIVER:Object:Update:Model", -1, self.data.remoteId, self.data.model)
-        end,
-        Alpha = function()
-            TriggerClientEvent("AQUIVER:Object:Update:Alpha", -1, self.data.remoteId, self.data.alpha)
-        end,
-        Hide = function()
-            TriggerClientEvent("AQUIVER:Object:Update:Hide", -1, self.data.remoteId, self.data.hide)
-        end,
-        Dimension = function()
-            TriggerClientEvent("AQUIVER:Object:Update:Dimension", -1, self.data.remoteId, self.data.dimension)
-        end,
-        Variables = function()
-            TriggerClientEvent("AQUIVER:Object:Update:Variables", -1, self.data.remoteId, self.data.variables)
+            Sync.Variables()
+            self.Save.Variables()
         end
     }
 
@@ -227,10 +239,10 @@ Manager.new = function(data)
                 exports.oxmysql:query(
                     "UPDATE av_module_objects SET x = @x, y = @y, z = @z WHERE id = @id",
                     {
-                        ["@id"] = self.data.id,
-                        ["@x"] = self.data.x,
-                        ["@y"] = self.data.y,
-                        ["@z"] = self.data.z,
+                        ["@id"] = _data.id,
+                        ["@x"] = _data.x,
+                        ["@y"] = _data.y,
+                        ["@z"] = _data.z,
                     }
                 )
             end
@@ -240,10 +252,10 @@ Manager.new = function(data)
                 exports.oxmysql:query(
                     "UPDATE av_module_objects SET rx = @rx, ry = @ry, rz = @rz WHERE id = @id",
                     {
-                        ["@id"] = self.data.id,
-                        ["@rx"] = self.data.rx,
-                        ["@ry"] = self.data.ry,
-                        ["@rz"] = self.data.rz,
+                        ["@id"] = _data.id,
+                        ["@rx"] = _data.rx,
+                        ["@ry"] = _data.ry,
+                        ["@rz"] = _data.rz,
                     }
                 )
             end
@@ -253,8 +265,8 @@ Manager.new = function(data)
                 exports.oxmysql:query(
                     "UPDATE av_module_objects SET model = @model WHERE id = @id",
                     {
-                        ["@id"] = self.data.id,
-                        ["@model"] = self.data.model,
+                        ["@id"] = _data.id,
+                        ["@model"] = _data.model,
                     }
                 )
             end
@@ -264,8 +276,8 @@ Manager.new = function(data)
                 exports.oxmysql:query(
                     "UPDATE av_module_objects SET dimension = @dimension WHERE id = @id",
                     {
-                        ["@id"] = self.data.id,
-                        ["@dimension"] = self.data.dimension,
+                        ["@id"] = _data.id,
+                        ["@dimension"] = _data.dimension,
                     }
                 )
             end
@@ -275,18 +287,21 @@ Manager.new = function(data)
                 exports.oxmysql:query(
                     "UPDATE av_module_objects SET variables = @variables WHERE id = @id",
                     {
-                        ["@id"] = self.data.id,
-                        ["@variables"] = json.encode(self.data.variables) or {},
+                        ["@id"] = _data.id,
+                        ["@variables"] = json.encode(_data.variables) or {},
                     }
                 )
             end
         end
     }
 
-    TriggerClientEvent("AQUIVER:Object:Create", -1, self.data)
-    Manager.Entities[self.data.remoteId] = self
+    -- Run validators on create.
+    self.RunValidators()
 
-    AQUIVER_SHARED.Utils.Print("^3Created new object with remoteId: " .. self.data.remoteId)
+    TriggerClientEvent("AQUIVER:Object:Create", -1, _data)
+    Manager.Entities[_data.remoteId] = self
+
+    AQUIVER_SHARED.Utils.Print("^3Created new object with remoteId: " .. _data.remoteId)
     TriggerEvent("onObjectCreated", self)
 
     return self
@@ -365,7 +380,7 @@ Manager.AddVariableValidator = function(model, cb)
     })
 
     for k, v in pairs(Manager.Entities) do
-        if v.data.model == model then
+        if v.Get.Model() == model then
             v.RunValidators()
         end
     end
@@ -389,7 +404,7 @@ end
 
 Manager.atRemoteId = function(remoteId)
     for k, v in pairs(Manager.Entities) do
-        if v.data.remoteId == remoteId then
+        if v.Get.RemoteId() == remoteId then
             return v
         end
     end
@@ -397,7 +412,7 @@ end
 
 Manager.atMysqlId = function(mysqlId)
     for k, v in pairs(Manager.Entities) do
-        if v.data.id == mysqlId then
+        if v.Get.MysqlId() == mysqlId then
             return v
         end
     end
@@ -460,7 +475,7 @@ RegisterNetEvent("AQUIVER:Object:RequestData", function()
     local source = source
 
     for k, v in pairs(Manager.Entities) do
-        TriggerClientEvent("AQUIVER:Object:Create", source, v.data)
+        TriggerClientEvent("AQUIVER:Object:Create", source, v.Get.Data())
     end
 end)
 

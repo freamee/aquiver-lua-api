@@ -32,12 +32,15 @@ Manager.SetEntityHandle = function(handleId)
             if findPed then
                 Manager.AimedPedEntity = findPed
                 TriggerEvent("onPedRaycast", findPed)
+                AQUIVER_SHARED.Utils.Print(string.format("^3Raycast entity changed: Ped: (%d)", findPed.data.remoteId))
             end
         elseif GetEntityType(Manager.currentHitHandle) == 3 then
             local findObject = AQUIVER_CLIENT.ObjectManager.atHandle(Manager.currentHitHandle)
             if findObject then
                 Manager.AimedObjectEntity = findObject
                 TriggerEvent("onObjectRaycast", findObject)
+                AQUIVER_SHARED.Utils.Print(string.format("^3Raycast entity changed: Object: (%d)",
+                    findObject.data.remoteId))
             end
         end
 
@@ -78,6 +81,7 @@ Manager.SetEntityHandle = function(handleId)
         Manager.AimedObjectEntity = nil
         Manager.AimedPedEntity = nil
         TriggerEvent("onNullRaycast")
+        AQUIVER_SHARED.Utils.Print("^3Raycast entity changed: NULL")
     end
 end
 

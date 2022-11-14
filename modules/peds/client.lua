@@ -45,6 +45,8 @@ Manager.new = function(data)
         -- Resync animation here. This is basically a set again.
         self.Set.Animation(self.data.animDict, self.data.animName, self.data.animFlag)
 
+        AQUIVER_SHARED.Utils.Print(string.format("^3Ped streamed in (%d)", self.data.remoteId))
+
         if self.data.questionMark or self.data.name then
             Citizen.CreateThread(function()
                 while self.isStreamed do
@@ -97,6 +99,8 @@ Manager.new = function(data)
         if DoesEntityExist(self.pedHandle) then
             DeleteEntity(self.pedHandle)
         end
+
+        AQUIVER_SHARED.Utils.Print(string.format("^3Ped streamed out (%d)", self.data.remoteId))
     end
 
     self.Get = {

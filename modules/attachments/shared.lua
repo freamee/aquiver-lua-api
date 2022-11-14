@@ -17,7 +17,10 @@ Manager.exists = function(attachmentName)
 end
 
 Manager.get = function(attachmentName)
-    return Manager.Data[attachmentName] or nil
+    if Manager.exists(attachmentName) then
+        return Manager.Data[attachmentName].data
+    end
+    return nil
 end
 
 Manager.getAll = function()

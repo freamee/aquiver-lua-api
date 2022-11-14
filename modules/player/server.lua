@@ -78,7 +78,7 @@ Manager.new = function(source)
     end
 
     self.AddAttachment = function(attachmentName)
-        if not API.AttachmentManager.exists(attachmentName) then
+        if not AQUIVER_SHARED.AttachmentManager.exists(attachmentName) then
             AQUIVER_SHARED.Utils.Print(string.format("^1%s AddAttachment not registered.", attachmentName))
             return
         end
