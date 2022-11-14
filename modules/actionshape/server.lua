@@ -20,7 +20,7 @@ Manager.new = function(data)
 
     self.data = data
     self.data.variables = type(self.data.variables) == "table" and self.data.variables or {}
-    self.invokedFromResource = API.InvokeResourceName()
+    self.invokedFromResource = AQUIVER_SHARED.Utils.GetInvokingResource()
     self.data.remoteId = remoteIdCount
     remoteIdCount = remoteIdCount + 1
 
@@ -64,14 +64,14 @@ Manager.new = function(data)
 
         TriggerClientEvent("AQUIVER:ActionShape:Destroy", -1, self.data.remoteId)
 
-        API.Utils.Debug.Print("^3Removed ActionShape with remoteId: " .. self.data.remoteId)
+        AQUIVER_SHARED.Utils.Print("^3Removed ActionShape with remoteId: " .. self.data.remoteId)
     end
 
     TriggerClientEvent("AQUIVER:ActionShape:Create", -1, self.data)
 
     Manager.Entities[self.data.remoteId] = self
 
-    API.Utils.Debug.Print("^3Created new actionshape with remoteId: " .. self.data.remoteId)
+    AQUIVER_SHARED.Utils.Print("^3Created new actionshape with remoteId: " .. self.data.remoteId)
 
     return self
 end

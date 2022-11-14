@@ -79,7 +79,7 @@ Manager.new = function(source)
 
     self.AddAttachment = function(attachmentName)
         if not API.AttachmentManager.exists(attachmentName) then
-            API.Utils.Debug.Print(string.format("^1%s AddAttachment not registered.", attachmentName))
+            AQUIVER_SHARED.Utils.Print(string.format("^1%s AddAttachment not registered.", attachmentName))
             return
         end
 
@@ -188,18 +188,18 @@ Manager.new = function(source)
             Manager.Entities[self.source] = nil
         end
 
-        API.Utils.Debug.Print("^3Removed player with sourceID: " .. self.source)
+        AQUIVER_SHARED.Utils.Print("^3Removed player with sourceID: " .. self.source)
     end
 
     if Manager.exists(self.source) then
-        API.Utils.Debug.Print("^1Player already exists with source: " .. self.source)
+        AQUIVER_SHARED.Utils.Print("^1Player already exists with source: " .. self.source)
         return
     end
 
     Manager.Entities[self.source] = self
 
     --         self.SetDimension(CONFIG.DEFAULT_DIMENSION)
-    API.Utils.Debug.Print("^3Created new player with sourceID: " .. self.source)
+    AQUIVER_SHARED.Utils.Print("^3Created new player with sourceID: " .. self.source)
 
     return self
 end

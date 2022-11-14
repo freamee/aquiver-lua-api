@@ -33,7 +33,7 @@ Manager.new = function(data)
             end
         end)
 
-        API.Utils.Debug.Print(string.format("^3ActionShape streamed in (%d)", self.data.remoteId))
+        AQUIVER_SHARED.Utils.Print(string.format("^3ActionShape streamed in (%d)", self.data.remoteId))
     end
 
     self.RemoveStream = function()
@@ -44,7 +44,7 @@ Manager.new = function(data)
         -- Need to trigger the onLeave here.
         self.onLeave()
 
-        API.Utils.Debug.Print(string.format("^3ActionShape streamed out (%d)", self.data.remoteId))
+        AQUIVER_SHARED.Utils.Print(string.format("^3ActionShape streamed out (%d)", self.data.remoteId))
     end
 
     self.onEnter = function()
@@ -74,12 +74,12 @@ Manager.new = function(data)
         -- Remove from stream when destroyed.
         self.RemoveStream()
 
-        API.Utils.Debug.Print("^3Removed ActionShape with remoteId: " .. self.data.remoteId)
+        AQUIVER_SHARED.Utils.Print("^3Removed ActionShape with remoteId: " .. self.data.remoteId)
     end
 
     Manager.Entities[self.data.remoteId] = self
 
-    API.Utils.Debug.Print("^3Created new actionshape with remoteId: " .. self.data.remoteId)
+    AQUIVER_SHARED.Utils.Print("^3Created new actionshape with remoteId: " .. self.data.remoteId)
 
     return self
 end

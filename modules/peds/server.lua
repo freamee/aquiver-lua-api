@@ -26,7 +26,7 @@ Manager.new = function(data)
     data.heading = type(data.heading) == "number" and data.heading or 0.0
 
     self.data = data
-    self.invokedFromResource = API.InvokeResourceName()
+    self.invokedFromResource = AQUIVER_SHARED.Utils.GetInvokingResource()
     self.data.remoteId = remoteIdCount
     remoteIdCount = remoteIdCount + 1
     ---@type fun(Player: ServerPlayer, Ped: ServerPed)
@@ -105,17 +105,17 @@ Manager.new = function(data)
         TriggerClientEvent("AQUIVER:Ped:Destroy", -1, self.data.remoteId)
         TriggerEvent("onPedDestroyed", self)
 
-        API.Utils.Debug.Print("^3Removed ped with remoteId: " .. self.data.remoteId)
+        AQUIVER_SHARED.Utils.Print("^3Removed ped with remoteId: " .. self.data.remoteId)
     end
 
     if Manager.exists(self.data.remoteId) then
-        API.Utils.Debug.Print("^1Ped already exists with remoteId: " .. self.data.remoteId)
+        AQUIVER_SHARED.Utils.Print("^1Ped already exists with remoteId: " .. self.data.remoteId)
         return
     end
 
     Manager.Entities[self.data.remoteId] = self
 
-    API.Utils.Debug.Print("^3Created new ped with remoteId: " .. self.data.remoteId)
+    AQUIVER_SHARED.Utils.Print("^3Created new ped with remoteId: " .. self.data.remoteId)
 
     TriggerEvent("onPedCreated", self)
 

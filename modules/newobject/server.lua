@@ -28,12 +28,12 @@ Manager.new = function(data)
     local self = {}
 
     if type(data.model) ~= "string" then
-        API.Utils.Debug.Print("^1Object could not get created: model is not a string.")
+        AQUIVER_SHARED.Utils.Print("^1Object could not get created: model is not a string.")
         return
     end
 
     if type(data.x) ~= "number" or type(data.x) ~= "number" or type(data.z) ~= "number" then
-        API.Utils.Debug.Print("^1Object could not get created: position is not a vector3.")
+        AQUIVER_SHARED.Utils.Print("^1Object could not get created: position is not a vector3.")
         return
     end
 
@@ -49,7 +49,7 @@ Manager.new = function(data)
     end
 
     self.data = data
-    self.invokedFromResource = API.InvokeResourceName()
+    self.invokedFromResource = AQUIVER_SHARED.Utils.GetInvokingResource()
     self.data.remoteId = remoteIdCount
     self.data.variables.hasAction = false
     remoteIdCount = remoteIdCount + 1
@@ -57,7 +57,7 @@ Manager.new = function(data)
     self.onPress = nil
 
     if Manager.exists(self.data.remoteId) then
-        API.Utils.Debug.Print("^1Object already exists with remoteId: " .. self.data.remoteId)
+        AQUIVER_SHARED.Utils.Print("^1Object already exists with remoteId: " .. self.data.remoteId)
         return
     end
 
@@ -69,7 +69,7 @@ Manager.new = function(data)
 
         TriggerClientEvent("AQUIVER:Object:Destroy", -1, self.data.remoteId)
         TriggerEvent("onObjectDestroyed", self)
-        API.Utils.Debug.Print("^3Removed object with remoteId: " .. self.data.remoteId)
+        AQUIVER_SHARED.Utils.Print("^3Removed object with remoteId: " .. self.data.remoteId)
 
         if GetResourceState("oxmysql") == "started" then
             exports.oxmysql:query(
@@ -80,7 +80,7 @@ Manager.new = function(data)
             )
         end
 
-        API.Utils.Debug.Print("^3Removed object with remoteId: " .. self.data.remoteId)
+        AQUIVER_SHARED.Utils.Print("^3Removed object with remoteId: " .. self.data.remoteId)
     end
 
     self.RunValidators = function()
@@ -283,7 +283,7 @@ Manager.new = function(data)
     TriggerClientEvent("AQUIVER:Object:Create", -1, self.data)
     Manager.Entities[self.data.remoteId] = self
 
-    API.Utils.Debug.Print("^3Created new object with remoteId: " .. self.data.remoteId)
+    AQUIVER_SHARED.Utils.Print("^3Created new object with remoteId: " .. self.data.remoteId)
     TriggerEvent("onObjectCreated", self)
 
     return self
@@ -292,7 +292,7 @@ end
 ---@param data MysqlObjectInterface
 ---@async
 Manager.InsertSQL = function(data)
-    API.Utils.Debug.Print("^4Inserting SQL Object...")
+    AQUIVER_SHARED.Utils.Print("^4Inserting SQL Object...")
 
     if GetResourceState("oxmysql") == "started" then
         local insertId = exports.oxmysql:insert_async(
@@ -331,14 +331,14 @@ Manager.LoadObjectsFromSQL = function()
             "SELECT * FROM av_module_objects",
             function(response)
                 if response and type(response) == "table" then
-                    API.Utils.Debug.Print(string.format("^4Loading %d objects...", #response))
+                    AQUIVER_SHARED.Utils.Print(string.format("^4Loading %d objects...", #response))
 
                     for i = 1, #response do
                         Manager.new(response[i])
 
                     end
 
-                    API.Utils.Debug.Print("^4Objects successfully loaded.")
+                    AQUIVER_SHARED.Utils.Print("^4Objects successfully loaded.")
                 end
             end
         )
@@ -348,7 +348,7 @@ end
 ---@param cb fun(Object: ServerObject)
 Manager.AddVariableValidator = function(model, cb)
     if not Citizen.GetFunctionReference(cb) then
-        API.Utils.Debug.Print("^1Object validator should be a function.")
+        AQUIVER_SHARED.Utils.Print("^1Object validator should be a function.")
         return
     end
 
@@ -358,7 +358,7 @@ Manager.AddVariableValidator = function(model, cb)
 
     table.insert(variableValidators[model], {
         cb = cb,
-        invokedFromResource = API.InvokeResourceName()
+        invokedFromResource = AQUIVER_SHARED.Utils.GetInvokingResource()
     })
 
     for k, v in pairs(Manager.Entities) do

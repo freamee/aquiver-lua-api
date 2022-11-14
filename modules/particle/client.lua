@@ -64,7 +64,7 @@ Manager.new = function(data)
             )
         end
 
-        API.Utils.Debug.Print(string.format("^3Particle streamed in (%d, %s, %s)", self.data.remoteId,
+        AQUIVER_SHARED.Utils.Print(string.format("^3Particle streamed in (%d, %s, %s)", self.data.remoteId,
             self.data.particleName, self.data.particleUid))
     end
 
@@ -78,7 +78,7 @@ Manager.new = function(data)
             self.particleHandle = nil
         end
 
-        API.Utils.Debug.Print(string.format("^3Particle streamed out (%d, %s, %s)", self.data.remoteId,
+        AQUIVER_SHARED.Utils.Print(string.format("^3Particle streamed out (%d, %s, %s)", self.data.remoteId,
             self.data.particleName, self.data.particleUid))
     end
 
@@ -105,7 +105,7 @@ Manager.new = function(data)
             StopParticleFxLooped(self.particleHandle, false)
         end
 
-        API.Utils.Debug.Print("^3Removed particle with remoteId: " .. self.data.remoteId)
+        AQUIVER_SHARED.Utils.Print("^3Removed particle with remoteId: " .. self.data.remoteId)
     end
 
 
@@ -116,7 +116,7 @@ Manager.new = function(data)
 
     Manager.Entities[self.data.remoteId] = self
 
-    API.Utils.Debug.Print("^3Created new particle with remoteId: " .. self.data.remoteId)
+    AQUIVER_SHARED.Utils.Print("^3Created new particle with remoteId: " .. self.data.remoteId)
 
     return self
 end

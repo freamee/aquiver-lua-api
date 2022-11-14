@@ -18,7 +18,7 @@ Manager.new = function(data)
     local self = {}
 
     self.data = data
-    self.invokedFromResource = API.InvokeResourceName()
+    self.invokedFromResource = AQUIVER_SHARED.Utils.GetInvokingResource()
     self.data.remoteId = remoteIdCount
     remoteIdCount = remoteIdCount + 1
 
@@ -66,7 +66,7 @@ Manager.new = function(data)
     end
 
     if Manager.exists(self.data.remoteId) then
-        API.Utils.Debug.Print("^1RadarBlip already exists with remoteId: " .. self.data.remoteId)
+        AQUIVER_SHARED.Utils.Print("^1RadarBlip already exists with remoteId: " .. self.data.remoteId)
         return
     end
 

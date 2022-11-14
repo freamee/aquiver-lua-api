@@ -27,10 +27,10 @@ Manager.new = function(data)
     self.data.alpha = type(self.data.alpha) == "number" and self.data.alpha or 255
     self.data.remoteId = remoteIdCount
     remoteIdCount = remoteIdCount + 1
-    self.invokedFromResource = API.InvokeResourceName()
+    self.invokedFromResource = AQUIVER_SHARED.Utils.GetInvokingResource()
 
     if Manager.exists(self.data.remoteId) then
-        API.Utils.Debug.Print("^1Blip already exists with remoteId: " .. self.data.remoteId)
+        AQUIVER_SHARED.Utils.Print("^1Blip already exists with remoteId: " .. self.data.remoteId)
         return
     end
 
@@ -107,7 +107,7 @@ Manager.new = function(data)
 
     TriggerClientEvent("AQUIVER:Blip:Create", -1, self.data)
     Manager.Entities[self.data.remoteId] = self
-    API.Utils.Debug.Print("^3Created new blip with remoteId: " .. self.data.remoteId)
+    AQUIVER_SHARED.Utils.Print("^3Created new blip with remoteId: " .. self.data.remoteId)
     TriggerEvent("onBlipCreated", self)
 
     return self

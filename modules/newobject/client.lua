@@ -19,7 +19,7 @@ Manager.new = function(data)
         local modelHash = GetHashKey(self.data.model)
         if not IsModelValid(modelHash) then return end
 
-        API.Utils.Client.requestModel(modelHash)
+        AQUIVER_CLIENT.Utils.RequestModel(modelHash)
 
         local obj = CreateObjectNoOffset(modelHash, self.Get.Position(), false, false, false)
         SetEntityCoordsNoOffset(obj, self.Get.Position(), false, false, false)
@@ -30,7 +30,7 @@ Manager.new = function(data)
 
         TriggerEvent("onObjectStreamIn", self)
 
-        API.Utils.Debug.Print(string.format("^3Object streamed in (%d, %s)", self.data.remoteId, self.data.model))
+        AQUIVER_SHARED.Utils.Print(string.format("^3Object streamed in (%d, %s)", self.data.remoteId, self.data.model))
     end
 
     self.RemoveStream = function()
@@ -44,7 +44,7 @@ Manager.new = function(data)
 
         TriggerEvent("onObjectStreamOut", self)
 
-        API.Utils.Debug.Print(string.format("^3Object streamed out (%d, %s)", self.data.remoteId, self.data.model))
+        AQUIVER_SHARED.Utils.Print(string.format("^3Object streamed out (%d, %s)", self.data.remoteId, self.data.model))
     end
 
     self.Destroy = function()
@@ -57,7 +57,7 @@ Manager.new = function(data)
             DeleteEntity(self.objectHandle)
         end
 
-        API.Utils.Debug.Print("^3Removed object with remoteId: " .. self.data.remoteId)
+        AQUIVER_SHARED.Utils.Print("^3Removed object with remoteId: " .. self.data.remoteId)
     end
 
     self.Get = {
@@ -97,7 +97,7 @@ Manager.new = function(data)
     }
 
     Manager.Entities[self.data.remoteId] = self
-    API.Utils.Debug.Print("^3Created new object with remoteId: " .. self.data.remoteId)
+    AQUIVER_SHARED.Utils.Print("^3Created new object with remoteId: " .. self.data.remoteId)
 
     return self
 end

@@ -23,12 +23,12 @@ Manager.new = function(data)
     local self = {}
 
     self.data = data
-    self.invokedFromResource = API.InvokeResourceName()
+    self.invokedFromResource = AQUIVER_SHARED.Utils.GetInvokingResource()
     self.data.remoteId = remoteIdCount
     remoteIdCount = remoteIdCount + 1
 
     if Manager.exists(self.data.remoteId) then
-        API.Utils.Debug.Print("^Particle already exists with remoteId: " .. self.data.remoteId)
+        AQUIVER_SHARED.Utils.Print("^Particle already exists with remoteId: " .. self.data.remoteId)
         return
     end
 
@@ -49,13 +49,13 @@ Manager.new = function(data)
 
         TriggerClientEvent("AQUIVER:Particle:Destroy", -1, self.data.remoteId)
 
-        API.Utils.Debug.Print("^3Removed particle with remoteId: " .. self.data.remoteId)
+        AQUIVER_SHARED.Utils.Print("^3Removed particle with remoteId: " .. self.data.remoteId)
     end
 
     TriggerClientEvent("AQUIVER:Particle:Create", -1, self.data)
 
     Manager.Entities[self.data.remoteId] = self
-    API.Utils.Debug.Print("^3Created new particle with remoteId: " .. self.data.remoteId)
+    AQUIVER_SHARED.Utils.Print("^3Created new particle with remoteId: " .. self.data.remoteId)
 
     -- Start timeout if the timeMS is specified.
     if type(self.data.timeMS) == "number" then

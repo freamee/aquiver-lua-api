@@ -8,18 +8,17 @@ dependencies {
     '/server:4752',
 }
 
-shared_scripts {
-    'api.lua',
-    'utils.lua',
-    'attachments.lua',
-}
-
 server_scripts {
     'CONFIG.lua',
 
     -- This api should start first.
     'modules/server_api.lua',
 
+    'modules/shared_api.lua',
+    'modules/utils/shared.lua',
+    'modules/attachments/shared.lua',
+
+    'modules/utils/server.lua',
     'modules/helps/server.lua',
     'modules/newobject/server.lua',
     'modules/particle/server.lua',
@@ -41,6 +40,11 @@ client_scripts {
     -- This api should start first.
     'modules/client_api.lua',
 
+    'modules/shared_api.lua',
+    'modules/utils/shared.lua',
+    'modules/attachments/shared.lua',
+
+    'modules/utils/client.lua',
     'modules/helps/client.lua',
     'modules/newobject/client.lua',
     'modules/particle/client.lua',

@@ -44,7 +44,7 @@ Manager.SetEntityHandle = function(handleId)
         Citizen.CreateThread(function()
             while Manager.currentHitHandle == handleId do
 
-                API.Utils.Client.DrawSprite2D(
+                AQUIVER_CLIENT.Utils.DrawSprite2D(
                     0.5,
                     0.5,
                     CONFIG.RAYCAST.SPRITE_DICT,

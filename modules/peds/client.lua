@@ -21,7 +21,7 @@ Manager.new = function(data)
         local modelHash = GetHashKey(self.data.model)
         if not IsModelValid(modelHash) then return end
 
-        API.Utils.Client.requestModel(modelHash)
+        AQUIVER_CLIENT.Utils.RequestModel(modelHash)
 
         local ped = CreatePed(0, modelHash, self.Get.PositionVector3(), self.data.heading, false, false)
         SetEntityCanBeDamaged(ped, false)
@@ -67,7 +67,7 @@ Manager.new = function(data)
                         end
 
                         if self.data.name then
-                            API.Utils.Client.DrawText3D(
+                            AQUIVER_CLIENT.Utils.DrawText3D(
                                 self.data.position.x,
                                 self.data.position.y,
                                 self.data.position.z + 1,
@@ -164,12 +164,12 @@ Manager.new = function(data)
             DeleteEntity(self.pedHandle)
         end
 
-        API.Utils.Debug.Print("^3Removed ped with remoteId: " .. self.data.remoteId)
+        AQUIVER_SHARED.Utils.Print("^3Removed ped with remoteId: " .. self.data.remoteId)
     end
 
     Manager.Entities[self.data.remoteId] = self
 
-    API.Utils.Debug.Print("^3Created new ped with remoteId: " .. self.data.remoteId)
+    AQUIVER_SHARED.Utils.Print("^3Created new ped with remoteId: " .. self.data.remoteId)
 
     return self
 end

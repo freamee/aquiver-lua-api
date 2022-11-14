@@ -26,7 +26,7 @@ RegisterNetEvent("AQUIVER:Player:Attachment:Add", function(attachmentName)
     if not aData then return end
 
     local modelHash = GetHashKey(aData.model)
-    API.Utils.Client.requestModel(modelHash)
+    AQUIVER_CLIENT.Utils.RequestModel(modelHash)
 
     local localPlayer = PlayerPedId()
     local playerCoords = GetEntityCoords(localPlayer)

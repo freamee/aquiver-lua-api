@@ -36,7 +36,7 @@ Manager.new = function(data)
     self.blipHandle = blip
 
     Manager.Entities[self.data.remoteId] = self
-    API.Utils.Debug.Print("^3Created new blip with remoteId: " .. self.data.remoteId)
+    AQUIVER_SHARED.Utils.Print("^3Created new blip with remoteId: " .. self.data.remoteId)
     TriggerEvent("onBlipCreated", self)
 
     return self
