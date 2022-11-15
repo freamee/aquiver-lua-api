@@ -8,9 +8,23 @@ Manager.new = function(data)
     local self = {}
 
     local _data = data
+    ---@type { [string]: number } -- Contains the object handles.
+    local _attachments = {}
 
     self.isStreamed = false
     self.objectHandle = nil
+
+    local initAttachments = function()
+        for k, v in pairs(_data.attachments) do
+            self.AddAttachment(k)
+        end
+    end
+
+    local shutdownAttachments = function()
+        for k, v in pairs(_data.attachments) do
+            self.RemoveAttachment(k)
+        end
+    end
 
     self.AddStream = function()
         if self.isStreamed then return end
@@ -29,6 +43,8 @@ Manager.new = function(data)
 
         self.objectHandle = obj
 
+        initAttachments()
+
         TriggerEvent("onObjectStreamIn", self)
 
         AQUIVER_SHARED.Utils.Print(string.format("^3Object streamed in (%d, %s)", _data.remoteId, _data.model))
@@ -43,9 +59,54 @@ Manager.new = function(data)
 
         self.isStreamed = false
 
+        shutdownAttachments()
+
         TriggerEvent("onObjectStreamOut", self)
 
         AQUIVER_SHARED.Utils.Print(string.format("^3Object streamed out (%d, %s)", _data.remoteId, _data.model))
+    end
+
+    self.AddAttachment = function(attachmentName)
+        if self.HasAttachment(attachmentName) then return end
+
+        local aData = AQUIVER_SHARED.AttachmentManager.get(attachmentName)
+        if not aData then return end
+
+        local modelHash = GetHashKey(aData.model)
+        AQUIVER_CLIENT.Utils.RequestModel(modelHash)
+
+        local obj = CreateObject(modelHash, self.Get.Position(), false, false, false)
+
+        AttachEntityToEntity(
+            obj,
+            self.objectHandle,
+            0,
+            aData.x, aData.y, aData.z,
+            aData.rx, aData.ry, aData.rz,
+            true, true, false, false, 2, true
+        )
+
+        _attachments[attachmentName] = obj
+
+        AQUIVER_SHARED.Utils.Print(string.format("^3Object attachment added (%d, %s, %s)", _data.remoteId, _data.model,
+            attachmentName))
+    end
+
+    self.RemoveAttachment = function(attachmentName)
+        if not self.HasAttachment(attachmentName) then return end
+
+        if DoesEntityExist(_attachments[attachmentName]) then
+            DeleteEntity(_attachments[attachmentName])
+        end
+
+        _attachments[attachmentName] = nil
+
+        AQUIVER_SHARED.Utils.Print(string.format("^3Object attachment removed (%d, %s, %s)", _data.remoteId, _data.model
+            , attachmentName))
+    end
+
+    self.HasAttachment = function(attachmentName)
+        return _attachments[attachmentName] and true or false
     end
 
     self.Destroy = function()
@@ -57,6 +118,8 @@ Manager.new = function(data)
         if DoesEntityExist(self.objectHandle) then
             DeleteEntity(self.objectHandle)
         end
+
+        shutdownAttachments()
 
         AQUIVER_SHARED.Utils.Print("^3Removed object with remoteId: " .. _data.remoteId)
     end
@@ -299,6 +362,16 @@ RegisterNetEvent("AQUIVER:Object:Destroy", function(remoteId)
     local ObjectEntity = Manager.get(remoteId)
     if not ObjectEntity then return end
     ObjectEntity.Destroy()
+end)
+RegisterNetEvent("AQUIVER:Object:Attachment:Add", function(remoteId, attachmentName)
+    local ObjectEntity = Manager.get(remoteId)
+    if not ObjectEntity then return end
+    ObjectEntity.AddAttachment(attachmentName)
+end)
+RegisterNetEvent("AQUIVER:Object:Attachment:Remove", function(remoteId, attachmentName)
+    local ObjectEntity = Manager.get(remoteId)
+    if not ObjectEntity then return end
+    ObjectEntity.RemoveAttachment(attachmentName)
 end)
 
 AddEventHandler("onResourceStop", function(resourceName)

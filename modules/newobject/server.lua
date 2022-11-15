@@ -12,6 +12,7 @@
 ---@field hide boolean
 ---@field dimension number
 ---@field remoteId? number
+---@field attachments { [string]: boolean }
 
 local remoteIdCount = 1
 ---@type table<string, { invokedFromResource: string; cb: fun(Object: ServerObject) }[]>
@@ -43,6 +44,7 @@ Manager.new = function(data)
     data.alpha = type(data.alpha) == "number" and data.alpha or 255
     data.hide = type(data.hide) == "boolean" and data.hide or false
     data.dimension = type(data.dimension) == "number" and data.dimension or CONFIG.DEFAULT_DIMENSION
+    data.attachments = type(data.attachments) == "table" and data.attachments or {}
 
     if type(data.variables) ~= "table" then
         data.variables = json.decode(data.variables) or {}
@@ -61,6 +63,31 @@ Manager.new = function(data)
     if Manager.exists(_data.remoteId) then
         AQUIVER_SHARED.Utils.Print("^1Object already exists with remoteId: " .. _data.remoteId)
         return
+    end
+
+    self.AddAttachment = function(attachmentName)
+        if self.HasAttachment(attachmentName) then return end
+
+        if not AQUIVER_SHARED.AttachmentManager.exists(attachmentName) then
+            AQUIVER_SHARED.Utils.Print(string.format("^1%s AddAttachment not registered.", attachmentName))
+            return
+        end
+
+        _data.attachments[attachmentName] = true
+
+        TriggerClientEvent("AQUIVER:Object:Attachment:Add", -1, _data.remoteId, attachmentName)
+    end
+
+    self.HasAttachment = function(attachmentName)
+        return _data.attachments[attachmentName] and true or false
+    end
+
+    self.RemoveAttachment = function(attachmentName)
+        if not self.HasAttachment(attachmentName) then return end
+
+        _data.attachments[attachmentName] = false
+
+        TriggerClientEvent("AQUIVER:Object:Attachment:Remove", -1, _data.remoteId, attachmentName)
     end
 
     ---@param cb fun(Player: ServerPlayer, Object: ServerObject)
@@ -358,6 +385,15 @@ Manager.LoadObjectsFromSQL = function()
                 end
             end
         )
+    end
+end
+
+---@param modelsTable string[]
+---@param cb fun(Object: ServerObject)
+Manager.AddManyVariableValidators = function(modelsTable, cb)
+    for i = 1, #modelsTable do
+        local model = modelsTable[i]
+        Manager.AddVariableValidator(model, cb)
     end
 end
 

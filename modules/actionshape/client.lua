@@ -22,7 +22,7 @@ Manager.new = function(data)
 
                 DrawMarker(
                     _data.sprite,
-                    _data.position.x, _data.position.y, _data.position.z,
+                    _data.position.x, _data.position.y, _data.position.z - 1.0,
                     0.0, 0.0, 0.0,
                     0.0, 0.0, 0.0,
                     1.0, 1.0, 1.0,
@@ -84,6 +84,9 @@ Manager.new = function(data)
         end,
         PositionVector3 = function()
             return vector3(_data.position.x, _data.position.y, _data.position.z)
+        end,
+        Variable = function(key)
+            return _data.variables[key] or nil
         end,
         Data = function()
             return _data
