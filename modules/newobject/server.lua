@@ -111,7 +111,7 @@ Manager.new = function(data)
 
         if GetResourceState("oxmysql") == "started" then
             exports.oxmysql:query(
-                "DELETE FROM av_module_objects WHERE id = @id",
+                "DELETE FROM avp_module_objects WHERE id = @id",
                 {
                     ["@id"] = _data.id
                 }
@@ -262,7 +262,7 @@ Manager.new = function(data)
         Position = function()
             if GetResourceState("oxmysql") == "started" then
                 exports.oxmysql:query(
-                    "UPDATE av_module_objects SET x = @x, y = @y, z = @z WHERE id = @id",
+                    "UPDATE avp_module_objects SET x = @x, y = @y, z = @z WHERE id = @id",
                     {
                         ["@id"] = _data.id,
                         ["@x"] = _data.x,
@@ -275,7 +275,7 @@ Manager.new = function(data)
         Rotation = function()
             if GetResourceState("oxmysql") == "started" then
                 exports.oxmysql:query(
-                    "UPDATE av_module_objects SET rx = @rx, ry = @ry, rz = @rz WHERE id = @id",
+                    "UPDATE avp_module_objects SET rx = @rx, ry = @ry, rz = @rz WHERE id = @id",
                     {
                         ["@id"] = _data.id,
                         ["@rx"] = _data.rx,
@@ -288,7 +288,7 @@ Manager.new = function(data)
         Model = function()
             if GetResourceState("oxmysql") == "started" then
                 exports.oxmysql:query(
-                    "UPDATE av_module_objects SET model = @model WHERE id = @id",
+                    "UPDATE avp_module_objects SET model = @model WHERE id = @id",
                     {
                         ["@id"] = _data.id,
                         ["@model"] = _data.model,
@@ -299,7 +299,7 @@ Manager.new = function(data)
         Dimension = function()
             if GetResourceState("oxmysql") == "started" then
                 exports.oxmysql:query(
-                    "UPDATE av_module_objects SET dimension = @dimension WHERE id = @id",
+                    "UPDATE avp_module_objects SET dimension = @dimension WHERE id = @id",
                     {
                         ["@id"] = _data.id,
                         ["@dimension"] = _data.dimension,
@@ -310,7 +310,7 @@ Manager.new = function(data)
         Variables = function()
             if GetResourceState("oxmysql") == "started" then
                 exports.oxmysql:query(
-                    "UPDATE av_module_objects SET variables = @variables WHERE id = @id",
+                    "UPDATE avp_module_objects SET variables = @variables WHERE id = @id",
                     {
                         ["@id"] = _data.id,
                         ["@variables"] = json.encode(_data.variables) or {},
@@ -339,7 +339,7 @@ Manager.InsertSQL = function(data)
 
     if GetResourceState("oxmysql") == "started" then
         local insertId = exports.oxmysql:insert_async(
-            "INSERT INTO av_module_objects (model,x,y,z,rx,ry,rz,dimension,variables) VALUES (@model,@x,@y,@z,@rx,@ry,@rz,@dimension,@variables)"
+            "INSERT INTO avp_module_objects (model,x,y,z,rx,ry,rz,dimension,variables) VALUES (@model,@x,@y,@z,@rx,@ry,@rz,@dimension,@variables)"
             ,
             {
                 ["@model"] = data.model,
@@ -355,7 +355,7 @@ Manager.InsertSQL = function(data)
         )
         if type(insertId) == "number" then
             local dataResponse = exports.oxmysql:single_async(
-                "SELECT * FROM av_module_objects WHERE id = @id",
+                "SELECT * FROM avp_module_objects WHERE id = @id",
                 {
                     ["@id"] = insertId
                 }
@@ -371,7 +371,7 @@ end
 Manager.LoadObjectsFromSQL = function()
     if GetResourceState("oxmysql") == "started" then
         exports.oxmysql:query(
-            "SELECT * FROM av_module_objects",
+            "SELECT * FROM avp_module_objects",
             function(response)
                 if response and type(response) == "table" then
                     AQUIVER_SHARED.Utils.Print(string.format("^4Loading %d objects...", #response))

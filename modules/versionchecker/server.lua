@@ -4,7 +4,7 @@ AQUIVER_SERVER.CheckResourceVersion = function()
     if resourceName == nil then
         resourceName = GetCurrentResourceName()
     else
-        local specifiedResourceName = GetResourceMetadata(resourceName, "av_resourcename", 0)
+        local specifiedResourceName = GetResourceMetadata(resourceName, "aquiver_resourcename", 0)
         if specifiedResourceName then
             resourceName = specifiedResourceName
         end

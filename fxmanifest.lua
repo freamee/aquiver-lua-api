@@ -65,5 +65,3 @@ ui_page 'html/compiled/index.html'
 files {
     'html/compiled/**',
 }
-
--- av_resourcename "av_distillery"
