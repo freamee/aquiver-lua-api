@@ -130,6 +130,10 @@ Manager.new = function(source)
         TriggerClientEvent("AQUIVER:Player:DisableMovement:State", self.source, state)
     end
 
+    self.StartIndicatorAtPosition = function(uid, vec3, text, timeMS)
+        TriggerClientEvent("AQUIVER:Player:StartIndicatorAtPosition", self.source, uid, vec3, text, timeMS)
+    end
+
     ---@param type "error" | "success" | "info" | "warning"
     ---@param message string
     self.Notification = function(type, message)

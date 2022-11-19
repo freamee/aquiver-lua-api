@@ -9,7 +9,45 @@ Manager.forceAnimationData = {
 Manager.isMovementDisabled = false
 Manager.dimension = CONFIG.DEFAULT_DIMENSION
 Manager.CachedPosition = GetEntityCoords(PlayerPedId())
+---@type { [string]: { position: {x:number;y:number;z:number;}; text:string; } }
+Manager.Indicators = {}
 
+Manager.StartIndicatorAtPosition = function(uid, vec3, text, timeMS)
+    if Manager.HasIndicator(uid) then return end
+
+    local run = true
+
+    SetTimeout(timeMS, function()
+        run = false
+    end)
+
+    Citizen.CreateThread(function()
+        while run do
+
+            DrawMarker(
+                2,
+                vec3.x, vec3.y, vec3.z + 0.5,
+                0.0, 0.0, 0.0,
+                180.0, 0.0, 0.0,
+                0.5, 0.5, 0.5,
+                255, 255, 0, 155,
+                true, false, 2, true, nil, nil, false
+            )
+
+            AQUIVER_CLIENT.Utils.DrawText3D(vec3.x, vec3.y, vec3.z, text)
+
+            Citizen.Wait(1)
+        end
+    end)
+end
+
+Manager.HasIndicator = function(uid)
+    return Manager.Indicators[uid] and true or false
+end
+
+RegisterNetEvent("AQUIVER:Player:StartIndicatorAtPosition", function(uid, vec3, text, timeMS)
+    Manager.StartIndicatorAtPosition(uid, vec3, text, timeMS)
+end)
 
 Manager.HasAttachment = function(attachmentName)
     if Manager.attachments[attachmentName] and DoesEntityExist(Manager.attachments[attachmentName]) then
