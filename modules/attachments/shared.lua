@@ -23,10 +23,6 @@ Manager.get = function(attachmentName)
     return nil
 end
 
-Manager.getAll = function()
-    return Manager.Data
-end
-
 ---@param d IAttachment
 Manager.registerOne = function(attachmentName, d)
     if Manager.exists(attachmentName) then

@@ -71,10 +71,6 @@ Manager.get = function(id)
     return Manager.Entities[id] or nil
 end
 
-Manager.getAll = function()
-    return Manager.Entities
-end
-
 RegisterNetEvent("AQUIVER:RadarBlip:Create", function(data)
     Manager.new(data)
 end)

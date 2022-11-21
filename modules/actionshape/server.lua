@@ -85,10 +85,6 @@ Manager.get = function(remoteId)
     return Manager.Entities[remoteId] or nil
 end
 
-Manager.getAll = function()
-    return Manager.Entities
-end
-
 RegisterNetEvent("AQUIVER:ActionShape:RequestData", function()
     local source = source
 

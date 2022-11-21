@@ -432,10 +432,6 @@ Manager.get = function(id)
     return Manager.exists(id) and Manager.Entities[id] or nil
 end
 
-Manager.getAll = function()
-    return Manager.Entities
-end
-
 Manager.atRemoteId = function(remoteId)
     for k, v in pairs(Manager.Entities) do
         if v.Get.RemoteId() == remoteId then

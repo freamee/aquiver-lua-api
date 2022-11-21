@@ -91,10 +91,6 @@ Manager.get = function(id)
     return Manager.Entities[id] or nil
 end
 
-Manager.getAll = function()
-    return Manager.Entities
-end
-
 RegisterNetEvent("AQUIVER:RadarBlip:RequestData", function()
     local source = source
 

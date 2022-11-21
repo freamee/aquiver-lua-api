@@ -225,10 +225,6 @@ Manager.get = function(id)
     return Manager.Entities[id] or nil
 end
 
-Manager.getAll = function()
-    return Manager.Entities
-end
-
 Manager.atHandle = function(handleId)
     for k, v in pairs(Manager.Entities) do
         if v.pedHandle == handleId then

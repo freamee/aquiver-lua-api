@@ -133,10 +133,6 @@ Manager.get = function(remoteId)
     return Manager.Entities[remoteId] or nil
 end
 
-Manager.getAll = function()
-    return Manager.Entities
-end
-
 AddEventHandler("onResourceStop", function(resourceName)
     if resourceName ~= GetCurrentResourceName() then return end
 

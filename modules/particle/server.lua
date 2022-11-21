@@ -78,10 +78,6 @@ Manager.get = function(remoteId)
     return Manager.Entities[remoteId] or nil
 end
 
-Manager.getAll = function()
-    return Manager.Entities
-end
-
 Manager.ObjectGetParticleByUid = function(remoteId, uid)
     for k, v in pairs(Manager.Entities) do
         if v.Get.Data().toObjectRemoteId == remoteId and v.Get.Data().particleUid == uid then

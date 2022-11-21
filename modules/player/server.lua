@@ -225,10 +225,6 @@ Manager.get = function(source)
     return Manager.Entities[source] or nil
 end
 
-Manager.getAll = function()
-    return Manager.Entities
-end
-
 AddEventHandler("onResourceStart", function(resourceName)
     if GetCurrentResourceName() ~= resourceName then return end
 
