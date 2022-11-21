@@ -37,7 +37,11 @@ Manager.new = function(source)
 
     self.Set = {
         Variable = function(key, value)
+            if self.variables[key] == value then return end
+
             self.variables[key] = value
+            TriggerEvent("onPlayerVariableChange", self, key, value)
+            TriggerClientEvent("onPlayerVariableChange", self.source, key, value)
         end,
         Dimension = function(dimension)
             local attaches = json.decode(json.encode(self.attachments))
@@ -106,8 +110,7 @@ Manager.new = function(source)
     end
 
     self.Freeze = function(state)
-        self.variables.isFreezed = state
-        TriggerClientEvent("AQUIVER:Player:Freeze:State", self.source, state)
+        self.Set.Variable("isFreezed", state)
     end
 
     self.PlayAnimation = function(dict, name, flag)
@@ -150,9 +153,9 @@ Manager.new = function(source)
     ---@param time number Time in milliseconds (MS) 1000ms-1second
     ---@param cb fun()
     self.Progress = function(text, time, cb)
-        if self.variables.hasProgress then return end
+        if self.Get.Variable("hasProgress") then return end
 
-        self.variables.hasProgress = true
+        self.Set.Variable("hasProgress", true)
 
         self.SendNUIMessage({
             event = "Progress-Start",
@@ -164,7 +167,7 @@ Manager.new = function(source)
             -- No idea, if that can happen on FiveM..
             if not self then return end
 
-            self.variables.hasProgress = false
+            self.Set.Variable("hasProgress", false)
 
             if Citizen.GetFunctionReference(cb) then
                 cb()

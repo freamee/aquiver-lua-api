@@ -96,9 +96,12 @@ RegisterNetEvent("AQUIVER:Player:Attachment:RemoveAll", function()
 
     Manager.attachments = {}
 end)
-RegisterNetEvent("AQUIVER:Player:Freeze:State", function(state)
-    Manager.isFreezed = state
-    FreezeEntityPosition(PlayerPedId(), state)
+
+RegisterNetEvent("onPlayerVariableChange", function(key, value)
+    if key == "isFreezed" then
+        Manager.isFreezed = value
+        FreezeEntityPosition(PlayerPedId(), state)
+    end
 end)
 RegisterNetEvent("AQUIVER:Player:Animation:Play", function(dict, name, flag)
     RequestAnimDict(dict)

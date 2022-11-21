@@ -153,17 +153,20 @@ RegisterNetEvent("AQUIVER:Particle:Destroy", function(remoteId)
     if not ParticleEntity then return end
     ParticleEntity.Destroy()
 end)
+
+---@param ObjectEntity ClientObject
 AddEventHandler("onObjectStreamIn", function(ObjectEntity)
     for k, v in pairs(Manager.Entities) do
-        if v.Get.Data().toObjectRemoteId == ObjectEntity.data.remoteId then
+        if v.Get.Data().toObjectRemoteId == ObjectEntity.Get.RemoteId() then
             v.AddStream()
         end
     end
 end)
 
+---@param ObjectEntity ClientObject
 AddEventHandler("onObjectStreamOut", function(ObjectEntity)
     for k, v in pairs(Manager.Entities) do
-        if v.Get.Data().toObjectRemoteId == ObjectEntity.data.remoteId then
+        if v.Get.Data().toObjectRemoteId == ObjectEntity.Get.RemoteId() then
             v.RemoveStream()
         end
     end
