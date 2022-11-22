@@ -17,7 +17,7 @@ Manager.StartIndicatorAtPosition = function(uid, vec3, text, timeMS)
 
     local run = true
 
-    SetTimeout(timeMS, function()
+    Citizen.SetTimeout(timeMS, function()
         run = false
     end)
 
