@@ -21,17 +21,6 @@ Manager.new = function(source)
         end,
         Dimension = function()
             return GetPlayerRoutingBucket(self.source)
-        end,
-        Identifier = function()
-            for k, v in pairs(GetPlayerIdentifiers(self.source)) do
-                if string.sub(v, 1, string.len('license:')) == 'license:' then
-                    return v
-                end
-            end
-            return nil
-        end,
-        Name = function()
-            return GetPlayerName(self.source)
         end
     }
 
@@ -59,27 +48,6 @@ Manager.new = function(source)
             end
         end
     }
-
-    self.AddItem = function(item, amount)
-        if GetResourceState("ox_inventory") == "started" then
-            if exports.ox_inventory:CanCarryItem(self.source, item, amount) then
-                exports.ox_inventory:AddItem(self.source, item, amount)
-                return true
-            end
-        end
-    end
-
-    self.GetItemAmount = function(item)
-        if GetResourceState("ox_inventory") == "started" then
-            return exports.ox_inventory:GetItem(self.source, item, nil, true)
-        end
-    end
-
-    self.RemoveItem = function(item, amount)
-        if GetResourceState("ox_inventory") == "started" then
-            exports.ox_inventory:RemoveItem(self.source, item, amount)
-        end
-    end
 
     self.AddAttachment = function(attachmentName)
         if not AQUIVER_SHARED.AttachmentManager.exists(attachmentName) then

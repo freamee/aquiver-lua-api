@@ -77,6 +77,10 @@ Manager.new = function(data)
 
         local obj = CreateObject(modelHash, self.Get.Position(), false, false, false)
 
+        while not DoesEntityExist(self.objectHandle) do
+            Citizen.Wait(50)
+        end
+
         AttachEntityToEntity(
             obj,
             self.objectHandle,
@@ -88,7 +92,8 @@ Manager.new = function(data)
 
         _attachments[attachmentName] = obj
 
-        AQUIVER_SHARED.Utils.Print(string.format("^3Object attachment added (%d, %s, %s)", _data.remoteId, _data.model,
+        AQUIVER_SHARED.Utils.Print(string.format("^3Object attachment added (%d, %s, %s)", _data.remoteId,
+            _data.model,
             attachmentName))
     end
 
