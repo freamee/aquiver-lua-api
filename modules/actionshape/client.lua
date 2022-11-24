@@ -42,9 +42,6 @@ Manager.new = function(data)
 
         self.isStreamed = false
 
-        -- Need to trigger the onLeave here.
-        self.onLeave()
-
         AQUIVER_SHARED.Utils.Print(string.format("^3ActionShape streamed out (%d)", _data.remoteId))
     end
 

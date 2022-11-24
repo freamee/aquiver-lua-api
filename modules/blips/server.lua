@@ -110,6 +110,8 @@ Manager.new = function(data)
         end
 
         TriggerClientEvent("AQUIVER:Blip:Destroy", -1, _data.remoteId)
+
+        AQUIVER_SHARED.Utils.Print("^3Removed Blip with remoteId: " .. _data.remoteId)
     end
 
     TriggerClientEvent("AQUIVER:Blip:Create", -1, _data)
