@@ -40,6 +40,20 @@ export const useModalStore = defineStore("ModalStore", () => {
         }
     }
 
+    function executeClick(event: string, args: any) {
+        let inputs: Record<any, any> = {}
+        store.value.modalData.inputs.forEach(a => {
+            inputs[a.id] = a.value;
+        });
+
+        eventhandler.TriggerServer(event, {
+            args,
+            inputs
+        });
+        selectSound();
+        store.value.opened = false;
+    }
+
     watch(() => store.value.opened, (newState) => {
         if (newState) {
             window.addEventListener("keyup", keyupHandler);
@@ -54,7 +68,7 @@ export const useModalStore = defineStore("ModalStore", () => {
     });
 
 
-    return { store }
+    return { store, executeClick }
 });
 
 eventhandler.on("ModalMenu-Open", ({ modalData }) => {

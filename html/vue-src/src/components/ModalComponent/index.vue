@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { hoverSound, selectSound } from '@/plugins/audioPlugin';
-import eventhandler from '@/plugins/eventhandler';
 import { useModalStore } from './modal.store';
 
-const { store } = useModalStore();
+const { store, executeClick } = useModalStore();
 
 </script>
 
@@ -21,11 +20,8 @@ const { store } = useModalStore();
                 :placeholder="a.placeholder" type="text">
 
             <div v-if="store.modalData.buttons.length > 0" class="modal-buttons-child">
-                <div @mouseenter="hoverSound()" @click="() => {
-                    eventhandler.TriggerServer(a.event, a.args);
-                    selectSound();
-                    store.opened = false;
-                }" v-for="a in store.modalData.buttons" class="modal-button-entry">
+                <div @mouseenter="hoverSound()" @click="executeClick(a.event, a.args)"
+                    v-for="a in store.modalData.buttons" class="modal-button-entry">
                     {{ a.name }}
                 </div>
             </div>
