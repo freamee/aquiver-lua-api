@@ -152,6 +152,14 @@ Manager.new = function(source)
         })
     end
 
+    ---@param modalData { question:string; icon?:string; inputs: { id:string; placeholder:string; value?:string; }[]; buttons: { name:string; event:string; args?:any; }[] }
+    self.OpenModal = function(modalData)
+        self.SendNUIMessage({
+            event = "ModalMenu-Open",
+            modalData = modalData
+        })
+    end
+
     ---@param jsonContent table
     self.SendNUIMessage = function(jsonContent)
         TriggerClientEvent("AQUIVER:Player:SendNUIMessage", self.source, jsonContent)

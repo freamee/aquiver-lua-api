@@ -5,6 +5,7 @@
         <ClickMenuComponent />
         <DialogueComponent />
         <HelpComponent />
+        <ModalComponent />
     </div>
 </template>
   
@@ -16,6 +17,7 @@ import NotificationComponent from "@/components/NotificationComponent/index.vue"
 import ClickMenuComponent from "@/components/ClickMenuComponent/index.vue";
 import DialogueComponent from "@/components/DialogueComponent/index.vue";
 import HelpComponent from "@/components/HelpComponent/index.vue";
+import ModalComponent from "@/components/ModalComponent/index.vue";
 
 export default defineComponent({
     components: {
@@ -23,7 +25,8 @@ export default defineComponent({
         NotificationComponent,
         ClickMenuComponent,
         DialogueComponent,
-        HelpComponent
+        HelpComponent,
+        ModalComponent
     }
 
 });
