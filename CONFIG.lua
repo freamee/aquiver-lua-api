@@ -21,7 +21,7 @@ CONFIG.FORCE_ANIMATION_INTERVAL = 500
 -- How often check the raycast, performance++
 CONFIG.RAYCAST_INTERVAL = 30
 
-CONFIG.DEBUG_ENABLED = true
+CONFIG.DEBUG_ENABLED = false
 
 -- Named as RoutingBucket on FiveM.
 CONFIG.DEFAULT_DIMENSION = 0

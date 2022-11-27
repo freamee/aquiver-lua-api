@@ -1,7 +1,7 @@
 local Manager = {}
 
 Manager.GetInvokingResource = function()
-    return GetInvokingResource() or "api"
+    return GetInvokingResource() or GetCurrentResourceName()
 end
 
 --- Print to console

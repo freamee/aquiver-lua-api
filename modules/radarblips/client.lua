@@ -98,7 +98,7 @@ RegisterNetEvent("AQUIVER:RadarBlip:Update:Flashing", function(remoteId, state)
 
     RadarBlipEntity.Set.Flashing(state)
 end)
-RegisterNetEvent("AQUIVER:RadarBlip:Destroy", function(uid)
+RegisterNetEvent("AQUIVER:RadarBlip:Destroy", function(remoteId)
     local RadarBlipEntity = Manager.get(remoteId)
     if not RadarBlipEntity then return end
     RadarBlipEntity.Destroy()

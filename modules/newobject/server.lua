@@ -107,7 +107,6 @@ Manager.new = function(data)
 
         TriggerClientEvent("AQUIVER:Object:Destroy", -1, _data.remoteId)
         TriggerEvent("onObjectDestroyed", self)
-        AQUIVER_SHARED.Utils.Print("^3Removed object with remoteId: " .. _data.remoteId)
 
         if GetResourceState("oxmysql") == "started" then
             exports.oxmysql:query(

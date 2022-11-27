@@ -20,7 +20,9 @@ server_scripts {
 
     'modules/utils/server.lua',
     'modules/helps/server.lua',
+
     'modules/newobject/server.lua',
+
     'modules/particle/server.lua',
     'modules/blips/server.lua',
     'modules/radarblips/server.lua',
@@ -46,7 +48,9 @@ client_scripts {
 
     'modules/utils/client.lua',
     'modules/helps/client.lua',
+
     'modules/newobject/client.lua',
+
     'modules/particle/client.lua',
     'modules/blips/client.lua',
     'modules/radarblips/client.lua',
@@ -64,4 +68,9 @@ ui_page 'html/compiled/index.html'
 
 files {
     'html/compiled/**',
+
+    '_modules/client_*.lua',
+    '_modules/shared_*.lua',
+    '_modules/**/client.lua',
+    '_modules/**/shared.lua'
 }
