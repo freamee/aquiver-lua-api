@@ -15,6 +15,8 @@ end
 
 Shared = {}
 
+---@type SharedConfigModule
+Shared.Config = loadModule("_modules/config.lua")
 ---@type SharedUtilsModule
 Shared.Utils = loadModule("_modules/utils/shared.lua")
 ---@type SharedAttachmentModule

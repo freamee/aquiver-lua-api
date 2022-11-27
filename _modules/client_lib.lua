@@ -28,3 +28,5 @@ Client.ObjectManager = loadModule("_modules/objects/client.lua")
 Client.LocalPlayer = loadModule("_modules/players/client.lua")
 ---@type CPedModule
 Client.PedManager = loadModule("_modules/peds/client.lua")
+---@type CRaycastManager
+Client.RaycastManager = loadModule("_modules/raycast/client.lua")

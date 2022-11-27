@@ -69,6 +69,7 @@ ui_page 'html/compiled/index.html'
 files {
     'html/compiled/**',
 
+    '_modules/config.lua',
     '_modules/client_*.lua',
     '_modules/shared_*.lua',
     '_modules/**/client.lua',

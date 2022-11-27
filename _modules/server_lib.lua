@@ -28,3 +28,5 @@ Server.ObjectManager = loadModule("_modules/objects/server.lua")
 Server.PlayerManager = loadModule("_modules/players/server.lua")
 ---@type SPedModule
 Server.PedManager = loadModule("_modules/peds/server.lua")
+---@type function
+Server.checkResourceVersion = loadModule("_modules/versionChecker/server.lua")
