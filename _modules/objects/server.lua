@@ -73,7 +73,8 @@ function Object:__init__()
     self.data.rz = type(self.data.rz) == "number" and self.data.rz or 0.0
     self.data.alpha = type(self.data.alpha) == "number" and self.data.alpha or 255
     self.data.hide = type(self.data.hide) == "boolean" and self.data.hide or false
-    self.data.dimension = type(self.data.dimension) == "number" and self.data.dimension or CONFIG.DEFAULT_DIMENSION
+    self.data.dimension = type(self.data.dimension) == "number" and self.data.dimension or
+        Shared.Config.DEFAULT_DIMENSION
     self.data.attachments = type(self.data.attachments) == "table" and self.data.attachments or {}
 
     if type(self.data.variables) ~= "table" then
@@ -384,7 +385,7 @@ function Module:insertSQL(d, cb)
                     ["@rx"] = type(d.rx) == "number" and d.rx or 0,
                     ["@ry"] = type(d.ry) == "number" and d.ry or 0,
                     ["@rz"] = type(d.rz) == "number" and d.rz or 0,
-                    ["@dimension"] = type(d.dimension) == "number" and d.dimension or CONFIG.DEFAULT_DIMENSION,
+                    ["@dimension"] = type(d.dimension) == "number" and d.dimension or Shared.Config.DEFAULT_DIMENSION,
                     ["@resource"] = GetCurrentResourceName(),
                     ["@variables"] = json.encode(d.variables) or {}
                 }

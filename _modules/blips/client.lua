@@ -16,6 +16,7 @@ Blip.new = function(d)
     local self = setmetatable({}, Blip)
 
     self.data = d
+    self.blipHandle = nil
 
     if Module:exists(self.data.remoteId) then
         Shared.Utils:Print("^1Blip already exists with remoteID: " .. self.data.remoteId)
@@ -72,6 +73,14 @@ end
 function Module:get(remoteId)
     return self.Entities[remoteId] or nil
 end
+
+AddEventHandler("onResourceStop", function(resourceName)
+    if GetCurrentResourceName() ~= resourceName then return end
+
+    for k, v in pairs(Module.Entities) do
+        v:Destroy()
+    end
+end)
 
 RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:Blip:Create", function(data)
     Module:new(data)

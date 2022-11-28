@@ -34,3 +34,7 @@ Client.RaycastManager = loadModule("_modules/raycast/client.lua")
 Client.ActionShapeManager = loadModule("_modules/actionshape/client.lua")
 ---@type CBlipModule
 Client.BlipManager = loadModule("_modules/blips/client.lua")
+---@type CParticleModule
+Client.ParticleManager = loadModule("_modules/particle/client.lua")
+---@type CRadarBlipModule
+Client.RadarBlipManager = loadModule("_modules/radarblip/client.lua")

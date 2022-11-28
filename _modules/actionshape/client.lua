@@ -17,6 +17,8 @@ ActionShape.new = function(d)
     local self = setmetatable({}, ActionShape)
 
     self.data = d
+    self.isStreamed = false
+    self.isEntered = false
 
     if Module:exists(self.data.remoteId) then
         Shared.Utils:Print("^1ActionShape already exists with remoteID: " .. self.data.remoteId)

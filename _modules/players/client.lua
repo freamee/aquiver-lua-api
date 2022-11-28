@@ -8,7 +8,7 @@ Module.forceAnimationData = {
     flag = nil
 }
 Module.isMovementDisabled = false
-Module.dimension = 0
+Module.dimension = Shared.Config.DEFAULT_DIMENSION
 Module.cachedPosition = GetEntityCoords(PlayerPedId())
 
 ---@type { [string]: { position: {x:number; y:number; z:number; }; text:string; }}

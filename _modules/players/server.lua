@@ -35,7 +35,7 @@ Player.new = function(source)
 end
 
 function Player:__init__()
-    self:setDimension(0)
+    self:setDimension(Shared.Config.DEFAULT_DIMENSION)
 end
 
 function Player:Destroy()

@@ -32,6 +32,10 @@ Server.PedManager = loadModule("_modules/peds/server.lua")
 Server.ActionShapeManager = loadModule("_modules/actionshape/server.lua")
 ---@type SBlipModule
 Server.BlipManager = loadModule("_modules/blips/server.lua")
+---@type SParticleModule
+Server.ParticleManager = loadModule("_modules/particle/server.lua")
+---@type SRadarBlipModule
+Server.RadarBlipManager = loadModule("_modules/radarblip/server.lua")
 
 ---@type function
 Server.checkResourceVersion = loadModule("_modules/versionChecker/server.lua")

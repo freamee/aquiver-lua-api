@@ -1,5 +1,7 @@
 ---@class SharedConfigModule
 local Config = {
+    DEFAULT_DIMENSION = 0,
+
     RAYCAST = {
         INTERVAL = 300,
         -- Distance to find targets (Measured from the gameplay camera coords, and depends on the which camera you use, if you use the far one, maybe 10 will be small.)
