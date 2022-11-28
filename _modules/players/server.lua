@@ -123,14 +123,14 @@ function Player:setDimension(dimension)
 end
 
 ---@param jsonContent table
-function Player:sendNuiMessage(jsonContent)
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:Player:SendNUIMessage", self.source, jsonContent)
+function Player:sendNuiMessageAPI(jsonContent)
+    TriggerClientEvent("AQUIVER:API:Player:SendNUIMessage", self.source, jsonContent)
 end
 
 ---@param type "error" | "success" | "info" | "warning"
 ---@param message string
 function Player:notification(type, message)
-    self:sendNuiMessage({
+    self:sendNuiMessageAPI({
         event = "Send-Notification",
         type = type,
         message = message
@@ -147,7 +147,7 @@ function Player:progress(text, time, cb)
 
     self:setVar("hasProgress", true)
 
-    self:sendNuiMessage({
+    self:sendNuiMessageAPI({
         event = "Progress-Start",
         time = time,
         text = text
@@ -167,7 +167,7 @@ end
 
 ---@param menuData { name:string; icon:string; eventName?:string; eventArgs?:any }[]
 function Player:clickMenuOpen(menuHeader, menuData)
-    self:sendNuiMessage({
+    self:sendNuiMessageAPI({
         event = "ClickMenu-Open",
         menuHeader = menuHeader,
         menuData = menuData
@@ -176,7 +176,7 @@ end
 
 ---@param modalData { question:string; icon?:string; inputs: { id:string; placeholder:string; value?:string; }[]; buttons: { name:string; event:string; args?:any; }[] }
 function Player:openModal(modalData)
-    self:sendNuiMessage({
+    self:sendNuiMessageAPI({
         event = "ModalMenu-Open",
         modalData = modalData
     })

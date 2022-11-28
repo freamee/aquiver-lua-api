@@ -198,7 +198,7 @@ end)
 Citizen.CreateThread(function()
     while true do
         Module.cachedPosition = GetEntityCoords(PlayerPedId())
-        Citizen.Wait(1000)
+        Citizen.Wait(Shared.Config.CACHE_PLAYER_POSITION_INTERVAL)
     end
 end)
 

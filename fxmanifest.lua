@@ -33,7 +33,9 @@ server_scripts {
     'modules/versionchecker/server.lua',
 
     -- This one should start the last.
-    'modules/server_main.lua'
+    'modules/server_main.lua',
+
+    'globals/server_global_*.lua'
 }
 
 client_scripts {
@@ -61,7 +63,9 @@ client_scripts {
     'modules/nui/client.lua',
 
     -- This one should start the last.
-    'modules/client_main.lua'
+    'modules/client_main.lua',
+
+    'globals/client_global_*.lua'
 }
 
 ui_page 'html/compiled/index.html'

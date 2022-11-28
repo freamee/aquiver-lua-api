@@ -1,8 +1,12 @@
 ---@class SharedConfigModule
 local Config = {
+    -- Named as RoutingBucket on FiveM.
     DEFAULT_DIMENSION = 0,
+    -- How often cache the player position with GetEntityCoords.
+    CACHE_PLAYER_POSITION_INTERVAL = 500,
 
     RAYCAST = {
+        -- How often check the raycast, performance++
         INTERVAL = 300,
         -- Distance to find targets (Measured from the gameplay camera coords, and depends on the which camera you use, if you use the far one, maybe 10 will be small.)
         RAY_DISTANCE = 10.0,
