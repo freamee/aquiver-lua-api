@@ -14,6 +14,20 @@ local Config = {
         SPRITE_NAME = "spectating",
         SPRITE_COLOR = { r = 255, g = 255, b = 255, a = 200 },
         INTERACTION_KEY = 38
+    },
+    -- Streaming handler intervals. (MS)
+    STREAM_INTERVALS = {
+        OBJECT = 1000,
+        PED = 1000,
+        PARTICLE = 1000,
+        ACTIONSHAPE = 1000
+    },
+    -- Streaming distances
+    STREAM_DISTANCES = {
+        OBJECT = 100.0,
+        PED = 100.0,
+        PARTICLE = 100.0,
+        ACTIONSHAPE = 100.0
     }
 }
 

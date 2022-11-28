@@ -30,3 +30,7 @@ Client.LocalPlayer = loadModule("_modules/players/client.lua")
 Client.PedManager = loadModule("_modules/peds/client.lua")
 ---@type CRaycastManager
 Client.RaycastManager = loadModule("_modules/raycast/client.lua")
+---@type CActionShapeModule
+Client.ActionShapeManager = loadModule("_modules/actionshape/client.lua")
+---@type CBlipModule
+Client.BlipManager = loadModule("_modules/blips/client.lua")
