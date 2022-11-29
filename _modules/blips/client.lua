@@ -82,32 +82,34 @@ AddEventHandler("onResourceStop", function(resourceName)
     end
 end)
 
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:Blip:Create", function(data)
-    Module:new(data)
-end)
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:Blip:Update:Color", function(remoteId, color)
-    local aBlip = Module:get(remoteId)
-    if not aBlip then return end
+Shared.EventManager:RegisterModuleNetworkEvent({
+    ["Blip:Create"] = function(data)
+        Module:new(data)
+    end,
+    ["Blip:Update:Color"] = function(remoteId, color)
+        local aBlip = Module:get(remoteId)
+        if not aBlip then return end
 
-    aBlip.data.color = color
+        aBlip.data.color = color
 
-    if DoesBlipExist(aBlip.blipHandle) then
-        SetBlipColour(aBlip.blipHandle, color)
-    end
-end)
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:Blip:Destroy", function(remoteId)
-    local aBlip = Module:get(remoteId)
-    if not aBlip then return end
+        if DoesBlipExist(aBlip.blipHandle) then
+            SetBlipColour(aBlip.blipHandle, color)
+        end
+    end,
+    ["Blip:Destroy"] = function(remoteId)
+        local aBlip = Module:get(remoteId)
+        if not aBlip then return end
 
-    aBlip:Destroy()
-end)
+        aBlip:Destroy()
+    end,
+})
 
 Citizen.CreateThread(function()
     while true do
 
         if NetworkIsPlayerActive(PlayerId()) then
             -- Request Data from server.
-            TriggerServerEvent(GetCurrentResourceName() .. "AQUIVER:Blip:RequestData")
+            Shared.EventManager:TriggerModuleServerEvent("Blip:RequestData")
             break
         end
 

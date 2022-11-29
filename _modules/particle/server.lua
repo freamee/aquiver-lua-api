@@ -42,7 +42,7 @@ Particle.new = function(d)
 
     Module.Entities[self.data.remoteId] = self
 
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:Particle:Create", -1, self.data)
+    Shared.EventManager:TriggerModuleClientEvent("Particle:Create", -1, self.data)
 
     Shared.Utils:Print("^3Created new Particle with remoteID: " .. self.data.remoteId)
 
@@ -63,7 +63,7 @@ function Particle:Destroy()
         Module.Entities[self.data.remoteId] = nil
     end
 
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:Particle:Destroy", -1, self.data.remoteId)
+    Shared.EventManager:TriggerModuleClientEvent("Particle:Destroy", -1, self.data.remoteId)
 
     Shared.Utils:Print("^3Removed particle with remoteId: " .. self.data.remoteId)
 end
@@ -101,11 +101,11 @@ function Module:hasObjectParticleByUid(objectRemoteId, particleUid)
     return false
 end
 
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:Particle:RequestData", function()
+Shared.EventManager:RegisterModuleNetworkEvent("Particle:RequestData", function()
     local source = source
 
     for k, v in pairs(Module.Entities) do
-        TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:Particle:Create", source, v.data)
+        Shared.EventManager:TriggerModuleClientEvent("Particle:Create", source, v.data)
     end
 end)
 
@@ -117,14 +117,17 @@ AddEventHandler("onResourceStop", function(resourceName)
     end
 end)
 
--- ---@param Object ServerObject
--- AddEventHandler("onObjectDestroyed", function(Object)
---     -- Destroy particle if the object got destroyed.
---     for k, v in pairs(Manager.Entities) do
---         if v.Get.Data().toObjectRemoteId == Object.Get.RemoteId() then
---             v.Destroy()
---         end
---     end
--- end)
+---@param resourceName string
+---@param remoteId number
+AddEventHandler("onObjectDestroyed", function(resourceName, remoteId)
+    if resourceName ~= GetCurrentResourceName() then return end
+
+    -- Destroy particle if the object got destroyed.
+    for k, v in pairs(Module.Entities) do
+        if v.data.toObjectRemoteId == remoteId then
+            v:Destroy()
+        end
+    end
+end)
 
 return Module

@@ -55,7 +55,7 @@ function Player:addAttachment(attachmentName)
     if self:hasAttachment(attachmentName) then return end
 
     self.attachments[attachmentName] = true
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:Player:Attachment:Add", self.source, attachmentName)
+    Shared.EventManager:TriggerModuleClientEvent("Player:Attachment:Add", self.source, attachmentName)
 end
 
 function Player:hasAttachment(attachmentName)
@@ -66,12 +66,12 @@ function Player:removeAttachment(attachmentName)
     if not self:hasAttachment(attachmentName) then return end
 
     self.attachments[attachmentName] = nil
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:Player:Attachment:Remove", self.source, attachmentName)
+    Shared.EventManager:TriggerModuleClientEvent("Player:Attachment:Remove", self.source, attachmentName)
 end
 
 function Player:removeAllAttachments()
     self.attachments = {}
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:Player:Attachment:RemoveAll", self.source)
+    Shared.EventManager:TriggerModuleClientEvent("Player:Attachment:RemoveAll", self.source)
 end
 
 function Player:setVar(key, value)
@@ -81,32 +81,31 @@ function Player:setVar(key, value)
 end
 
 function Player:freeze(state)
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:Player:Freeze", self.source, state)
+    Shared.EventManager:TriggerModuleEvent("Player:Freeze", self.source, state)
 end
 
 function Player:playAnimation(dict, name, flag)
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:Player:Animation:Play", self.source, dict, name, flag)
+    Shared.EventManager:TriggerModuleClientEvent("Player:Animation:Play", self.source, dict, name, flag)
 end
 
 function Player:StopAnimation()
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:Player:Animation:Stop", self.source)
+    Shared.EventManager:TriggerModuleClientEvent("Player:Animation:Stop", self.source)
 end
 
 function Player:forceAnimation(dict, name, flag)
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:Player:ForceAnimation:Play", self.source, dict, name, flag)
+    Shared.EventManager:TriggerModuleEvent("Player:ForceAnimation:Play", self.source, dict, name, flag)
 end
 
 function Player:StopForceAnimation()
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:Player:ForceAnimation:Stop", self.source)
+    Shared.EventManager:TriggerModuleClientEvent("Player:ForceAnimation:Stop", self.source)
 end
 
 function Player:disableMovement(state)
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:Player:DisableMovement:State", self.source, state)
+    Shared.EventManager:TriggerModuleClientEvent("Player:DisableMovement:State", self.source, state)
 end
 
 function Player:startIndicatorPosition(uid, vec3, text, timeMS)
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:Player:StartIndicatorAtPosition", self.source, uid, vec3,
-        text, timeMS)
+    Shared.EventManager:TriggerModuleClientEvent("Player:StartIndicatorAtPosition", self.source, uid, vec3, text, timeMS)
 end
 
 function Player:setDimension(dimension)
@@ -115,7 +114,7 @@ function Player:setDimension(dimension)
     self:removeAllAttachments()
 
     SetPlayerRoutingBucket(self.source, dimension)
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:Player:Set:Dimension", self.source, dimension)
+    Shared.EventManager:TriggerModuleClientEvent("Player:Set:Dimension", self.source, dimension)
 
     for k, v in pairs(attaches) do
         self:addAttachment(k)

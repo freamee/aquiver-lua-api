@@ -37,7 +37,7 @@ ActionShape.new = function(d)
     self:__init__()
 
     Module.Entities[self.data.remoteId] = self
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:ActionShape:Create", -1, self.data)
+    Shared.EventManager:TriggerModuleClientEvent("ActionShape:Create", -1, self.data)
 
     Shared.Utils:Print("^3Created new ActionShape with remoteID: " .. self.data.remoteId)
 
@@ -53,7 +53,7 @@ function ActionShape:Destroy()
         Module.Entities[self.data.remoteId] = nil
     end
 
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:ActionShape:Destroy", -1, self.data.remoteId)
+    Shared.EventManager:TriggerModuleClientEvent("ActionShape:Destroy", -1, self.data.remoteId)
 
     Shared.Utils:Print("^3Removed ActionShape with remoteId: " .. self.data.remoteId)
 end
@@ -82,11 +82,11 @@ AddEventHandler("onResourceStop", function(resourceName)
     end
 end)
 
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:ActionShape:RequestData", function()
+Shared.EventManager:RegisterModuleNetworkEvent("ActionShape:RequestData", function()
     local source = source
 
     for k, v in pairs(Module.Entities) do
-        TriggerClientEvent("AQUIVER:ActionShape:Create", source, v.data)
+        Shared.EventManager:TriggerModuleClientEvent("ActionShape:Create", source, v.data)
     end
 end)
 

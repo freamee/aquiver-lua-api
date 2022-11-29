@@ -157,7 +157,7 @@ Citizen.CreateThread(function()
 
         if NetworkIsPlayerActive(PlayerId()) then
             -- Request Data from server.
-            TriggerServerEvent(GetCurrentResourceName() .. "AQUIVER:ActionShape:RequestData")
+            Shared.EventManager:TriggerModuleServerEvent("ActionShape:RequestData")
             break
         end
 
@@ -165,14 +165,16 @@ Citizen.CreateThread(function()
     end
 end)
 
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:ActionShape:Create", function(data)
-    Module:new(data)
-end)
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:ActionShape:Destroy", function(remoteId)
-    local aActionShape = Module:get(remoteId)
-    if not aActionShape then return end
+Shared.EventManager:RegisterModuleNetworkEvent({
+    ["ActionShape:Create"] = function(data)
+        Module:new(data)
+    end,
+    ["ActionShape:Destroy"] = function(remoteId)
+        local aActionShape = Module:get(remoteId)
+        if not aActionShape then return end
 
-    aActionShape:Destroy()
-end)
+        aActionShape:Destroy()
+    end
+})
 
 return Module

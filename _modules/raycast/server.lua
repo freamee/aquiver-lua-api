@@ -1,27 +1,24 @@
--- RegisterNetEvent("Object:Interaction:Press", function(remoteId)
---     local source = source
+Shared.EventManager:RegisterModuleNetworkEvent({
+    ["Object:Interaction:Press"] = function(remoteId)
+        local source = source
 
---     local ObjectEntity = AQUIVER_SERVER.ObjectManager.get(remoteId)
---     if not ObjectEntity then return end
+        local aObject = Server.ObjectManager:get(remoteId)
+        local Player = Server.PlayerManager:get(source)
+        if not (Player and aObject) then return end
 
---     local Player = AQUIVER_SERVER.PlayerManager.get(source)
---     if not Player then return end
+        if type(aObject.onPress) == "function" then
+            aObject.onPress(Player, aObject)
+        end
+    end,
+    ["Ped:Interaction:Press"] = function(remoteId)
+        local source = source
 
---     if Citizen.GetFunctionReference(ObjectEntity.onPress) then
---         ObjectEntity.onPress(Player, ObjectEntity)
---     end
--- end)
+        local aPed = Server.PedManager:get(remoteId)
+        local Player = Server.PlayerManager:get(source)
+        if not (Player and aPed) then return end
 
--- RegisterNetEvent("Ped:Interaction:Press", function(remoteId)
---     local source = source
-
---     local PedEntity = AQUIVER_SERVER.PedManager.get(remoteId)
---     if not PedEntity then return end
-
---     local Player = AQUIVER_SERVER.PlayerManager.get(source)
---     if not Player then return end
-
---     if Citizen.GetFunctionReference(PedEntity.onPress) then
---         PedEntity.onPress(Player, PedEntity)
---     end
--- end)
+        if type(aPed.onPress) == "function" then
+            aPed.onPress(Player, aPed)
+        end
+    end,
+})

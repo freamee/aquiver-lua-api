@@ -37,7 +37,7 @@ RadarBlip.new = function(d)
 
     Module.Entities[self.data.remoteId] = self
 
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:RadarBlip:Create", -1, self.data)
+    Shared.EventManager:TriggerModuleClientEvent("RadarBlip:Create", -1, self.data)
 
     Shared.Utils:Print("^3Created new RadarBlip with remoteID: " .. self.data.remoteId)
 
@@ -53,27 +53,27 @@ function RadarBlip:Destroy()
         Module.Entities[self.data.remoteId] = nil
     end
 
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:RadarBlip:Destroy", -1, self.data.remoteId)
+    Shared.EventManager:TriggerModuleClientEvent("RadarBlip:Destroy", -1, self.data.remoteId)
 end
 
 function RadarBlip:setRadius(radius)
     self.data.radius = radius
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:RadarBlip:Update:Radius", -1, self.data.remoteId, radius)
+    Shared.EventManager:TriggerModuleEvent("RadarBlip:Update:Radius", -1, self.data.remoteId, radius)
 end
 
 function RadarBlip:setColor(colorId)
     self.data.color = colorId
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:RadarBlip:Update:Color", -1, self.data.remoteId, colorId)
+    Shared.EventManager:TriggerModuleClientEvent("RadarBlip:Update:Color", -1, self.data.remoteId, colorId)
 end
 
 function RadarBlip:setFlashing(state)
     self.data.isFlashing = state
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:RadarBlip:Update:Flashing", -1, self.data.remoteId, state)
+    Shared.EventManager:TriggerModuleClientEvent("RadarBlip:Update:Flashing", -1, self.data.remoteId, state)
 end
 
 function RadarBlip:setAlpha(alpha)
     self.data.alpha = alpha
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:RadarBlip:Update:Alpha", -1, self.data.remoteId, alpha)
+    Shared.EventManager:TriggerModuleClientEvent("RadarBlip:Update:Alpha", -1, self.data.remoteId, alpha)
 end
 
 ---@param d IRadarBlip
@@ -92,11 +92,11 @@ function Module:get(remoteId)
     return self.Entities[remoteId] or nil
 end
 
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:RadarBlip:RequestData", function()
+Shared.EventManager:RegisterModuleNetworkEvent("RadarBlip:RequestData", function()
     local source = source
 
     for k, v in pairs(Module.Entities) do
-        TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:RadarBlip:Create", source, v.data)
+        Shared.EventManager:TriggerModuleClientEvent("RadarBlip:Create", source, v.data)
     end
 end)
 

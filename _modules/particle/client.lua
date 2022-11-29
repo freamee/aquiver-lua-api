@@ -161,22 +161,48 @@ AddEventHandler("onResourceStop", function(resourceName)
     end
 end)
 
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:Particle:Create", function(data)
-    Module:new(Data)
-end)
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:Particle:Destroy", function(remoteId)
-    local aParticle = Module:get(remoteId)
-    if not aParticle then return end
-    aParticle:Destroy()
+---@param resourceName string
+---@param remoteId number
+AddEventHandler("onObjectStreamIn", function(resourceName, remoteId)
+    if resourceName ~= GetCurrentResourceName() then return end
+
+    -- Create particle(s) on object stream in.
+    for k, v in pairs(Module.Entities) do
+        if v.data.toObjectRemoteId == remoteId then
+            v:addStream()
+        end
+    end
 end)
 
+---@param resourceName string
+---@param remoteId number
+AddEventHandler("onObjectStreamOut", function(resourceName, remoteId)
+    if resourceName ~= GetCurrentResourceName() then return end
+
+    for k, v in pairs(Module.Entities) do
+        if v.data.toObjectRemoteId == remoteId then
+            v:removeStream()
+        end
+    end
+end)
+
+Shared.EventManager:RegisterModuleNetworkEvent({
+    ["Particle:Create"] = function(data)
+        Module:new(data)
+    end,
+    ["Particle:Destroy"] = function(remoteId)
+        local aParticle = Module:get(remoteId)
+        if not aParticle then return end
+        aParticle:Destroy()
+    end
+})
 
 Citizen.CreateThread(function()
     while true do
 
         if NetworkIsPlayerActive(PlayerId()) then
             -- Request Data from server.
-            TriggerServerEvent(GetCurrentResourceName() .. "AQUIVER:Particle:RequestData")
+            Shared.EventManager:TriggerModuleServerEvent("Particle:RequestData")
             break
         end
 
@@ -207,21 +233,3 @@ Citizen.CreateThread(function()
 end)
 
 return Module
-
--- ---@param ObjectEntity ClientObject
--- AddEventHandler("onObjectStreamIn", function(ObjectEntity)
---     for k, v in pairs(Manager.Entities) do
---         if v.Get.Data().toObjectRemoteId == ObjectEntity.Get.RemoteId() then
---             v.AddStream()
---         end
---     end
--- end)
-
--- ---@param ObjectEntity ClientObject
--- AddEventHandler("onObjectStreamOut", function(ObjectEntity)
---     for k, v in pairs(Manager.Entities) do
---         if v.Get.Data().toObjectRemoteId == ObjectEntity.Get.RemoteId() then
---             v.RemoveStream()
---         end
---     end
--- end)

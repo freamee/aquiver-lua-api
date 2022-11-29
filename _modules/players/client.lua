@@ -54,136 +54,142 @@ function Module:hasAttachment(attachmentName)
     return false
 end
 
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:Player:StartIndicatorAtPosition",
-    function(uid, vec3, text, timeMS)
+---@param jsonContent table
+function Module:sendNuiMessageAPI(jsonContent)
+    SendNUIMessage(jsonContent)
+end
+
+Shared.EventManager:RegisterModuleNetworkEvent({
+    ["Player:StartIndicatorAtPosition"] = function(uid, vec3, text, timeMS)
         Module:startIndicatorAtPosition(uid, vec3, text, timeMS)
-    end)
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:Player:Freeze", function(state)
-    Module.isFreezed = state
-    FreezeEntityPosition(PlayerPedId(), state)
-end)
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:Player:Attachment:Add", function(attachmentName)
-    -- Return if already exists.
-    if Module:hasAttachment(attachmentName) then return end
+    end,
+    ["Player:Freeze"] = function(state)
+        Module.isFreezed = state
+        FreezeEntityPosition(PlayerPedId(), state)
+    end,
+    ["Player:Attachment:Add"] = function(attachmentName)
+        -- Return if already exists.
+        if Module:hasAttachment(attachmentName) then return end
 
-    local aData = Shared.AttachmentManager:get(attachmentName)
-    if not aData then return end
+        local aData = Shared.AttachmentManager:get(attachmentName)
+        if not aData then return end
 
-    local modelHash = GetHashKey(aData.model)
-    Client.Utils:RequestModel(modelHash)
+        local modelHash = GetHashKey(aData.model)
+        Client.Utils:RequestModel(modelHash)
 
-    local localPlayer = PlayerPedId()
-    local playerCoords = GetEntityCoords(localPlayer)
-    local obj = CreateObject(modelHash, playerCoords, true, true, true)
+        local localPlayer = PlayerPedId()
+        local playerCoords = GetEntityCoords(localPlayer)
+        local obj = CreateObject(modelHash, playerCoords, true, true, true)
 
-    AttachEntityToEntity(
-        obj,
-        localPlayer,
-        GetPedBoneIndex(localPlayer, aData.boneId),
-        aData.x, aData.y, aData.z,
-        aData.rx, aData.ry, aData.rz,
-        true, true, false, false, 2, true
-    )
+        AttachEntityToEntity(
+            obj,
+            localPlayer,
+            GetPedBoneIndex(localPlayer, aData.boneId),
+            aData.x, aData.y, aData.z,
+            aData.rx, aData.ry, aData.rz,
+            true, true, false, false, 2, true
+        )
 
-    Module.attachments[attachmentName] = obj
-end)
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:Player:Attachment:Remove", function(attachmentName)
-    if not Manager.HasAttachment(attachmentName) then return end
+        Module.attachments[attachmentName] = obj
+    end,
+    ["Player:Attachment:Remove"] = function(attachmentName)
+        if not Manager.HasAttachment(attachmentName) then return end
 
-    DeleteEntity(Manager.attachments[attachmentName])
-    Manager.attachments[attachmentName] = nil
-end)
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:Player:Attachment:RemoveAll", function()
-    for attachmentName, objectHandle in pairs(Module.attachments) do
-        if DoesEntityExist(objectHandle) then
-            DeleteEntity(objectHandle)
+        DeleteEntity(Manager.attachments[attachmentName])
+        Manager.attachments[attachmentName] = nil
+    end,
+    ["Player:Attachment:RemoveAll"] = function()
+        for attachmentName, objectHandle in pairs(Module.attachments) do
+            if DoesEntityExist(objectHandle) then
+                DeleteEntity(objectHandle)
+            end
         end
-    end
 
-    Module.attachments = {}
-end)
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:Player:Set:Dimension", function(dimension)
-    Module.dimension = dimension
-end)
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:Player:Animation:Play", function(dict, name, flag)
-    RequestAnimDict(dict)
-    while not HasAnimDictLoaded(dict) do
-        Citizen.Wait(10)
-    end
-    TaskPlayAnim(PlayerPedId(), dict, name, 4.0, 4.0, -1, tonumber(flag), 1.0, false, false, false)
-end)
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:Player:Animation:Stop", function()
-    ClearPedTasks(PlayerPedId())
-end)
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:Player:ForceAnimation:Play", function(dict, name, flag)
-    RequestAnimDict(dict)
+        Module.attachments = {}
+    end,
+    ["Player:Set:Dimension"] = function(dimension)
+        Module.dimension = dimension
+    end,
+    ["Player:Animation:Play"] = function(dict, name, flag)
+        RequestAnimDict(dict)
+        while not HasAnimDictLoaded(dict) do
+            Citizen.Wait(10)
+        end
+        TaskPlayAnim(PlayerPedId(), dict, name, 4.0, 4.0, -1, tonumber(flag), 1.0, false, false, false)
+    end,
+    ["Player:Animation:Stop"] = function()
+        ClearPedTasks(PlayerPedId())
+    end,
+    ["Player:ForceAnimation:Play"] = function(dict, name, flag)
+        RequestAnimDict(dict)
 
-    while not HasAnimDictLoaded(dict) do
-        Citizen.Wait(10)
-    end
+        while not HasAnimDictLoaded(dict) do
+            Citizen.Wait(10)
+        end
 
-    Module.forceAnimationData = {
-        dict = dict,
-        name = name,
-        flag = flag
-    }
+        Module.forceAnimationData = {
+            dict = dict,
+            name = name,
+            flag = flag
+        }
 
-    Citizen.CreateThread(function()
-        while Module.forceAnimationData.dict ~= nil do
+        Citizen.CreateThread(function()
+            while Module.forceAnimationData.dict ~= nil do
 
-            local localPlayer = PlayerPedId()
+                local localPlayer = PlayerPedId()
 
-            if not IsEntityPlayingAnim(
-                localPlayer,
-                Module.forceAnimationData.dict,
-                Module.forceAnimationData.name,
-                Module.forceAnimationData.flag
-            ) then
-                TaskPlayAnim(
+                if not IsEntityPlayingAnim(
                     localPlayer,
                     Module.forceAnimationData.dict,
                     Module.forceAnimationData.name,
-                    4.0,
-                    4.0,
-                    -1,
-                    tonumber(Module.forceAnimationData.flag),
-                    1.0,
-                    false, false, false
-                )
-            end
+                    Module.forceAnimationData.flag
+                ) then
+                    TaskPlayAnim(
+                        localPlayer,
+                        Module.forceAnimationData.dict,
+                        Module.forceAnimationData.name,
+                        4.0,
+                        4.0,
+                        -1,
+                        tonumber(Module.forceAnimationData.flag),
+                        1.0,
+                        false, false, false
+                    )
+                end
 
-            Citizen.Wait(1000)
-        end
-    end)
-end)
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:Player:DisableMovement:State", function(state)
-    if state then
-        if state == Module.isMovementDisabled then return end
-
-        Module.isMovementDisabled = state
-
-        Citizen.CreateThread(function()
-            while Module.isMovementDisabled do
-
-                DisableAllControlActions(0)
-                EnableControlAction(0, 1, true)
-                EnableControlAction(0, 2, true)
-
-                Citizen.Wait(0)
+                Citizen.Wait(1000)
             end
         end)
-    else
-        Module.isMovementDisabled = state
-    end
-end)
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:Player:ForceAnimation:Stop", function()
-    Module.forceAnimationData = {
-        dict = nil,
-        name = nil,
-        flag = nil
-    }
-    ClearPedTasks(PlayerPedId())
-end)
+    end,
+    ["Player:DisableMovement:State"] = function(state)
+        if state then
+            if state == Module.isMovementDisabled then return end
+
+            Module.isMovementDisabled = state
+
+            Citizen.CreateThread(function()
+                while Module.isMovementDisabled do
+
+                    DisableAllControlActions(0)
+                    EnableControlAction(0, 1, true)
+                    EnableControlAction(0, 2, true)
+
+                    Citizen.Wait(0)
+                end
+            end)
+        else
+            Module.isMovementDisabled = state
+        end
+    end,
+    ["Player:ForceAnimation:Stop"] = function()
+        Module.forceAnimationData = {
+            dict = nil,
+            name = nil,
+            flag = nil
+        }
+        ClearPedTasks(PlayerPedId())
+    end,
+})
 
 AddEventHandler("onResourceStop", function(resourceName)
     if resourceName ~= GetCurrentResourceName() then return end

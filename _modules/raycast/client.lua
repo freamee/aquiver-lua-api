@@ -62,14 +62,20 @@ function Module:setEntityHandle(handleId)
 
                 if self.AimedPedEntity then
                     if IsDisabledControlJustPressed(0, Shared.Config.RAYCAST.INTERACTION_KEY) then
-                        TriggerServerEvent("Ped:Interaction:Press", self.AimedPedEntity.data.remoteId)
+                        Shared.EventManager:TriggerModuleServerEvent(
+                            "Ped:Interaction:Press",
+                            self.AimedPedEntity.data.remoteId
+                        )
                         TriggerServerEvent("onPedInteractionPress", self.AimedPedEntity.data.remoteId)
                     end
                 end
 
                 if self.AimedObjectEntity then
                     if IsDisabledControlJustPressed(0, Shared.Config.RAYCAST.INTERACTION_KEY) then
-                        TriggerServerEvent("Object:Interaction:Press", self.AimedObjectEntity.data.remoteId)
+                        Shared.EventManager:TriggerModuleServerEvent(
+                            "Object:Interaction:Press",
+                            self.AimedObjectEntity.data.remoteId
+                        )
                         TriggerServerEvent("onObjectInteractionPress", self.AimedObjectEntity.data.remoteId)
                     end
                 end

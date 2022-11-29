@@ -40,7 +40,7 @@ Blip.new = function(d)
 
     Module.Entities[self.data.remoteId] = self
 
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:Blip:Create", -1, self.data)
+    Shared.EventManager:TriggerModuleClientEvent("Blip:Create", -1, self.data)
 
     Shared.Utils:Print("^3Created new Blip with remoteID: " .. self.data.remoteId)
 
@@ -59,14 +59,14 @@ function Blip:Destroy()
         Module.Entities[self.data.remoteId] = nil
     end
 
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:Blip:Destroy", -1, self.data.remoteId)
+    Shared.EventManager:TriggerModuleClientEvent("Blip:Destroy", -1, self.data.remoteId)
 
     Shared.Utils:Print("^3Removed Blip with remoteId: " .. self.data.remoteId)
 end
 
 function Blip:setColor(colorId)
     self.data.color = colorId
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:Blip:Update:Color", -1, self.data.remoteId, colorId)
+    Shared.EventManager:TriggerModuleClientEvent("Blip:Update:Color", -1, self.data.remoteId, colorId)
 end
 
 ---@param d IBlip
@@ -85,11 +85,11 @@ function Module:get(remoteId)
     return self.Entities[remoteId] or nil
 end
 
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:Blip:RequestData", function()
+Shared.EventManager:RegisterModuleNetworkEvent("Blip:RequestData", function()
     local source = source
 
     for k, v in pairs(Module.Entities) do
-        TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:Blip:Create", source, v.data)
+        Shared.EventManager:TriggerModuleClientEvent("Blip:Create", source, v.data)
     end
 end)
 

@@ -21,7 +21,7 @@ Module.Entities = {}
 local Ped = {
     ---@type IPed
     data = {},
-    ---@type fun(Player: SAquiverPlayer, Object: SAquiverObject)
+    ---@type fun(Player: SAquiverPlayer, Ped: SAquiverPed)
     onPress = nil
 }
 Ped.__index = Ped
@@ -43,7 +43,7 @@ Ped.new = function(d)
     self:__init__()
 
     Module.Entities[self.data.remoteId] = self
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:Ped:Create", -1, self.data)
+    Shared.EventManager:TriggerModuleClientEvent("Ped:Create", -1, self.data)
 
     Shared.Utils:Print("^3Created new Ped with remoteID: " .. self.data.remoteId)
 
@@ -60,7 +60,7 @@ function Ped:Destroy()
         Module.Entities[self.data.remoteId] = nil
     end
 
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:Ped:Destroy", -1, self.data.remoteId)
+    Shared.EventManager:TriggerModuleClientEvent("Ped:Destroy", -1, self.data.remoteId)
     Shared.Utils:Print("^3Removed ped with remoteId: " .. self.data.remoteId)
 end
 
@@ -69,14 +69,19 @@ function Ped:playAnimation(dict, anim, flag)
     self.data.animName = anim
     self.data.animFlag = flag
 
-    TriggerClientEvent(
-        GetCurrentResourceName() .. "AQUIVER:Ped:Update:Animation",
+    Shared.EventManager:TriggerModuleClientEvent(
+        "Ped:Update:Animation",
         -1,
         self.data.remoteId,
         self.data.animDict,
         self.data.animName,
         self.data.animFlag
     )
+end
+
+---@param Player SAquiverPlayer
+function Ped:startDialogue(Player, DialoguesData)
+    Shared.EventManager:TriggerModuleClientEvent("Ped:Start:Dialogue", Player.source, self.data.remoteId, DialoguesData)
 end
 
 ---@param d IPed
@@ -103,85 +108,12 @@ AddEventHandler("onResourceStop", function(resourceName)
     end
 end)
 
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:Ped:RequestData", function()
+Shared.EventManager:RegisterModuleNetworkEvent("Ped:RequestData", function()
     local source = source
 
     for k, v in pairs(Module.Entities) do
-        TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:Ped:Create", source, v.data)
+        Shared.EventManager:TriggerModuleClientEvent("Ped:Create", source, v.data)
     end
 end)
 
 return Module
-
--- ---@param data IPed
--- Manager.new = function(data)
---     ---@class ServerPed
---     local self = {}
-
---     local Sync = {
---         Position = function()
---             TriggerClientEvent("AQUIVER:Ped:Update:Position", -1, _data.remoteId, _data.position)
---         end,
---         Heading = function()
---             TriggerClientEvent("AQUIVER:Ped:Update:Heading", -1, _data.remoteId, _data.heading)
---         end,
---         Model = function()
---             TriggerClientEvent("AQUIVER:Ped:Update:Model", -1, _data.remoteId, _data.model)
---         end,
---         Dimension = function()
---             TriggerClientEvent("AQUIVER:Ped:Update:Dimension", -1, _data.remoteId, _data.dimension)
---         end
---     }
-
---     self.Set = {
---         Position = function(vec3)
---             _data.position = vec3
---             Sync.Position()
---         end,
---         Heading = function(heading)
---             _data.heading = heading
---             Sync.Heading()
---         end,
---         Model = function(model)
---             _data.model = model
---             Sync.Model()
---         end,
---         Dimension = function(dimension)
---             _data.dimension = dimension
---             Sync.Dimension()
---         end
---     }
-
---     self.Get = {
---         Position = function()
---             return vector3(_data.position.x, _data.position.y, _data.position.z)
---         end,
---         Data = function()
---             return _data
---         end
---     }
-
---     ---@param Player ServerPlayer
---     self.StartDialogue = function(Player, DialoguesData)
---         TriggerClientEvent("AQUIVER:Ped:Start:Dialogue", Player.source, _data.remoteId, DialoguesData)
---     end
-
---     ---@param cb fun(Player: ServerPlayer, Ped: ServerPed)
---     self.AddPressFunction = function(cb)
---         if Citizen.GetFunctionReference(self.onPress) then
---             AQUIVER_SHARED.Utils.Print("^2Ped AddPressFunction already exists, it was overwritten. Ped: " ..
---                 _data.remoteId)
---         end
-
---         self.onPress = cb
---     end
-
---     if Manager.exists(_data.remoteId) then
---         AQUIVER_SHARED.Utils.Print("^1Ped already exists with remoteId: " .. _data.remoteId)
---         return
---     end
-
---     return self
--- end
-
--- AQUIVER_SERVER.PedManager = Manager

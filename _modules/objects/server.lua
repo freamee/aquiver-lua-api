@@ -12,7 +12,6 @@
 ---@field hide boolean
 ---@field dimension number
 ---@field remoteId? number
----@field attachments { [string]: boolean }
 ---@field resource string
 
 ---@type { [string]: fun(Object: SAquiverObject)[] }
@@ -28,8 +27,10 @@ Module.Entities = {}
 local Object = {
     ---@type MysqlObjectInterface
     data = {},
-    ---@type fun(Player: ServerPlayer, Object: SAquiverObject)
-    onPress = nil
+    ---@type fun(Player: SAquiverPlayer, Object: SAquiverObject)
+    onPress = nil,
+    ---@type { [string]: boolean }
+    attachments = {}
 }
 Object.__index = Object
 
@@ -41,6 +42,7 @@ Object.new = function(d)
     self.data.remoteId = remoteIdCount
     remoteIdCount = (remoteIdCount or 0) + 1
     self.onPress = nil
+    self.attachments = {}
 
     if Module:exists(self.data.remoteId) then
         Shared.Utils:Print("^1Object already exists with remoteId: " .. self.data.remoteId)
@@ -52,7 +54,7 @@ Object.new = function(d)
     Module.Entities[self.data.remoteId] = self
 
     Shared.Utils:Print("^3Created new object with remoteId: " .. self.data.remoteId)
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:Object:Create", -1, self.data)
+    Shared.EventManager:TriggerModuleClientEvent("Object:Create", -1, self.data)
 
     return self
 end
@@ -75,7 +77,6 @@ function Object:__init__()
     self.data.hide = type(self.data.hide) == "boolean" and self.data.hide or false
     self.data.dimension = type(self.data.dimension) == "number" and self.data.dimension or
         Shared.Config.DEFAULT_DIMENSION
-    self.data.attachments = type(self.data.attachments) == "table" and self.data.attachments or {}
 
     if type(self.data.variables) ~= "table" then
         self.data.variables = json.decode(self.data.variables) or {}
@@ -91,7 +92,9 @@ function Object:Destroy()
         Module.Entities[self.data.remoteId] = nil
     end
 
-    TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:Object:Destroy", -1, self.data.remoteId)
+    Shared.EventManager:TriggerModuleClientEvent("Object:Destroy", -1, self.data.remoteId)
+    TriggerEvent("onObjectDestroyed", GetCurrentResourceName(), self.data.remoteId)
+
     Shared.Utils:Print("^3Removed object with remoteId: " .. self.data.remoteId)
 
     if GetResourceState("oxmysql") == "started" then
@@ -119,8 +122,8 @@ function Object:setPosition(x, y, z)
     self.data.y = y
     self.data.z = z
 
-    TriggerClientEvent(
-        GetCurrentResourceName() .. "AQUIVER:Object:Update:Position",
+    Shared.EventManager:TriggerModuleClientEvent(
+        "Object:Update:Position",
         -1,
         self.data.remoteId,
         self.data.x,
@@ -148,8 +151,8 @@ function Object:setRotation(rx, ry, rz)
     self.data.ry = ry
     self.data.rz = rz
 
-    TriggerClientEvent(
-        GetCurrentResourceName() .. "AQUIVER:Object:Update:Rotation",
+    Shared.EventManager:TriggerModuleClientEvent(
+        "Object:Update:Rotation",
         -1,
         self.data.remoteId,
         self.data.rx,
@@ -175,8 +178,8 @@ function Object:setModel(model)
 
     self.data.model = model
 
-    TriggerClientEvent(
-        GetCurrentResourceName() .. "AQUIVER:Object:Update:Model",
+    Shared.EventManager:TriggerModuleClientEvent(
+        "Object:Update:Model",
         -1,
         self.data.remoteId,
         self.data.model
@@ -198,8 +201,8 @@ function Object:setAlpha(alpha)
 
     self.data.alpha = alpha
 
-    TriggerClientEvent(
-        GetCurrentResourceName() .. "AQUIVER:Object:Update:Alpha",
+    Shared.EventManager:TriggerModuleClientEvent(
+        "Object:Update:Alpha",
         -1,
         self.data.remoteId,
         self.data.alpha
@@ -211,8 +214,8 @@ function Object:setHide(state)
 
     self.data.hide = state
 
-    TriggerClientEvent(
-        GetCurrentResourceName() .. "AQUIVER:Object:Update:Hide",
+    Shared.EventManager:TriggerModuleClientEvent(
+        "Object:Update:Hide",
         -1,
         self.data.remoteId,
         self.data.hide
@@ -224,8 +227,8 @@ function Object:setDimension(dimension)
 
     self.data.dimension = dimension
 
-    TriggerClientEvent(
-        GetCurrentResourceName() .. "AQUIVER:Object:Update:Dimension",
+    Shared.EventManager:TriggerModuleClientEvent(
+        "Object:Update:Dimension",
         -1,
         self.data.remoteId,
         self.data.dimension
@@ -247,8 +250,8 @@ function Object:setVar(key, value)
 
     self.data.variables[key] = value
 
-    TriggerClientEvent(
-        GetCurrentResourceName() .. "AQUIVER:Object:Update:VariableKey",
+    Shared.EventManager:TriggerModuleClientEvent(
+        "Object:Update:VariableKey",
         -1,
         self.data.remoteId,
         key,
@@ -272,6 +275,31 @@ end
 ---@param vec3 { x:number; y:number; z: number; }
 function Object:dist(vec3)
     return #(self:getVector3Position() - vector3(vec3.x, vec3.y, vec3.z))
+end
+
+function Object:addAttachment(attachmentName)
+    if self:hasAttachment(attachmentName) then return end
+
+    if not Shared.AttachmentManager:exists(attachmentName) then
+        Shared.Utils:Print(string.format("^1%s AddAttachment not registered.", attachmentName))
+        return
+    end
+
+    self.attachments[attachmentName] = true
+
+    Shared.EventManager:TriggerModuleClientEvent("Object:Attachment:Add", -1, self.data.remoteId, attachmentName)
+end
+
+function Object:removeAttachment(attachmentName)
+    if not self:hasAttachment(attachmentName) then return end
+
+    self.attachments[attachmentName] = false
+
+    Shared.EventManager:TriggerModuleClientEvent("Object:Attachment:Remove", -1, self.data.remoteId, attachmentName)
+end
+
+function Object:hasAttachment(attachmentName)
+    return self.attachments[attachmentName] and true or false
 end
 
 function Object:runValidators()
@@ -469,11 +497,11 @@ AddEventHandler("onResourceStop", function(resourceName)
     end
 end)
 
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:Object:RequestData", function()
+Shared.EventManager:RegisterModuleNetworkEvent("Object:RequestData", function()
     local source = source
 
     for k, v in pairs(Module.Entities) do
-        TriggerClientEvent(GetCurrentResourceName() .. "AQUIVER:Object:Create", source, v.data)
+        Shared.EventManager:TriggerModuleClientEvent("Object:Create", source, v.data)
     end
 end)
 

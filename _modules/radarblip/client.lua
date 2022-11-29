@@ -68,62 +68,63 @@ function Module:get(remoteId)
     return self.Entities[remoteId] or nil
 end
 
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:RadarBlip:Create", function(data)
-    Module:new(data)
-end)
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:RadarBlip:Destroy", function(remoteId)
-    local aRadarBlip = Module:get(remoteId)
-    if not aRadarBlip then return end
-    aRadarBlip:Destroy()
-end)
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:RadarBlip:Update:Color", function(remoteId, color)
-    local aRadarBlip = Module:get(remoteId)
-    if not aRadarBlip then return end
+Shared.EventManager:RegisterModuleNetworkEvent({
+    ["RadarBlip:Create"] = function(data)
+        Module:new(data)
+    end,
+    ["RadarBlip:Destroy"] = function(remoteId)
+        local aRadarBlip = Module:get(remoteId)
+        if not aRadarBlip then return end
+        aRadarBlip:Destroy()
+    end,
+    ["RadarBlip:Update:Color"] = function(remoteId, color)
+        local aRadarBlip = Module:get(remoteId)
+        if not aRadarBlip then return end
 
-    aRadarBlip.data.color = color
+        aRadarBlip.data.color = color
 
-    if DoesBlipExist(aRadarBlip.blipHandle) then
-        SetBlipColour(aRadarBlip.blipHandle, color)
-    end
-end)
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:RadarBlip:Update:Radius", function(remoteId, radius)
-    local aRadarBlip = Module:get(remoteId)
-    if not aRadarBlip then return end
+        if DoesBlipExist(aRadarBlip.blipHandle) then
+            SetBlipColour(aRadarBlip.blipHandle, color)
+        end
+    end,
+    ["RadarBlip:Update:Radius"] = function(remoteId, radius)
+        local aRadarBlip = Module:get(remoteId)
+        if not aRadarBlip then return end
 
-    aRadarBlip.data.radius = radius
+        aRadarBlip.data.radius = radius
 
-    if DoesBlipExist(aRadarBlip.blipHandle) then
-        SetBlipScale(aRadarBlip.blipHandle, radius)
-    end
-end)
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:RadarBlip:Update:Alpha", function(remoteId, alpha)
-    local aRadarBlip = Module:get(remoteId)
-    if not aRadarBlip then return end
+        if DoesBlipExist(aRadarBlip.blipHandle) then
+            SetBlipScale(aRadarBlip.blipHandle, radius)
+        end
+    end,
+    ["RadarBlip:Update:Alpha"] = function(remoteId, alpha)
+        local aRadarBlip = Module:get(remoteId)
+        if not aRadarBlip then return end
 
-    aRadarBlip.data.alpha = alpha
+        aRadarBlip.data.alpha = alpha
 
-    if DoesBlipExist(aRadarBlip.blipHandle) then
-        SetBlipAlpha(aRadarBlip.blipHandle, alpha)
-    end
-end)
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:RadarBlip:Update:Flashing", function(remoteId, state)
-    local aRadarBlip = Module:get(remoteId)
-    if not aRadarBlip then return end
+        if DoesBlipExist(aRadarBlip.blipHandle) then
+            SetBlipAlpha(aRadarBlip.blipHandle, alpha)
+        end
+    end,
+    ["RadarBlip:Update:Flashing"] = function(remoteId, state)
+        local aRadarBlip = Module:get(remoteId)
+        if not aRadarBlip then return end
 
-    aRadarBlip.data.isFlashing = state
+        aRadarBlip.data.isFlashing = state
 
-    if DoesBlipExist(aRadarBlip.blipHandle) then
-        SetBlipFlashes(aRadarBlip.blipHandle, state)
-    end
-end)
-
+        if DoesBlipExist(aRadarBlip.blipHandle) then
+            SetBlipFlashes(aRadarBlip.blipHandle, state)
+        end
+    end,
+})
 
 Citizen.CreateThread(function()
     while true do
 
         if NetworkIsPlayerActive(PlayerId()) then
             -- Request Data from server.
-            TriggerServerEvent(GetCurrentResourceName() .. "AQUIVER:RadarBlip:RequestData")
+            Shared.EventManager:TriggerModuleServerEvent("RadarBlip:RequestData")
             break
         end
 

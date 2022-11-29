@@ -1,4 +1,4 @@
--- local dialogueCamera = nil
+local dialogueCamera = nil
 
 ---@class CPedModule
 local Module = {}
@@ -178,6 +178,26 @@ function Ped:dist(vec3)
     return #(self:getVector3Position() - vector3(vec3.x, vec3.y, vec3.z))
 end
 
+function Ped:startDialogue(dialoguesData)
+    if not DoesEntityExist(self.pedHandle) then return end
+
+    local pedOffset = GetOffsetFromEntityInWorldCoords(self.pedHandle, 0.0, 1.6, 0.2)
+
+    dialogueCamera = CreateCam("DEFAULT_SCRIPTED_CAMERA", false)
+    SetCamCoord(dialogueCamera, pedOffset)
+    PointCamAtEntity(dialogueCamera, self.pedHandle, -1.0, 0, 0, true)
+    SetCamRot(dialogueCamera, 10.0, 0.0, 0.0, 2)
+    SetCamFov(dialogueCamera, 85.0)
+    SetCamActive(dialogueCamera, true)
+    ShakeCam(dialogueCamera, "HAND_SHAKE", 0.2)
+    RenderScriptCams(true, true, 900, true, true)
+
+    Client.LocalPlayer:sendNuiMessageAPI({
+        event = "StartDialogue",
+        dialoguesData = dialoguesData
+    })
+end
+
 ---@param d IPed
 function Module:new(d)
     local aPed = Ped.new(d)
@@ -203,18 +223,33 @@ function Module:atHandle(handleId)
     return nil
 end
 
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:Ped:Create", function(data)
-    Module:new(data)
-end)
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:Ped:Update:Animation", function(id, dict, name, flag)
-    local aPed = Module:get(id)
-    if not aPed then return end
-    aPed:playAnimation(dict, name, flag)
-end)
-RegisterNetEvent(GetCurrentResourceName() .. "AQUIVER:Ped:Destroy", function(id)
-    local aPed = Module:get(id)
-    if not aPed then return end
-    aPed:Destroy()
+Shared.EventManager:RegisterModuleNetworkEvent({
+    ["Ped:Create"] = function(data)
+        Module:new(data)
+    end,
+    ["Ped:Update:Animation"] = function(remoteId, dict, name, flag)
+        local aPed = Module:get(remoteId)
+        if not aPed then return end
+        aPed:playAnimation(dict, name, flag)
+    end,
+    ["Ped:Destroy"] = function(remoteId)
+        local aPed = Module:get(remoteId)
+        if not aPed then return end
+        aPed:Destroy()
+    end,
+    ["Ped:Start:Dialogue"] = function(remoteId, dialoguesData)
+        local aPed = Module:get(remoteId)
+        if not aPed then return end
+
+        aPed:startDialogue(dialoguesData)
+    end
+})
+
+AddEventHandler("DialogueClosed", function()
+    if DoesCamExist(dialogueCamera) then
+        RenderScriptCams(false, true, 900, true, true)
+        DestroyCam(dialogueCamera, false)
+    end
 end)
 
 AddEventHandler("onResourceStop", function(resourceName)
@@ -251,7 +286,7 @@ Citizen.CreateThread(function()
 
         if NetworkIsPlayerActive(PlayerId()) then
             -- Request Data from server.
-            TriggerServerEvent(GetCurrentResourceName() .. "AQUIVER:Ped:RequestData")
+            Shared.EventManager:TriggerModuleServerEvent("Ped:RequestData")
             break
         end
 
@@ -260,53 +295,3 @@ Citizen.CreateThread(function()
 end)
 
 return Module
-
--- ---@param data IPed
--- Manager.new = function(data)
---     ---@class ClientPed
---     local self = {}
-
---     self.StartDialogue = function(dialoguesData)
---         if not DoesEntityExist(self.pedHandle) then return end
-
---         local pedOffset = GetOffsetFromEntityInWorldCoords(self.pedHandle, 0.0, 1.6, 0.2)
-
---         dialogueCamera = CreateCam("DEFAULT_SCRIPTED_CAMERA", false)
---         SetCamCoord(dialogueCamera, pedOffset)
---         PointCamAtEntity(dialogueCamera, self.pedHandle, -1.0, 0, 0, true)
---         SetCamRot(dialogueCamera, 10.0, 0.0, 0.0, 2)
---         SetCamFov(dialogueCamera, 85.0)
---         SetCamActive(dialogueCamera, true)
---         ShakeCam(dialogueCamera, "HAND_SHAKE", 0.2)
---         RenderScriptCams(true, true, 900, true, true)
-
---         SendNUIMessage({
---             event = "StartDialogue",
---             dialoguesData = dialoguesData
---         })
---     end
-
---     Manager.Entities[_data.remoteId] = self
-
---     AQUIVER_SHARED.Utils.Print("^3Created new ped with remoteId: " .. _data.remoteId)
-
---     return self
--- end
-
-
-
--- RegisterNetEvent("AQUIVER:Ped:Start:Dialogue", function(id, dialoguesData)
---     local PedEntity = Manager.get(id)
---     if not PedEntity then return end
-
---     PedEntity.StartDialogue(dialoguesData)
--- end)
-
--- AddEventHandler("DialogueClosed", function()
---     if DoesCamExist(dialogueCamera) then
---         RenderScriptCams(false, true, 900, true, true);
---         DestroyCam(dialogueCamera, false)
---     end
--- end)
-
--- AQUIVER_CLIENT.PedManager = Manager
