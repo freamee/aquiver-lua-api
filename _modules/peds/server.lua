@@ -100,14 +100,6 @@ function Module:get(remoteId)
     return self.Entities[remoteId] or nil
 end
 
-AddEventHandler("onResourceStop", function(resourceName)
-    if GetCurrentResourceName() ~= resourceName then return end
-
-    for k, v in pairs(Module.Entities) do
-        v:Destroy()
-    end
-end)
-
 Shared.EventManager:RegisterModuleNetworkEvent("Ped:RequestData", function()
     local source = source
 

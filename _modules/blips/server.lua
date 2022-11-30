@@ -93,13 +93,4 @@ Shared.EventManager:RegisterModuleNetworkEvent("Blip:RequestData", function()
     end
 end)
 
--- Delete if another resource is restarted which has connections to this.
-AddEventHandler("onResourceStop", function(resourceName)
-    if GetCurrentResourceName() ~= resourceName then return end
-
-    for k, v in pairs(Module.Entities) do
-        v:Destroy()
-    end
-end)
-
 return Module

@@ -119,6 +119,14 @@ Shared.EventManager:RegisterModuleNetworkEvent({
     end,
 })
 
+AddEventHandler("onResouceStop", function(resourceName)
+    if GetCurrentResourceName() ~= resourceName then return end
+
+    for k, v in pairs(Module.Entities) do
+        v:Destroy()
+    end
+end)
+
 Citizen.CreateThread(function()
     while true do
 

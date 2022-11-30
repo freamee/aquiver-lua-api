@@ -1,1 +1,0 @@
-AQUIVER_SERVER.ObjectManager.LoadObjectsFromSQL()

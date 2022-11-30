@@ -1,8 +1,3 @@
----@type AQUIVER_SHARED
-APIShared = exports.aquiver_lua:getShared()
----@type AQUIVER_CLIENT
-APIClient = exports.aquiver_lua:getClient()
-
 local function loadModule(path)
     local code = LoadResourceFile("aquiver_lua", path)
     if code then
@@ -38,3 +33,5 @@ Client.BlipManager = loadModule("_modules/blips/client.lua")
 Client.ParticleManager = loadModule("_modules/particle/client.lua")
 ---@type CRadarBlipModule
 Client.RadarBlipManager = loadModule("_modules/radarblip/client.lua")
+---@type CHelpModule
+Client.HelpManager = loadModule("_modules/HelpManager/client.lua")

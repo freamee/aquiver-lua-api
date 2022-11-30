@@ -58,7 +58,7 @@ end
 
 function RadarBlip:setRadius(radius)
     self.data.radius = radius
-    Shared.EventManager:TriggerModuleEvent("RadarBlip:Update:Radius", -1, self.data.remoteId, radius)
+    Shared.EventManager:TriggerModuleClientEvent("RadarBlip:Update:Radius", -1, self.data.remoteId, radius)
 end
 
 function RadarBlip:setColor(colorId)
@@ -97,14 +97,6 @@ Shared.EventManager:RegisterModuleNetworkEvent("RadarBlip:RequestData", function
 
     for k, v in pairs(Module.Entities) do
         Shared.EventManager:TriggerModuleClientEvent("RadarBlip:Create", source, v.data)
-    end
-end)
-
-AddEventHandler("onResourceStop", function(resourceName)
-    if GetCurrentResourceName() ~= resourceName then return end
-
-    for k, v in pairs(Module.Entities) do
-        v:Destroy()
     end
 end)
 

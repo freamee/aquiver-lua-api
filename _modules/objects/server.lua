@@ -82,7 +82,7 @@ function Object:__init__()
         self.data.variables = json.decode(self.data.variables) or {}
     end
 
-    self.data.variables.hasAction = false
+    self:setVar("hasAction", false)
 
     self:runValidators()
 end
@@ -245,6 +245,10 @@ function Object:setDimension(dimension)
     end
 end
 
+function Object:getVar(key)
+    return self.data.variables[key]
+end
+
 function Object:setVar(key, value)
     if self.data.variables[key] == value then return end
 
@@ -397,7 +401,7 @@ function Module:getNearestObject(vec3, model, range)
 end
 
 ---@param d MysqlObjectInterface
----@param cb fun(Object: SAquiverObject)
+---@param cb? fun(Object: SAquiverObject)
 ---@async
 function Module:insertSQL(d, cb)
     Citizen.CreateThread(function()
@@ -426,7 +430,8 @@ function Module:insertSQL(d, cb)
                     }
                 )
                 if dataResponse then
-                    cb(Module:new(dataResponse))
+                    local aObject = Module:new(dataResponse)
+                    if cb then cb(aObject) end
                 end
             end
         end
@@ -488,14 +493,6 @@ end
 function Module:getVariableValidators(model)
     return type(variableValidators[model]) == "table" and variableValidators[model] or nil
 end
-
-AddEventHandler("onResourceStop", function(resourceName)
-    if resourceName == GetCurrentResourceName() then
-        for k, v in pairs(Module.Entities) do
-            v:Destroy()
-        end
-    end
-end)
 
 Shared.EventManager:RegisterModuleNetworkEvent("Object:RequestData", function()
     local source = source

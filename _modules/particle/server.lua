@@ -109,14 +109,6 @@ Shared.EventManager:RegisterModuleNetworkEvent("Particle:RequestData", function(
     end
 end)
 
-AddEventHandler("onResourceStop", function(resourceName)
-    if GetCurrentResourceName() ~= resourceName then return end
-
-    for k, v in pairs(Module.Entities) do
-        v:Destroy()
-    end
-end)
-
 ---@param resourceName string
 ---@param remoteId number
 AddEventHandler("onObjectDestroyed", function(resourceName, remoteId)

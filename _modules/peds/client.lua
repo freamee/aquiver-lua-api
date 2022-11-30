@@ -252,6 +252,7 @@ AddEventHandler("DialogueClosed", function()
     end
 end)
 
+-- Destroy the objects when the resource is stopped.
 AddEventHandler("onResourceStop", function(resourceName)
     if resourceName ~= GetCurrentResourceName() then return end
 
@@ -269,7 +270,7 @@ Citizen.CreateThread(function()
                 v:removeStream()
             else
                 local dist = v:dist(Client.LocalPlayer.cachedPosition)
-                if dist < 10.0 then
+                if dist < Shared.Config.STREAM_DISTANCES.PED then
                     v:addStream()
                 else
                     v:removeStream()
@@ -277,7 +278,7 @@ Citizen.CreateThread(function()
             end
         end
 
-        Citizen.Wait(1000)
+        Citizen.Wait(Shared.Config.STREAM_INTERVALS.PED)
     end
 end)
 

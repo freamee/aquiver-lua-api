@@ -5,6 +5,10 @@ local Config = {
     -- How often cache the player position with GetEntityCoords.
     CACHE_PLAYER_POSITION_INTERVAL = 500,
 
+    HELP = {
+        HAS_SOUND = true
+    },
+
     RAYCAST = {
         -- How often check the raycast, performance++
         INTERVAL = 300,

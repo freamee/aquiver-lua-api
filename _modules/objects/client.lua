@@ -339,8 +339,8 @@ Shared.EventManager:RegisterModuleNetworkEvent({
         aObject.data.variables[key] = value
 
         -- Update the raycast & variables which is shown in the interface.
-        if Client.RaycastManager.AimedObjectEntity == self then
-            TriggerEvent("onObjectRaycast", self)
+        if Client.RaycastManager.AimedObjectEntity == aObject then
+            TriggerEvent("onObjectRaycast", GetCurrentResourceName(), aObject.data.remoteId)
         end
     end,
     ["Object:Attachment:Add"] = function(remoteId, attachmentName)
@@ -357,6 +357,7 @@ Shared.EventManager:RegisterModuleNetworkEvent({
     end
 })
 
+-- Destroy the objects when the resource is stopped.
 AddEventHandler("onResourceStop", function(resourceName)
     if resourceName ~= GetCurrentResourceName() then return end
 
@@ -374,7 +375,7 @@ Citizen.CreateThread(function()
                 v:removeStream()
             else
                 local dist = v:dist(Client.LocalPlayer.cachedPosition)
-                if dist < 10.0 then
+                if dist < Shared.Config.STREAM_DISTANCES.OBJECT then
                     v:addStream()
                 else
                     v:removeStream()
@@ -382,7 +383,7 @@ Citizen.CreateThread(function()
             end
         end
 
-        Citizen.Wait(1000)
+        Citizen.Wait(Shared.Config.STREAM_INTERVALS.OBJECT)
     end
 end)
 

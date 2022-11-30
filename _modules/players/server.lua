@@ -74,29 +74,23 @@ function Player:removeAllAttachments()
     Shared.EventManager:TriggerModuleClientEvent("Player:Attachment:RemoveAll", self.source)
 end
 
-function Player:setVar(key, value)
-    if self.variables[key] == value then return end
-
-    self.variables[key] = value
-end
-
 function Player:freeze(state)
-    Shared.EventManager:TriggerModuleEvent("Player:Freeze", self.source, state)
+    Shared.EventManager:TriggerModuleClientEvent("Player:Freeze", self.source, state)
 end
 
 function Player:playAnimation(dict, name, flag)
     Shared.EventManager:TriggerModuleClientEvent("Player:Animation:Play", self.source, dict, name, flag)
 end
 
-function Player:StopAnimation()
+function Player:stopAnimation()
     Shared.EventManager:TriggerModuleClientEvent("Player:Animation:Stop", self.source)
 end
 
 function Player:forceAnimation(dict, name, flag)
-    Shared.EventManager:TriggerModuleEvent("Player:ForceAnimation:Play", self.source, dict, name, flag)
+    Shared.EventManager:TriggerModuleClientEvent("Player:ForceAnimation:Play", self.source, dict, name, flag)
 end
 
-function Player:StopForceAnimation()
+function Player:stopForceAnimation()
     Shared.EventManager:TriggerModuleClientEvent("Player:ForceAnimation:Stop", self.source)
 end
 
@@ -136,13 +130,23 @@ function Player:notification(type, message)
     })
 end
 
+function Player:getVar(key)
+    return self.variables[key]
+end
+
+function Player:setVar(key, value)
+    if self.variables[key] == value then return end
+
+    self.variables[key] = value
+end
+
 --- Start progress for player.
 --- Callback passes the Player after the progress is finished: cb(Player)
 ---@param text string
 ---@param time number Time in milliseconds (MS) 1000ms-1second
 ---@param cb fun()
 function Player:progress(text, time, cb)
-    if self.variables.hasProgress then return end
+    if self:getVar("hasProgress") then return end
 
     self:setVar("hasProgress", true)
 

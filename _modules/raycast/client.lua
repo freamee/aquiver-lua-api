@@ -39,7 +39,7 @@ function Module:setEntityHandle(handleId)
             local findObject = Client.ObjectManager:atHandle(self.currentHitHandle)
             if findObject then
                 self.AimedObjectEntity = findObject
-                TriggerEvent("onObjectRaycast", findObject)
+                TriggerEvent("onObjectRaycast", GetCurrentResourceName(), findObject.data.remoteId)
                 Shared.Utils:Print(string.format("^3Raycast entity changed: Object: (%d)", findObject.data.remoteId))
             end
         end
@@ -66,7 +66,8 @@ function Module:setEntityHandle(handleId)
                             "Ped:Interaction:Press",
                             self.AimedPedEntity.data.remoteId
                         )
-                        TriggerServerEvent("onPedInteractionPress", self.AimedPedEntity.data.remoteId)
+                        TriggerServerEvent("onPedInteractionPress", GetCurrentResourceName(),
+                            self.AimedPedEntity.data.remoteId)
                     end
                 end
 
@@ -76,7 +77,8 @@ function Module:setEntityHandle(handleId)
                             "Object:Interaction:Press",
                             self.AimedObjectEntity.data.remoteId
                         )
-                        TriggerServerEvent("onObjectInteractionPress", self.AimedObjectEntity.data.remoteId)
+                        TriggerServerEvent("onObjectInteractionPress", GetCurrentResourceName(),
+                            self.AimedObjectEntity.data.remoteId)
                     end
                 end
 
@@ -86,7 +88,7 @@ function Module:setEntityHandle(handleId)
     else
         self.AimedObjectEntity = nil
         self.AimedPedEntity = nil
-        TriggerEvent("onNullRaycast")
+        TriggerEvent("onNullRaycast", GetCurrentResourceName())
         Shared.Utils:Print("^3Raycast entity changed: NULL")
     end
 end
@@ -160,11 +162,11 @@ function Module:enable(state)
     end
 end
 
--- AddEventHandler("DialogueOpened", function()
---     Manager.Enable(false)
--- end)
--- AddEventHandler("DialogueClosed", function()
---     Manager.Enable(true)
--- end)
+AddEventHandler("DialogueOpened", function()
+    Module:enable(false)
+end)
+AddEventHandler("DialogueClosed", function()
+    Module:enable(true)
+end)
 
 return Module

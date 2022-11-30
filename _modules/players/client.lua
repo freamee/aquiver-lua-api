@@ -56,7 +56,7 @@ end
 
 ---@param jsonContent table
 function Module:sendNuiMessageAPI(jsonContent)
-    SendNUIMessage(jsonContent)
+    TriggerEvent("AQUIVER:API:Player:SendNUIMessage", jsonContent)
 end
 
 Shared.EventManager:RegisterModuleNetworkEvent({
@@ -93,10 +93,10 @@ Shared.EventManager:RegisterModuleNetworkEvent({
         Module.attachments[attachmentName] = obj
     end,
     ["Player:Attachment:Remove"] = function(attachmentName)
-        if not Manager.HasAttachment(attachmentName) then return end
+        if not Module:hasAttachment(attachmentName) then return end
 
-        DeleteEntity(Manager.attachments[attachmentName])
-        Manager.attachments[attachmentName] = nil
+        DeleteEntity(Module.attachments[attachmentName])
+        Module.attachments[attachmentName] = nil
     end,
     ["Player:Attachment:RemoveAll"] = function()
         for attachmentName, objectHandle in pairs(Module.attachments) do
