@@ -71,23 +71,21 @@ function Particle:addStream()
 
     if self:isObjectParticle() then
         local aObject = Client.ObjectManager:get(self.data.toObjectRemoteId)
-        if aObject then
-            if DoesEntityExist(aObject.objectHandle) then
-                self.particleHandle = StartParticleFxLoopedOnEntity(
-                    self.data.particleName,
-                    aObject.objectHandle,
-                    self.data.offset.x,
-                    self.data.offset.y,
-                    self.data.offset.z,
-                    self.data.rotation.x,
-                    self.data.rotation.y,
-                    self.data.rotation.z,
-                    self.data.scale,
-                    false,
-                    false,
-                    false
-                )
-            end
+        if aObject and DoesEntityExist(aObject.objectHandle) then
+            self.particleHandle = StartParticleFxLoopedOnEntity(
+                self.data.particleName,
+                aObject.objectHandle,
+                self.data.offset.x,
+                self.data.offset.y,
+                self.data.offset.z,
+                self.data.rotation.x,
+                self.data.rotation.y,
+                self.data.rotation.z,
+                self.data.scale,
+                false,
+                false,
+                false
+            )
         else
             -- If object is not exists yet, we set the isStreamed to false.
             -- This fixes the issue, that after restarting the script, the particles wont show up.
