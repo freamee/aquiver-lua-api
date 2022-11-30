@@ -73,7 +73,7 @@ function Object:addStream()
 
     self:initAttachments()
 
-    TriggerEvent("onObjectStreamIn", GetCurrentResourceName(), self.data.remoteId)
+    TriggerEvent("onObjectStreamIn", GetCurrentResourceName(), self)
 
     Shared.Utils:Print(string.format("^3Object streamed in (%d, %s)", self.data.remoteId, self.data.model))
 end
@@ -89,7 +89,7 @@ function Object:removeStream()
 
     self:shutdownAttachments()
 
-    TriggerEvent("onObjectStreamOut", GetCurrentResourceName(), self.data.remoteId)
+    TriggerEvent("onObjectStreamOut", GetCurrentResourceName(), self)
 
     Shared.Utils:Print(string.format("^3Object streamed out (%d, %s)", self.data.remoteId, self.data.model))
 end
@@ -340,7 +340,7 @@ Shared.EventManager:RegisterModuleNetworkEvent({
 
         -- Update the raycast & variables which is shown in the interface.
         if Client.RaycastManager.AimedObjectEntity == aObject then
-            TriggerEvent("onObjectRaycast", GetCurrentResourceName(), aObject.data.remoteId)
+            TriggerEvent("onObjectRaycast", GetCurrentResourceName(), aObject)
         end
     end,
     ["Object:Attachment:Add"] = function(remoteId, attachmentName)

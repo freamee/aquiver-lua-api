@@ -93,7 +93,7 @@ function Object:Destroy()
     end
 
     Shared.EventManager:TriggerModuleClientEvent("Object:Destroy", -1, self.data.remoteId)
-    TriggerEvent("onObjectDestroyed", GetCurrentResourceName(), self.data.remoteId)
+    TriggerEvent("onObjectDestroyed", GetCurrentResourceName(), self)
 
     Shared.Utils:Print("^3Removed object with remoteId: " .. self.data.remoteId)
 
@@ -112,7 +112,7 @@ function Object:getVector3Position()
 end
 
 function Object:getVector3Rotation()
-    return vectro3(self.data.rx, self.data.ry, self.data.rz)
+    return vector3(self.data.rx, self.data.ry, self.data.rz)
 end
 
 function Object:setPosition(x, y, z)
@@ -264,6 +264,8 @@ function Object:setVar(key, value)
 
     -- Very, very important to run it after the variable is set, otherwise it will cause a stack overflow.
     self:runValidators()
+
+    TriggerEvent("onObjectVariableChange", GetCurrentResourceName(), self, key, value)
 
     if GetResourceState("oxmysql") == "started" then
         exports.oxmysql:query(

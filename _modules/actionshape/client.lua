@@ -76,7 +76,7 @@ function ActionShape:onEnter()
 
     self.isEntered = true
 
-    TriggerEvent("onActionShapeEnter", GetCurrentResourceName(), self.data.remoteId)
+    TriggerEvent("onActionShapeEnter", GetCurrentResourceName(), self)
     TriggerServerEvent("onActionShapeEnter", GetCurrentResourceName(), self.data.remoteId)
 end
 
@@ -85,7 +85,7 @@ function ActionShape:onLeave()
 
     self.isEntered = false
 
-    TriggerEvent("onActionShapeLeave", GetCurrentResourceName(), self.data.remoteId)
+    TriggerEvent("onActionShapeLeave", GetCurrentResourceName(), self)
     TriggerServerEvent("onActionShapeLeave", GetCurrentResourceName(), self.data.remoteId)
 end
 

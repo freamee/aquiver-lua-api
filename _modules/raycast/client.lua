@@ -32,14 +32,14 @@ function Module:setEntityHandle(handleId)
             local findPed = Client.PedManager:atHandle(self.currentHitHandle)
             if findPed then
                 self.AimedPedEntity = findPed
-                TriggerEvent("onPedRaycast", findPed)
+                TriggerEvent("onPedRaycast", GetCurrentResourceName(), findPed)
                 Shared.Utils:Print(string.format("^3Raycast entity changed: Ped: (%d)", findPed.data.remoteId))
             end
         elseif GetEntityType(self.currentHitHandle) == 3 then
             local findObject = Client.ObjectManager:atHandle(self.currentHitHandle)
             if findObject then
                 self.AimedObjectEntity = findObject
-                TriggerEvent("onObjectRaycast", GetCurrentResourceName(), findObject.data.remoteId)
+                TriggerEvent("onObjectRaycast", GetCurrentResourceName(), findObject)
                 Shared.Utils:Print(string.format("^3Raycast entity changed: Object: (%d)", findObject.data.remoteId))
             end
         end
