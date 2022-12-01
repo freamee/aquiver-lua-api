@@ -5,6 +5,8 @@ local Module = {}
 ---@param content table|string|boolean|number
 ---@param toJSON? boolean
 function Module:Print(content, toJSON)
+    if not Shared.Config.DEBUG.ENABLE then return end
+
     local f = ""
     f = "[" .. GetCurrentResourceName() .. "]" .. "->" .. " "
 

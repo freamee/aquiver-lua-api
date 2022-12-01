@@ -7,8 +7,6 @@ local function loadModule(path)
         if rets[1] then
             print(string.format("^1[%s]-> ^6Loaded module (server): %s", GetCurrentResourceName(), path))
             return table.unpack(rets, 2, rets.n)
-        else
-            print("failed loading module")
         end
     end
 end
@@ -35,6 +33,3 @@ Server.RadarBlipManager = loadModule("_modules/radarblip/server.lua")
 Server.HelpManager = loadModule("_modules/helpManager/server.lua")
 
 loadModule("_modules/raycast/server.lua")
-
----@type function
-Server.checkResourceVersion = loadModule("_modules/versionChecker/server.lua")

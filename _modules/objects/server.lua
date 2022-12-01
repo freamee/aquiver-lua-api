@@ -255,18 +255,18 @@ function Object:setVar(key, value)
 
     self.data.variables[key] = value
 
+    -- Very, very important to run it after the variable is set, otherwise it will cause a stack overflow.
+    self:runValidators()
+
     Shared.EventManager:TriggerModuleClientEvent(
         "Object:Update:VariableKey",
         -1,
         self.data.remoteId,
         key,
-        value
+        self.data.variables[key]
     )
 
-    -- Very, very important to run it after the variable is set, otherwise it will cause a stack overflow.
-    self:runValidators()
-
-    Shared.EventManager:TriggerModuleEvent("onObjectVariableChange", self.data.remoteId, key, value)
+    Shared.EventManager:TriggerModuleEvent("onObjectVariableChange", self.data.remoteId, key, self.data.variables[key])
 
     if GetResourceState("oxmysql") == "started" then
         exports.oxmysql:query(
@@ -376,6 +376,7 @@ function Module:getObjectsInRange(vec3, model, range)
     return collectedObjects
 end
 
+---@return SAquiverObject | nil
 function Module:getNearestObject(vec3, model, range)
     local rangeMeter = range
     local closest

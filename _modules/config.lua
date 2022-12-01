@@ -9,6 +9,10 @@ local Config = {
         HAS_SOUND = true
     },
 
+    DEBUG = {
+        ENABLE = false
+    },
+
     RAYCAST = {
         -- How often check the raycast, performance++
         INTERVAL = 300,
