@@ -159,30 +159,23 @@ AddEventHandler("onResourceStop", function(resourceName)
     end
 end)
 
----@param resourceName string
----@param Object SAquiverObject
-AddEventHandler("onObjectStreamIn", function(resourceName, Object)
-    if resourceName ~= GetCurrentResourceName() then return end
-
-    -- Create particle(s) on object stream in.
-    for k, v in pairs(Module.Entities) do
-        if v.data.toObjectRemoteId == Object.data.remoteId then
-            v:addStream()
+Shared.EventManager:RegisterModuleEvent({
+    ["onObjectStreamIn"] = function(remoteId)
+        -- Create particle(s) on object stream in.
+        for k, v in pairs(Module.Entities) do
+            if v.data.toObjectRemoteId == remoteId then
+                v:addStream()
+            end
+        end
+    end,
+    ["onObjectStreamOut"] = function(remoteId)
+        for k, v in pairs(Module.Entities) do
+            if v.data.toObjectRemoteId == remoteId then
+                v:removeStream()
+            end
         end
     end
-end)
-
----@param resourceName string
----@param Object SAquiverObject
-AddEventHandler("onObjectStreamOut", function(resourceName, Object)
-    if resourceName ~= GetCurrentResourceName() then return end
-
-    for k, v in pairs(Module.Entities) do
-        if v.data.toObjectRemoteId == Object.data.remoteId then
-            v:removeStream()
-        end
-    end
-end)
+})
 
 Shared.EventManager:RegisterModuleNetworkEvent({
     ["Particle:Create"] = function(data)

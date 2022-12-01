@@ -44,6 +44,7 @@ Ped.new = function(d)
 
     Module.Entities[self.data.remoteId] = self
     Shared.EventManager:TriggerModuleClientEvent("Ped:Create", -1, self.data)
+    Shared.EventManager:TriggerModuleEvent("onPedCreated", self.data.remoteId)
 
     Shared.Utils:Print("^3Created new Ped with remoteID: " .. self.data.remoteId)
 
@@ -61,6 +62,7 @@ function Ped:Destroy()
     end
 
     Shared.EventManager:TriggerModuleClientEvent("Ped:Destroy", -1, self.data.remoteId)
+    Shared.EventManager:TriggerModuleEvent("onPedDestroyed", self.data.remoteId)
     Shared.Utils:Print("^3Removed ped with remoteId: " .. self.data.remoteId)
 end
 

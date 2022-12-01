@@ -32,14 +32,14 @@ function Module:setEntityHandle(handleId)
             local findPed = Client.PedManager:atHandle(self.currentHitHandle)
             if findPed then
                 self.AimedPedEntity = findPed
-                TriggerEvent("onPedRaycast", GetCurrentResourceName(), findPed)
+                Shared.EventManager:TriggerModuleEvent("onPedRaycast", findPed.data.remoteId)
                 Shared.Utils:Print(string.format("^3Raycast entity changed: Ped: (%d)", findPed.data.remoteId))
             end
         elseif GetEntityType(self.currentHitHandle) == 3 then
             local findObject = Client.ObjectManager:atHandle(self.currentHitHandle)
             if findObject then
                 self.AimedObjectEntity = findObject
-                TriggerEvent("onObjectRaycast", GetCurrentResourceName(), findObject)
+                Shared.EventManager:TriggerModuleEvent("onObjectRaycast", findObject.data.remoteId)
                 Shared.Utils:Print(string.format("^3Raycast entity changed: Object: (%d)", findObject.data.remoteId))
             end
         end
@@ -66,8 +66,10 @@ function Module:setEntityHandle(handleId)
                             "Ped:Interaction:Press",
                             self.AimedPedEntity.data.remoteId
                         )
-                        TriggerServerEvent("onPedInteractionPress", GetCurrentResourceName(),
-                            self.AimedPedEntity.data.remoteId)
+                        Shared.EventManager:TriggerModuleServerEvent(
+                            "onPedInteractionPress",
+                            self.AimedPedEntity.data.remoteId
+                        )
                     end
                 end
 
@@ -77,8 +79,10 @@ function Module:setEntityHandle(handleId)
                             "Object:Interaction:Press",
                             self.AimedObjectEntity.data.remoteId
                         )
-                        TriggerServerEvent("onObjectInteractionPress", GetCurrentResourceName(),
-                            self.AimedObjectEntity.data.remoteId)
+                        Shared.EventManager:TriggerModuleServerEvent(
+                            "onObjectInteractionPress",
+                            self.AimedObjectEntity.data.remoteId
+                        )
                     end
                 end
 
@@ -88,7 +92,7 @@ function Module:setEntityHandle(handleId)
     else
         self.AimedObjectEntity = nil
         self.AimedPedEntity = nil
-        TriggerEvent("onNullRaycast", GetCurrentResourceName())
+        Shared.EventManager:TriggerModuleEvent("onNullRaycast")
         Shared.Utils:Print("^3Raycast entity changed: NULL")
     end
 end

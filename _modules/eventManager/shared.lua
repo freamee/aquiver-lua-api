@@ -22,7 +22,7 @@ function Module:RegisterModuleNetworkEvent(eventName, cb)
 end
 
 ---@param eventName string | { [string]: fun(...) }
----@param cb fun(...)
+---@param cb? fun(...)
 function Module:RegisterModuleEvent(eventName, cb)
     if type(eventName) == "table" then
         for k, v in pairs(eventName) do

@@ -109,14 +109,10 @@ Shared.EventManager:RegisterModuleNetworkEvent("Particle:RequestData", function(
     end
 end)
 
----@param resourceName string
----@param Object SAquiverObject
-AddEventHandler("onObjectDestroyed", function(resourceName, Object)
-    if resourceName ~= GetCurrentResourceName() then return end
-
+Shared.EventManager:RegisterModuleEvent("onObjectDestroyed", function(remoteId)
     -- Destroy particle if the object got destroyed.
     for k, v in pairs(Module.Entities) do
-        if v.data.toObjectRemoteId == Object.data.remoteId then
+        if v.data.toObjectRemoteId == remoteId then
             v:Destroy()
         end
     end

@@ -55,6 +55,7 @@ Object.new = function(d)
 
     Shared.Utils:Print("^3Created new object with remoteId: " .. self.data.remoteId)
     Shared.EventManager:TriggerModuleClientEvent("Object:Create", -1, self.data)
+    Shared.EventManager:TriggerModuleEvent("onObjectCreated", self.data.remoteId)
 
     return self
 end
@@ -93,7 +94,7 @@ function Object:Destroy()
     end
 
     Shared.EventManager:TriggerModuleClientEvent("Object:Destroy", -1, self.data.remoteId)
-    TriggerEvent("onObjectDestroyed", GetCurrentResourceName(), self)
+    Shared.EventManager:TriggerModuleEvent("onObjectDestroyed", self.data.remoteId)
 
     Shared.Utils:Print("^3Removed object with remoteId: " .. self.data.remoteId)
 
@@ -265,7 +266,7 @@ function Object:setVar(key, value)
     -- Very, very important to run it after the variable is set, otherwise it will cause a stack overflow.
     self:runValidators()
 
-    TriggerEvent("onObjectVariableChange", GetCurrentResourceName(), self, key, value)
+    Shared.EventManager:TriggerModuleEvent("onObjectVariableChange", self.data.remoteId, key, value)
 
     if GetResourceState("oxmysql") == "started" then
         exports.oxmysql:query(
