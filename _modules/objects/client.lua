@@ -26,13 +26,13 @@ Object.new = function(d)
     self:__init__()
 
     if Module:exists(self.data.remoteId) then
-        Shared.Utils:Print("^1Object already exists with remoteId: " .. self.data.remoteId)
+        Shared.Utils.Print:Error("^1Object already exists with remoteId: " .. self.data.remoteId)
         return
     end
 
     Module.Entities[self.data.remoteId] = self
 
-    Shared.Utils:Print("^3Created new object with remoteId: " .. self.data.remoteId)
+    Shared.Utils.Print:Debug("^3Created new object with remoteId: " .. self.data.remoteId)
 
     return self
 end
@@ -75,7 +75,7 @@ function Object:addStream()
 
     Shared.EventManager:TriggerModuleEvent("onObjectStreamIn", self.data.remoteId)
 
-    Shared.Utils:Print(string.format("^3Object streamed in (%d, %s)", self.data.remoteId, self.data.model))
+    Shared.Utils.Print:Debug(string.format("^3Object streamed in (%d, %s)", self.data.remoteId, self.data.model))
 end
 
 function Object:removeStream()
@@ -91,7 +91,7 @@ function Object:removeStream()
 
     Shared.EventManager:TriggerModuleEvent("onObjectStreamOut", self.data.remoteId)
 
-    Shared.Utils:Print(string.format("^3Object streamed out (%d, %s)", self.data.remoteId, self.data.model))
+    Shared.Utils.Print:Debug(string.format("^3Object streamed out (%d, %s)", self.data.remoteId, self.data.model))
 end
 
 function Object:shutdownAttachments()
@@ -136,7 +136,8 @@ function Object:addAttachment(attachmentName)
 
     self.attachments[attachmentName] = obj
 
-    Shared.Utils:Print(string.format("^3Object attachment added (%d, %s, %s)", self.data.remoteId, self.data.model,
+    Shared.Utils.Print:Debug(string.format("^3Object attachment added (%d, %s, %s)", self.data.remoteId, self.data.model
+        ,
         attachmentName))
 end
 
@@ -149,7 +150,8 @@ function Object:removeAttachment(attachmentName)
 
     self.attachments[attachmentName] = nil
 
-    Shared.Utils:Print(string.format("^3Object attachment removed (%d, %s, %s)", self.data.remoteId, self.data.model,
+    Shared.Utils.Print:Debug(string.format("^3Object attachment removed (%d, %s, %s)", self.data.remoteId,
+        self.data.model,
         attachmentName))
 end
 
@@ -164,7 +166,7 @@ function Object:Destroy()
 
     self:shutdownAttachments()
 
-    Shared.Utils:Print("^3Removed object with remoteId: " .. self.data.remoteId)
+    Shared.Utils.Print:Debug("^3Removed object with remoteId: " .. self.data.remoteId)
 end
 
 ---@param d MysqlObjectInterface

@@ -32,7 +32,7 @@ Blip.new = function(d)
     remoteIdCount = (remoteIdCount or 0) + 1
 
     if Module:exists(self.data.remoteId) then
-        Shared.Utils:Print("^1Blip already exists with remoteID: " .. self.data.remoteId)
+        Shared.Utils.Print:Error("^1Blip already exists with remoteID: " .. self.data.remoteId)
         return
     end
 
@@ -42,7 +42,7 @@ Blip.new = function(d)
 
     Shared.EventManager:TriggerModuleClientEvent("Blip:Create", -1, self.data)
 
-    Shared.Utils:Print("^3Created new Blip with remoteID: " .. self.data.remoteId)
+    Shared.Utils.Print:Debug("^3Created new Blip with remoteID: " .. self.data.remoteId)
 
     return self
 end
@@ -61,7 +61,7 @@ function Blip:Destroy()
 
     Shared.EventManager:TriggerModuleClientEvent("Blip:Destroy", -1, self.data.remoteId)
 
-    Shared.Utils:Print("^3Removed Blip with remoteId: " .. self.data.remoteId)
+    Shared.Utils.Print:Debug("^3Removed Blip with remoteId: " .. self.data.remoteId)
 end
 
 function Blip:setColor(colorId)

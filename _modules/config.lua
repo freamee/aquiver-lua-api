@@ -10,7 +10,7 @@ local Config = {
     },
 
     DEBUG = {
-        ENABLE = false
+        ENABLE = true
     },
 
     RAYCAST = {

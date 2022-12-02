@@ -19,7 +19,7 @@ Blip.new = function(d)
     self.blipHandle = nil
 
     if Module:exists(self.data.remoteId) then
-        Shared.Utils:Print("^1Blip already exists with remoteID: " .. self.data.remoteId)
+        Shared.Utils.Print:Error("^1Blip already exists with remoteID: " .. self.data.remoteId)
         return
     end
 
@@ -27,7 +27,7 @@ Blip.new = function(d)
 
     Module.Entities[self.data.remoteId] = self
 
-    Shared.Utils:Print("^3Created new Blip with remoteID: " .. self.data.remoteId)
+    Shared.Utils.Print:Debug("^3Created new Blip with remoteID: " .. self.data.remoteId)
 
     return self
 end

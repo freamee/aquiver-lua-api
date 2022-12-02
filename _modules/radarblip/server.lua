@@ -29,7 +29,7 @@ RadarBlip.new = function(d)
     remoteIdCount = (remoteIdCount or 0) + 1
 
     if Module:exists(self.data.remoteId) then
-        Shared.Utils:Print("^1RadarBlip already exists with remoteID: " .. self.data.remoteId)
+        Shared.Utils.Print:Error("^1RadarBlip already exists with remoteID: " .. self.data.remoteId)
         return
     end
 
@@ -39,7 +39,7 @@ RadarBlip.new = function(d)
 
     Shared.EventManager:TriggerModuleClientEvent("RadarBlip:Create", -1, self.data)
 
-    Shared.Utils:Print("^3Created new RadarBlip with remoteID: " .. self.data.remoteId)
+    Shared.Utils.Print:Debug("^3Created new RadarBlip with remoteID: " .. self.data.remoteId)
 
     return self
 end

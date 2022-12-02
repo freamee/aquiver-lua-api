@@ -33,14 +33,14 @@ function Module:setEntityHandle(handleId)
             if findPed then
                 self.AimedPedEntity = findPed
                 Shared.EventManager:TriggerModuleEvent("onPedRaycast", findPed.data.remoteId)
-                Shared.Utils:Print(string.format("^3Raycast entity changed: Ped: (%d)", findPed.data.remoteId))
+                Shared.Utils.Print:Debug(string.format("^3Raycast entity changed: Ped: (%d)", findPed.data.remoteId))
             end
         elseif GetEntityType(self.currentHitHandle) == 3 then
             local findObject = Client.ObjectManager:atHandle(self.currentHitHandle)
             if findObject then
                 self.AimedObjectEntity = findObject
                 Shared.EventManager:TriggerModuleEvent("onObjectRaycast", findObject.data.remoteId)
-                Shared.Utils:Print(string.format("^3Raycast entity changed: Object: (%d)", findObject.data.remoteId))
+                Shared.Utils.Print:Debug(string.format("^3Raycast entity changed: Object: (%d)", findObject.data.remoteId))
             end
         end
 
@@ -93,7 +93,7 @@ function Module:setEntityHandle(handleId)
         self.AimedObjectEntity = nil
         self.AimedPedEntity = nil
         Shared.EventManager:TriggerModuleEvent("onNullRaycast")
-        Shared.Utils:Print("^3Raycast entity changed: NULL")
+        Shared.Utils.Print:Debug("^3Raycast entity changed: NULL")
     end
 end
 

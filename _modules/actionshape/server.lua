@@ -30,7 +30,7 @@ ActionShape.new = function(d)
     remoteIdCount = (remoteIdCount or 0) + 1
 
     if Module:exists(self.data.remoteId) then
-        Shared.Utils:Print("^1ActionShape already exists with remoteID: " .. self.data.remoteId)
+        Shared.Utils.Print:Error("^1ActionShape already exists with remoteID: " .. self.data.remoteId)
         return
     end
 
@@ -39,7 +39,7 @@ ActionShape.new = function(d)
     Module.Entities[self.data.remoteId] = self
     Shared.EventManager:TriggerModuleClientEvent("ActionShape:Create", -1, self.data)
 
-    Shared.Utils:Print("^3Created new ActionShape with remoteID: " .. self.data.remoteId)
+    Shared.Utils.Print:Debug("^3Created new ActionShape with remoteID: " .. self.data.remoteId)
 
     return self
 end
@@ -55,7 +55,7 @@ function ActionShape:Destroy()
 
     Shared.EventManager:TriggerModuleClientEvent("ActionShape:Destroy", -1, self.data.remoteId)
 
-    Shared.Utils:Print("^3Removed ActionShape with remoteId: " .. self.data.remoteId)
+    Shared.Utils.Print:Debug("^3Removed ActionShape with remoteId: " .. self.data.remoteId)
 end
 
 ---@param d IActionShape

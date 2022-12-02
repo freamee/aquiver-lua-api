@@ -23,13 +23,13 @@ Particle.new = function(d)
     self:__init__()
 
     if Module:exists(self.data.remoteId) then
-        Shared.Utils:Print("^1Particle already exists with remoteId: " .. self.data.remoteId)
+        Shared.Utils.Print:Error("^1Particle already exists with remoteId: " .. self.data.remoteId)
         return
     end
 
     Module.Entities[self.data.remoteId] = self
 
-    Shared.Utils:Print("^3Created new particle with remoteId: " .. self.data.remoteId)
+    Shared.Utils.Print:Debug("^3Created new particle with remoteId: " .. self.data.remoteId)
 
     return self
 end
@@ -50,7 +50,7 @@ function Particle:Destroy()
         StopParticleFxLooped(self.particleHandle, false)
     end
 
-    Shared.Utils:Print("^3Removed particle with remoteId: " .. self.data.remoteId)
+    Shared.Utils.Print:Debug("^3Removed particle with remoteId: " .. self.data.remoteId)
 end
 
 function Particle:isObjectParticle()
@@ -108,7 +108,7 @@ function Particle:addStream()
         )
     end
 
-    Shared.Utils:Print(string.format("^3Particle streamed in (%d, %s, %s)", self.data.remoteId,
+    Shared.Utils.Print:Debug(string.format("^3Particle streamed in (%d, %s, %s)", self.data.remoteId,
         self.data.particleName, self.data.particleUid))
 end
 
@@ -122,7 +122,8 @@ function Particle:removeStream()
         self.particleHandle = nil
     end
 
-    Shared.Utils:Print(string.format("^3Particle streamed out (%d, %s, %s)", self.data.remoteId, self.data.particleName,
+    Shared.Utils.Print:Debug(string.format("^3Particle streamed out (%d, %s, %s)", self.data.remoteId,
+        self.data.particleName,
         self.data.particleUid))
 end
 

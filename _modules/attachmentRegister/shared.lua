@@ -27,18 +27,18 @@ end
 ---@param d IAttachment
 function Module:registerOne(attachmentName, d)
     if self:exists(attachmentName) then
-        Shared.Utils:Print("^1AttachmentManager register failed, already exists: " .. attachmentName)
+        Shared.Utils.Print:Error("^1AttachmentManager register failed, already exists: " .. attachmentName)
         return
     end
 
     self.Data[attachmentName] = d
-    Shared.Utils:Print("^3Registered new attachment: " .. attachmentName)
+    Shared.Utils.Print:Debug("^3Registered new attachment: " .. attachmentName)
 end
 
 ---@param d { [string]: IAttachment }
 function Module:registerMany(d)
     if type(d) ~= "table" then
-        Shared.Utils:Print("^1AttachmentManager registerMany should be a key-pair table.")
+        Shared.Utils.Print:Error("^1AttachmentManager registerMany should be a key-pair table.")
         return
     end
 

@@ -21,7 +21,7 @@ ActionShape.new = function(d)
     self.isEntered = false
 
     if Module:exists(self.data.remoteId) then
-        Shared.Utils:Print("^1ActionShape already exists with remoteID: " .. self.data.remoteId)
+        Shared.Utils.Print:Error("^1ActionShape already exists with remoteID: " .. self.data.remoteId)
         return
     end
 
@@ -29,7 +29,7 @@ ActionShape.new = function(d)
 
     Module.Entities[self.data.remoteId] = self
 
-    Shared.Utils:Print("^3Created new ActionShape with remoteID: " .. self.data.remoteId)
+    Shared.Utils.Print:Debug("^3Created new ActionShape with remoteID: " .. self.data.remoteId)
 
     return self
 end
@@ -60,7 +60,7 @@ function ActionShape:addStream()
         end
     end)
 
-    Shared.Utils:Print(string.format("^3ActionShape streamed in (%d)", self.data.remoteId))
+    Shared.Utils.Print:Debug(string.format("^3ActionShape streamed in (%d)", self.data.remoteId))
 end
 
 function ActionShape:removeStream()
@@ -68,7 +68,7 @@ function ActionShape:removeStream()
 
     self.isStreamed = false
 
-    Shared.Utils:Print(string.format("^3ActionShape streamed out (%d)", self.data.remoteId))
+    Shared.Utils.Print:Debug(string.format("^3ActionShape streamed out (%d)", self.data.remoteId))
 end
 
 function ActionShape:onEnter()
@@ -97,7 +97,7 @@ function ActionShape:Destroy()
     -- Remove from stream when destroyed.
     self:removeStream()
 
-    Shared.Utils:Print("^3Removed ActionShape with remoteId: " .. self.data.remoteId)
+    Shared.Utils.Print:Debug("^3Removed ActionShape with remoteId: " .. self.data.remoteId)
 end
 
 function ActionShape:getVector3Position()

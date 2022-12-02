@@ -36,7 +36,7 @@ Ped.new = function(d)
     self.onPress = nil
 
     if Module:exists(self.data.remoteId) then
-        Shared.Utils:Print("^1Ped already exists with remoteID: " .. self.data.remoteId)
+        Shared.Utils.Print:Error("^1Ped already exists with remoteID: " .. self.data.remoteId)
         return
     end
 
@@ -46,7 +46,7 @@ Ped.new = function(d)
     Shared.EventManager:TriggerModuleClientEvent("Ped:Create", -1, self.data)
     Shared.EventManager:TriggerModuleEvent("onPedCreated", self.data.remoteId)
 
-    Shared.Utils:Print("^3Created new Ped with remoteID: " .. self.data.remoteId)
+    Shared.Utils.Print:Debug("^3Created new Ped with remoteID: " .. self.data.remoteId)
 
     return self
 end
@@ -63,7 +63,7 @@ function Ped:Destroy()
 
     Shared.EventManager:TriggerModuleClientEvent("Ped:Destroy", -1, self.data.remoteId)
     Shared.EventManager:TriggerModuleEvent("onPedDestroyed", self.data.remoteId)
-    Shared.Utils:Print("^3Removed ped with remoteId: " .. self.data.remoteId)
+    Shared.Utils.Print:Debug("^3Removed ped with remoteId: " .. self.data.remoteId)
 end
 
 function Ped:playAnimation(dict, anim, flag)

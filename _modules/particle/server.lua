@@ -34,7 +34,7 @@ Particle.new = function(d)
     remoteIdCount = (remoteIdCount or 0) + 1
 
     if Module:exists(self.data.remoteId) then
-        Shared.Utils:Print("^1Particle already exists with remoteID: " .. self.data.remoteId)
+        Shared.Utils.Print:Error("^1Particle already exists with remoteID: " .. self.data.remoteId)
         return
     end
 
@@ -44,7 +44,7 @@ Particle.new = function(d)
 
     Shared.EventManager:TriggerModuleClientEvent("Particle:Create", -1, self.data)
 
-    Shared.Utils:Print("^3Created new Particle with remoteID: " .. self.data.remoteId)
+    Shared.Utils.Print:Debug("^3Created new Particle with remoteID: " .. self.data.remoteId)
 
     return self
 end
@@ -65,7 +65,7 @@ function Particle:Destroy()
 
     Shared.EventManager:TriggerModuleClientEvent("Particle:Destroy", -1, self.data.remoteId)
 
-    Shared.Utils:Print("^3Removed particle with remoteId: " .. self.data.remoteId)
+    Shared.Utils.Print:Debug("^3Removed particle with remoteId: " .. self.data.remoteId)
 end
 
 ---@param d IParticle

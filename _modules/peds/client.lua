@@ -25,13 +25,13 @@ Ped.new = function(d)
     self:__init__()
 
     if Module:exists(self.data.remoteId) then
-        Shared.Utils:Print("^1Ped already exists with remoteId: " .. self.data.remoteId)
+        Shared.Utils.Print:Error("^1Ped already exists with remoteId: " .. self.data.remoteId)
         return
     end
 
     Module.Entities[self.data.remoteId] = self
 
-    Shared.Utils:Print("^3Created new ped with remoteId: " .. self.data.remoteId)
+    Shared.Utils.Print:Debug("^3Created new ped with remoteId: " .. self.data.remoteId)
 
     return self
 end
@@ -49,7 +49,7 @@ function Ped:Destroy()
         DeleteEntity(self.pedHandle)
     end
 
-    Shared.Utils:Print("^3Removed ped with remoteId: " .. self.data.remoteId)
+    Shared.Utils.Print:Debug("^3Removed ped with remoteId: " .. self.data.remoteId)
 end
 
 function Ped:getVector3Position()
@@ -88,7 +88,7 @@ function Ped:addStream()
     -- Resync animation here. This is basically a set again.
     self:playAnimation(self.data.animDict, self.data.animName, self.data.animFlag)
 
-    Shared.Utils:Print(string.format("^3Ped streamed in (%d)", self.data.remoteId))
+    Shared.Utils.Print:Debug(string.format("^3Ped streamed in (%d)", self.data.remoteId))
 
     if self.data.questionMark or self.data.name then
         Citizen.CreateThread(function()
@@ -143,7 +143,7 @@ function Ped:removeStream()
         DeleteEntity(self.pedHandle)
     end
 
-    Shared.Utils:Print(string.format("^3Ped streamed out (%d)", self.data.remoteId))
+    Shared.Utils.Print:Debug(string.format("^3Ped streamed out (%d)", self.data.remoteId))
 end
 
 function Ped:playAnimation(dict, name, flag)

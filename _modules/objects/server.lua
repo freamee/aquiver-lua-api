@@ -45,7 +45,7 @@ Object.new = function(d)
     self.attachments = {}
 
     if Module:exists(self.data.remoteId) then
-        Shared.Utils:Print("^1Object already exists with remoteId: " .. self.data.remoteId)
+        Shared.Utils.Print:Error("^1Object already exists with remoteId: " .. self.data.remoteId)
         return
     end
 
@@ -53,7 +53,7 @@ Object.new = function(d)
 
     Module.Entities[self.data.remoteId] = self
 
-    Shared.Utils:Print("^3Created new object with remoteId: " .. self.data.remoteId)
+    Shared.Utils.Print:Debug("^3Created new object with remoteId: " .. self.data.remoteId)
     Shared.EventManager:TriggerModuleClientEvent("Object:Create", -1, self.data)
     Shared.EventManager:TriggerModuleEvent("onObjectCreated", self.data.remoteId)
 
@@ -62,12 +62,12 @@ end
 
 function Object:__init__()
     if type(self.data.model) ~= "string" then
-        Shared.Utils:Print("^1Object could not get created: model is not a string.")
+        Shared.Utils.Print:Error("^1Object could not get created: model is not a string.")
         return
     end
 
     if type(self.data.x) ~= "number" or type(self.data.x) ~= "number" or type(self.data.z) ~= "number" then
-        Shared.Utils:Print("^1Object could not get created: position is not a vector3.")
+        Shared.Utils.Print:Error("^1Object could not get created: position is not a vector3.")
         return
     end
 
@@ -96,7 +96,7 @@ function Object:Destroy()
     Shared.EventManager:TriggerModuleClientEvent("Object:Destroy", -1, self.data.remoteId)
     Shared.EventManager:TriggerModuleEvent("onObjectDestroyed", self.data.remoteId)
 
-    Shared.Utils:Print("^3Removed object with remoteId: " .. self.data.remoteId)
+    Shared.Utils.Print:Debug("^3Removed object with remoteId: " .. self.data.remoteId)
 
     if GetResourceState("oxmysql") == "started" then
         exports.oxmysql:query(
@@ -288,7 +288,7 @@ function Object:addAttachment(attachmentName)
     if self:hasAttachment(attachmentName) then return end
 
     if not Shared.AttachmentManager:exists(attachmentName) then
-        Shared.Utils:Print(string.format("^1%s AddAttachment not registered.", attachmentName))
+        Shared.Utils.Print:Debug(string.format("^1%s AddAttachment not registered.", attachmentName))
         return
     end
 
@@ -451,13 +451,13 @@ function Module:loadObjectsFromSQL()
             },
             function(response)
                 if response and type(response) == "table" then
-                    Shared.Utils:Print(string.format("^4Loading %d objects...", #response))
+                    Shared.Utils.Print:Debug(string.format("^4Loading %d objects...", #response))
 
                     for i = 1, #response do
                         Module:new(response[i])
                     end
 
-                    Shared.Utils:Print("^4Objects successfully loaded.")
+                    Shared.Utils.Print:Debug("^4Objects successfully loaded.")
                 end
             end
         )
@@ -477,7 +477,7 @@ end
 ---@param cb fun(Object: SAquiverObject)
 function Module:addVariableValidator(model, cb)
     if type(cb) ~= "function" then
-        Shared.Utils:Print("^1Object validator should be a function.")
+        Shared.Utils.Print:Error("^1Object validator should be a function.")
         return
     end
 

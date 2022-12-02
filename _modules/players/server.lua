@@ -21,7 +21,7 @@ Player.new = function(source)
     self.variables = {}
 
     if Module:exists(self.source) then
-        Shared.Utils:Print("^1Player already exists with sourceID: " .. self.source)
+        Shared.Utils.Print:Error("^1Player already exists with sourceID: " .. self.source)
         return
     end
 
@@ -29,7 +29,7 @@ Player.new = function(source)
 
     Module.Entities[self.source] = self
 
-    Shared.Utils:Print("^3Created new player with sourceID: " .. self.source)
+    Shared.Utils.Print:Debug("^3Created new player with sourceID: " .. self.source)
 
     return self
 end
@@ -43,12 +43,12 @@ function Player:Destroy()
         Module.Entities[self.source] = nil
     end
 
-    Shared.Utils:Print("^3Removed player with sourceID: " .. self.source)
+    Shared.Utils.Print:Debug("^3Removed player with sourceID: " .. self.source)
 end
 
 function Player:addAttachment(attachmentName)
     if not Shared.AttachmentManager:exists(attachmentName) then
-        Shared.Utils:Print("^1" .. attachmentName .. " not registered.")
+        Shared.Utils.Print:Error("^1" .. attachmentName .. " not registered.")
         return
     end
 
