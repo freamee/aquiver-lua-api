@@ -96,6 +96,16 @@ Shared.EventManager:RegisterModuleNetworkEvent({
             SetBlipColour(aBlip.blipHandle, color)
         end
     end,
+    ["Blip:Update:Position"] = function(remoteId, vec3)
+        local aBlip = Module:get(remoteId)
+        if not aBlip then return end
+
+        aBlip.data.position = vec3
+
+        if DoesBlipExist(aBlip.blipHandle) then
+            SetBlipCoords(aBlip.blipHandle, vec3.x, vec3.y, vec3.z)
+        end
+    end,
     ["Blip:Destroy"] = function(remoteId)
         local aBlip = Module:get(remoteId)
         if not aBlip then return end

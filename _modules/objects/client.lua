@@ -9,6 +9,7 @@ local Object = {
     data = {},
     isStreamed = false,
     objectHandle = nil,
+    -- Stores the object handles.
     ---@type { [string]: number }
     attachments = {}
 }
@@ -95,19 +96,19 @@ function Object:removeStream()
 end
 
 function Object:shutdownAttachments()
-    for k, v in pairs(self.attachments) do
+    for k, v in pairs(self.data.attachments) do
         self:removeAttachment(k)
     end
 end
 
 function Object:initAttachments()
-    for k, v in pairs(self.attachments) do
+    for k, v in pairs(self.data.attachments) do
         self:addAttachment(k)
     end
 end
 
 function Object:hasAttachment(attachmentName)
-    return self.attachments[attachmentName] and true or false
+    return DoesEntityExist(self.attachments[attachmentName])
 end
 
 function Object:addAttachment(attachmentName)

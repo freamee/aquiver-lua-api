@@ -69,6 +69,12 @@ function Blip:setColor(colorId)
     Shared.EventManager:TriggerModuleClientEvent("Blip:Update:Color", -1, self.data.remoteId, colorId)
 end
 
+---@param vec3 { x:number; y:number; z:number; }
+function Blip:setPosition(vec3)
+    self.data.position = vec3
+    Shared.EventManager:TriggerModuleClientEvent("Blip:Update:Position", -1, self.data.remoteId, vec3)
+end
+
 ---@param d IBlip
 function Module:new(d)
     local aBlip = Blip.new(d)

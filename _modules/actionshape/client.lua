@@ -76,8 +76,8 @@ function ActionShape:onEnter()
 
     self.isEntered = true
 
-    TriggerEvent("onActionShapeEnter", GetCurrentResourceName(), self)
-    TriggerServerEvent("onActionShapeEnter", GetCurrentResourceName(), self.data.remoteId)
+    Shared.EventManager:TriggerModuleEvent("onActionShapeEnter", self.data.remoteId)
+    Shared.EventManager:TriggerModuleServerEvent("onActionShapeEnter", self.data.remoteId)
 end
 
 function ActionShape:onLeave()
@@ -85,8 +85,8 @@ function ActionShape:onLeave()
 
     self.isEntered = false
 
-    TriggerEvent("onActionShapeLeave", GetCurrentResourceName(), self)
-    TriggerServerEvent("onActionShapeLeave", GetCurrentResourceName(), self.data.remoteId)
+    Shared.EventManager:TriggerModuleEvent("onActionShapeLeave", self.data.remoteId)
+    Shared.EventManager:TriggerModuleServerEvent("onActionShapeLeave", self.data.remoteId)
 end
 
 function ActionShape:Destroy()
@@ -168,6 +168,12 @@ end)
 Shared.EventManager:RegisterModuleNetworkEvent({
     ["ActionShape:Create"] = function(data)
         Module:new(data)
+    end,
+    ["ActionShape:Update:Position"] = function(remoteId, vec3)
+        local aActionShape = Module:get(remoteId)
+        if not aActionShape then return end
+
+        aActionShape.data.position = vec3
     end,
     ["ActionShape:Destroy"] = function(remoteId)
         local aActionShape = Module:get(remoteId)

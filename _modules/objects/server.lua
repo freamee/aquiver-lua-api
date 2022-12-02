@@ -13,6 +13,7 @@
 ---@field dimension number
 ---@field remoteId? number
 ---@field resource string
+---@field attachments? { [string]: boolean }
 
 ---@type { [string]: fun(Object: SAquiverObject)[] }
 local variableValidators = {}
@@ -42,7 +43,7 @@ Object.new = function(d)
     self.data.remoteId = remoteIdCount
     remoteIdCount = (remoteIdCount or 0) + 1
     self.onPress = nil
-    self.attachments = {}
+    self.data.attachments = type(self.data.attachments) == "table" and self.data.attachments or {}
 
     if Module:exists(self.data.remoteId) then
         Shared.Utils.Print:Error("^1Object already exists with remoteId: " .. self.data.remoteId)
@@ -292,7 +293,7 @@ function Object:addAttachment(attachmentName)
         return
     end
 
-    self.attachments[attachmentName] = true
+    self.data.attachments[attachmentName] = true
 
     Shared.EventManager:TriggerModuleClientEvent("Object:Attachment:Add", -1, self.data.remoteId, attachmentName)
 end
@@ -300,13 +301,13 @@ end
 function Object:removeAttachment(attachmentName)
     if not self:hasAttachment(attachmentName) then return end
 
-    self.attachments[attachmentName] = false
+    self.data.attachments[attachmentName] = false
 
     Shared.EventManager:TriggerModuleClientEvent("Object:Attachment:Remove", -1, self.data.remoteId, attachmentName)
 end
 
 function Object:hasAttachment(attachmentName)
-    return self.attachments[attachmentName] and true or false
+    return self.data.attachments[attachmentName] and true or false
 end
 
 function Object:runValidators()

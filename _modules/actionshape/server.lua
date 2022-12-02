@@ -48,6 +48,12 @@ function ActionShape:__init__()
     self.data.variables = type(self.data.variables) == "table" and self.data.variables or {}
 end
 
+---@param vec3 { x:number; y:number; z:number; }
+function ActionShape:setPosition(vec3)
+    self.data.position = vec3
+    Shared.EventManager:TriggerModuleClientEvent("ActionShape:Update:Position", -1, self.data.remoteId, vec3)
+end
+
 function ActionShape:Destroy()
     if Module:exists(self.data.remoteId) then
         Module.Entities[self.data.remoteId] = nil
