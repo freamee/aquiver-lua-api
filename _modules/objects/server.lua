@@ -95,7 +95,7 @@ function Object:Destroy()
     end
 
     Shared.EventManager:TriggerModuleClientEvent("Object:Destroy", -1, self.data.remoteId)
-    Shared.EventManager:TriggerModuleEvent("onObjectDestroyed", self.data.remoteId)
+    Shared.EventManager:TriggerModuleEvent("onObjectDestroyed", self.data)
 
     Shared.Utils.Print:Debug("^3Removed object with remoteId: " .. self.data.remoteId)
 

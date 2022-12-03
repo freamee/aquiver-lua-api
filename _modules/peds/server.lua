@@ -62,7 +62,7 @@ function Ped:Destroy()
     end
 
     Shared.EventManager:TriggerModuleClientEvent("Ped:Destroy", -1, self.data.remoteId)
-    Shared.EventManager:TriggerModuleEvent("onPedDestroyed", self.data.remoteId)
+    Shared.EventManager:TriggerModuleEvent("onPedDestroyed", self.data)
     Shared.Utils.Print:Debug("^3Removed ped with remoteId: " .. self.data.remoteId)
 end
 

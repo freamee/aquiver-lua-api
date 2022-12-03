@@ -109,10 +109,10 @@ Shared.EventManager:RegisterModuleNetworkEvent("Particle:RequestData", function(
     end
 end)
 
-Shared.EventManager:RegisterModuleEvent("onObjectDestroyed", function(remoteId)
+Shared.EventManager:RegisterModuleEvent("onObjectDestroyed", function(data)
     -- Destroy particle if the object got destroyed.
     for k, v in pairs(Module.Entities) do
-        if v.data.toObjectRemoteId == remoteId then
+        if v.data.toObjectRemoteId == data.remoteId then
             v:Destroy()
         end
     end
