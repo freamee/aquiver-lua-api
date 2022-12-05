@@ -379,17 +379,27 @@ end
 
 ---@param model string | string[]
 ---@return SAquiverObject | nil
-function Module:getNearestObject(vec3, model, range)
+function Module:getNearestObject(vec3, model, range, dimension)
     local rangeMeter = range
     local closest
 
     if type(vec3) ~= "vector3" then return end
 
     for k, v in pairs(self.Entities) do
-        if model then
-            if type(model) == "table" then
-                for i = 1, #model do
-                    if v.data.model == model[i] then
+        if v.data.dimension == dimension then
+            if model then
+                if type(model) == "table" then
+                    for i = 1, #model do
+                        if v.data.model == model[i] then
+                            local dist = v:dist(vec3)
+                            if dist < rangeMeter then
+                                rangeMeter = dist
+                                closest = v
+                            end
+                        end
+                    end
+                elseif type(model) == "string" then
+                    if v.data.model == model then
                         local dist = v:dist(vec3)
                         if dist < rangeMeter then
                             rangeMeter = dist
@@ -397,20 +407,12 @@ function Module:getNearestObject(vec3, model, range)
                         end
                     end
                 end
-            elseif type(model) == "string" then
-                if v.data.model == model then
-                    local dist = v:dist(vec3)
-                    if dist < rangeMeter then
-                        rangeMeter = dist
-                        closest = v
-                    end
+            else
+                local dist = v:dist(vec3)
+                if dist < rangeMeter then
+                    rangeMeter = dist
+                    closest = v
                 end
-            end
-        else
-            local dist = v:dist(vec3)
-            if dist < rangeMeter then
-                rangeMeter = dist
-                closest = v
             end
         end
     end
