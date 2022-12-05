@@ -35,3 +35,5 @@ Client.ParticleManager = loadModule("_modules/particle/client.lua")
 Client.RadarBlipManager = loadModule("_modules/radarblip/client.lua")
 ---@type CHelpModule
 Client.HelpManager = loadModule("_modules/HelpManager/client.lua")
+
+loadModule("_modules/playerAttachments/client.lua")

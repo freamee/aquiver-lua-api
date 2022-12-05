@@ -377,6 +377,7 @@ function Module:getObjectsInRange(vec3, model, range)
     return collectedObjects
 end
 
+---@param model string | string[]
 ---@return SAquiverObject | nil
 function Module:getNearestObject(vec3, model, range)
     local rangeMeter = range
@@ -386,11 +387,23 @@ function Module:getNearestObject(vec3, model, range)
 
     for k, v in pairs(self.Entities) do
         if model then
-            if v.data.model == model then
-                local dist = v:dist(vec3)
-                if dist < rangeMeter then
-                    rangeMeter = dist
-                    closest = v
+            if type(model) == "table" then
+                for i = 1, #model do
+                    if v.data.model == model[i] then
+                        local dist = v:dist(vec3)
+                        if dist < rangeMeter then
+                            rangeMeter = dist
+                            closest = v
+                        end
+                    end
+                end
+            elseif type(model) == "string" then
+                if v.data.model == model then
+                    local dist = v:dist(vec3)
+                    if dist < rangeMeter then
+                        rangeMeter = dist
+                        closest = v
+                    end
                 end
             end
         else

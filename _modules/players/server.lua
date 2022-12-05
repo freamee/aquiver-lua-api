@@ -29,6 +29,14 @@ Player.new = function(source)
 
     Module.Entities[self.source] = self
 
+    Shared.EventManager:TriggerModuleClientEvent(
+        "GlobalPlayers:Create",
+        -1,
+        self.source,
+        self.attachments,
+        self:getDimension()
+    )
+
     Shared.Utils.Print:Debug("^3Created new player with sourceID: " .. self.source)
 
     return self
@@ -43,6 +51,12 @@ function Player:Destroy()
         Module.Entities[self.source] = nil
     end
 
+    Shared.EventManager:TriggerModuleClientEvent(
+        "GlobalPlayers:Destroy",
+        -1,
+        self.source
+    )
+
     Shared.Utils.Print:Debug("^3Removed player with sourceID: " .. self.source)
 end
 
@@ -55,7 +69,7 @@ function Player:addAttachment(attachmentName)
     if self:hasAttachment(attachmentName) then return end
 
     self.attachments[attachmentName] = true
-    Shared.EventManager:TriggerModuleClientEvent("Player:Attachment:Add", self.source, attachmentName)
+    Shared.EventManager:TriggerModuleClientEvent("GlobalPlayer:Attachment:Add", -1, self.source, attachmentName)
 end
 
 function Player:hasAttachment(attachmentName)
@@ -66,12 +80,7 @@ function Player:removeAttachment(attachmentName)
     if not self:hasAttachment(attachmentName) then return end
 
     self.attachments[attachmentName] = nil
-    Shared.EventManager:TriggerModuleClientEvent("Player:Attachment:Remove", self.source, attachmentName)
-end
-
-function Player:removeAllAttachments()
-    self.attachments = {}
-    Shared.EventManager:TriggerModuleClientEvent("Player:Attachment:RemoveAll", self.source)
+    Shared.EventManager:TriggerModuleClientEvent("GlobalPlayer:Attachment:Remove", -1, self.source, attachmentName)
 end
 
 function Player:freeze(state)
@@ -103,16 +112,9 @@ function Player:startIndicatorPosition(uid, vec3, text, timeMS)
 end
 
 function Player:setDimension(dimension)
-    local attaches = json.decode(json.encode(self.attachments))
-
-    self:removeAllAttachments()
-
     SetPlayerRoutingBucket(self.source, dimension)
+    Shared.EventManager:TriggerModuleClientEvent("GlobalPlayer:Set:Dimension", -1, self.source, dimension)
     Shared.EventManager:TriggerModuleClientEvent("Player:Set:Dimension", self.source, dimension)
-
-    for k, v in pairs(attaches) do
-        self:addAttachment(k)
-    end
 end
 
 ---@param jsonContent table
@@ -230,6 +232,20 @@ end)
 AddEventHandler("playerJoining", function()
     local source = source
     Module:new(source)
+end)
+
+Shared.EventManager:RegisterModuleNetworkEvent("GlobalPlayers:RequestData", function()
+    local source = source
+
+    for k, v in pairs(Server.PlayerManager.Entities) do
+        Shared.EventManager:TriggerModuleClientEvent(
+            "GlobalPlayers:Create",
+            source,
+            v.source,
+            v.attachments,
+            v:getDimension()
+        )
+    end
 end)
 
 return Module

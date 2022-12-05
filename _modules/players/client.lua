@@ -1,6 +1,5 @@
 ---@class CPlayerModule
 local Module = {}
-Module.attachments = {}
 Module.isFreezed = false
 Module.forceAnimationData = {
     dict = nil,
@@ -31,7 +30,7 @@ function Module:startIndicatorAtPosition(uid, vec3, text, timeMS)
                 vec3.x, vec3.y, vec3.z + 0.5,
                 0.0, 0.0, 0.0,
                 180.0, 0.0, 0.0,
-                0.5, 0.5, 0.5,
+                0.35, 0.35, 0.35,
                 255, 255, 0, 155,
                 true, false, 2, true, nil, nil, false
             )
@@ -47,13 +46,6 @@ function Module:hasIndicator(uid)
     return self.indicators[uid] and true or false
 end
 
-function Module:hasAttachment(attachmentName)
-    if self.attachments[attachmentName] and DoesEntityExist(self.attachments[attachmentName]) then
-        return true
-    end
-    return false
-end
-
 ---@param jsonContent table
 function Module:sendNuiMessageAPI(jsonContent)
     TriggerEvent("AQUIVER:API:Player:SendNUIMessage", jsonContent)
@@ -66,46 +58,6 @@ Shared.EventManager:RegisterModuleNetworkEvent({
     ["Player:Freeze"] = function(state)
         Module.isFreezed = state
         FreezeEntityPosition(PlayerPedId(), state)
-    end,
-    ["Player:Attachment:Add"] = function(attachmentName)
-        -- Return if already exists.
-        if Module:hasAttachment(attachmentName) then return end
-
-        local aData = Shared.AttachmentManager:get(attachmentName)
-        if not aData then return end
-
-        local modelHash = GetHashKey(aData.model)
-        Client.Utils:RequestModel(modelHash)
-
-        local localPlayer = PlayerPedId()
-        local playerCoords = GetEntityCoords(localPlayer)
-        local obj = CreateObject(modelHash, playerCoords, true, true, true)
-
-        AttachEntityToEntity(
-            obj,
-            localPlayer,
-            GetPedBoneIndex(localPlayer, aData.boneId),
-            aData.x, aData.y, aData.z,
-            aData.rx, aData.ry, aData.rz,
-            true, true, false, false, 2, true
-        )
-
-        Module.attachments[attachmentName] = obj
-    end,
-    ["Player:Attachment:Remove"] = function(attachmentName)
-        if not Module:hasAttachment(attachmentName) then return end
-
-        DeleteEntity(Module.attachments[attachmentName])
-        Module.attachments[attachmentName] = nil
-    end,
-    ["Player:Attachment:RemoveAll"] = function()
-        for attachmentName, objectHandle in pairs(Module.attachments) do
-            if DoesEntityExist(objectHandle) then
-                DeleteEntity(objectHandle)
-            end
-        end
-
-        Module.attachments = {}
     end,
     ["Player:Set:Dimension"] = function(dimension)
         Module.dimension = dimension
@@ -190,16 +142,6 @@ Shared.EventManager:RegisterModuleNetworkEvent({
         ClearPedTasks(PlayerPedId())
     end,
 })
-
-AddEventHandler("onResourceStop", function(resourceName)
-    if resourceName ~= GetCurrentResourceName() then return end
-
-    for k, v in pairs(Module.attachments) do
-        if DoesEntityExist(v) then
-            DeleteEntity(v)
-        end
-    end
-end)
 
 Citizen.CreateThread(function()
     while true do
