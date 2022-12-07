@@ -175,6 +175,10 @@ function Object:setRotation(rx, ry, rz)
     end
 end
 
+function Object:setHeading(heading)
+    self:setRotation(self.data.rx, self.data.ry, heading)
+end
+
 function Object:setModel(model)
     if self.data.model == model then return end
 
