@@ -169,7 +169,7 @@ Citizen.CreateThread(function()
                 if v.dimension ~= Client.LocalPlayer.dimension then
                     v:removeStream()
                 else
-                    local dist = v:dist(Client.LocalPlayer.cachedPosition)
+                    local dist = v:dist(Client.LocalPlayer.cache.playerCoords)
                     if type(dist) == "number" and dist < 15.0 then
                         v:addStream()
                     else

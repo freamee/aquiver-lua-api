@@ -8,10 +8,33 @@ Module.forceAnimationData = {
 }
 Module.isMovementDisabled = false
 Module.dimension = Shared.Config.DEFAULT_DIMENSION
-Module.cachedPosition = GetEntityCoords(PlayerPedId())
+Module.cache = {
+    playerId = nil,
+    playerPed = nil,
+    playerServerId = nil,
+    playerCoords = nil,
+    playerHeading = nil
+}
 
 ---@type { [string]: { position: {x:number; y:number; z:number; }; text:string; }}
 Module.indicators = {}
+
+function Module:cacheNow()
+    Module.cache.playerId = PlayerId()
+    Module.cache.playerPed = PlayerPedId()
+    Module.cache.playerServerId = GetPlayerServerId(self.cache.playerId)
+    Module.cache.playerCoords = GetEntityCoords(self.cache.playerPed)
+    Module.cache.playerHeading = GetEntityHeading(self.cache.playerPed)
+end
+
+Module:cacheNow()
+
+Citizen.CreateThread(function()
+    while true do
+        Module:cacheNow()
+        Citizen.Wait(Shared.Config.CACHE_PLAYER)
+    end
+end)
 
 function Module:startIndicatorAtPosition(uid, vec3, text, timeMS)
     if self:hasIndicator(uid) then return end
@@ -57,7 +80,7 @@ Shared.EventManager:RegisterModuleNetworkEvent({
     end,
     ["Player:Freeze"] = function(state)
         Module.isFreezed = state
-        FreezeEntityPosition(PlayerPedId(), state)
+        FreezeEntityPosition(Module.cache.playerPed, state)
     end,
     ["Player:Set:Dimension"] = function(dimension)
         Module.dimension = dimension
@@ -67,10 +90,10 @@ Shared.EventManager:RegisterModuleNetworkEvent({
         while not HasAnimDictLoaded(dict) do
             Citizen.Wait(10)
         end
-        TaskPlayAnim(PlayerPedId(), dict, name, 4.0, 4.0, -1, tonumber(flag), 1.0, false, false, false)
+        TaskPlayAnim(Module.cache.playerPed, dict, name, 4.0, 4.0, -1, tonumber(flag), 1.0, false, false, false)
     end,
     ["Player:Animation:Stop"] = function()
-        ClearPedTasks(PlayerPedId())
+        ClearPedTasks(Module.cache.playerPed)
     end,
     ["Player:ForceAnimation:Play"] = function(dict, name, flag)
         RequestAnimDict(dict)
@@ -88,16 +111,14 @@ Shared.EventManager:RegisterModuleNetworkEvent({
         Citizen.CreateThread(function()
             while Module.forceAnimationData.dict ~= nil do
 
-                local localPlayer = PlayerPedId()
-
                 if not IsEntityPlayingAnim(
-                    localPlayer,
+                    Module.cache.playerPed,
                     Module.forceAnimationData.dict,
                     Module.forceAnimationData.name,
                     Module.forceAnimationData.flag
                 ) then
                     TaskPlayAnim(
-                        localPlayer,
+                        Module.cache.playerPed,
                         Module.forceAnimationData.dict,
                         Module.forceAnimationData.name,
                         4.0,
@@ -139,15 +160,8 @@ Shared.EventManager:RegisterModuleNetworkEvent({
             name = nil,
             flag = nil
         }
-        ClearPedTasks(PlayerPedId())
+        ClearPedTasks(Module.cache.playerPed)
     end,
 })
-
-Citizen.CreateThread(function()
-    while true do
-        Module.cachedPosition = GetEntityCoords(PlayerPedId())
-        Citizen.Wait(Shared.Config.CACHE_PLAYER_POSITION_INTERVAL)
-    end
-end)
 
 return Module

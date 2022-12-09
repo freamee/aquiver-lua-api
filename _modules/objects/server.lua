@@ -85,6 +85,7 @@ function Object:__init__()
     end
 
     self:setVar("hasAction", false)
+    self:enableRaycast(true)
 
     self:runValidators()
 end
@@ -177,6 +178,10 @@ end
 
 function Object:setHeading(heading)
     self:setRotation(self.data.rx, self.data.ry, heading)
+end
+
+function Object:enableRaycast(state)
+    self:setVar("raycastEnabled", state)
 end
 
 function Object:setModel(model)

@@ -2,8 +2,8 @@
 local Config = {
     -- Named as RoutingBucket on FiveM.
     DEFAULT_DIMENSION = 0,
-    -- How often cache the player position with GetEntityCoords.
-    CACHE_PLAYER_POSITION_INTERVAL = 500,
+    -- How often cache the player
+    CACHE_PLAYER = 500,
 
     HELP = {
         HAS_SOUND = true
@@ -15,7 +15,7 @@ local Config = {
 
     RAYCAST = {
         -- How often check the raycast, performance++
-        INTERVAL = 300,
+        INTERVAL = 150,
         -- Distance to find targets (Measured from the gameplay camera coords, and depends on the which camera you use, if you use the far one, maybe 10 will be small.)
         RAY_DISTANCE = 10.0,
         -- Raycast range, the lower the value is the harder it will be to aim on targets.

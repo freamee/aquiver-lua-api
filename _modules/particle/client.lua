@@ -210,7 +210,7 @@ Citizen.CreateThread(function()
                 if Client.LocalPlayer.dimension ~= v.data.dimension then
                     v:removeStream()
                 else
-                    local dist = v:dist(Client.LocalPlayer.cachedPosition)
+                    local dist = v:dist(Client.LocalPlayer.cache.playerCoords)
                     if dist < Shared.Config.STREAM_DISTANCES.PARTICLE then
                         v:addStream()
                     else

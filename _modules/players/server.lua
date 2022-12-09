@@ -84,7 +84,24 @@ function Player:removeAttachment(attachmentName)
 end
 
 function Player:freeze(state)
+    self.variables.isFreezed = state
     Shared.EventManager:TriggerModuleClientEvent("Player:Freeze", self.source, state)
+end
+
+function Player:isFreezed()
+    return self.variables.isFreezed or false
+end
+
+function Player:playAnimationPromise(dict, name, flag, timeMS)
+    if self.variables.hasAnimPromise then return end
+
+    self.variables.hasAnimPromise = true
+    self:playAnimation(dict, name, flag)
+
+    Citizen.SetTimeout(timeMS, function()
+        self.variables.hasAnimPromise = false
+        self:stopAnimation()
+    end)
 end
 
 function Player:playAnimation(dict, name, flag)

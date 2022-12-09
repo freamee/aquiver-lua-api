@@ -106,28 +106,22 @@ function Module:enable(state)
         Citizen.CreateThread(function()
             while self.isEnabled do
 
-                local cameraRotation = GetGameplayCamRot(2)
-                local cameraPosition = GetGameplayCamCoord()
-                local direction = RotationToDirection(cameraRotation)
-                local destination = vector3(
-                    cameraPosition.x + direction.x * Shared.Config.RAYCAST.RAY_DISTANCE,
-                    cameraPosition.y + direction.y * Shared.Config.RAYCAST.RAY_DISTANCE,
-                    cameraPosition.z + direction.z * Shared.Config.RAYCAST.RAY_DISTANCE
-                )
-
-                local shapeTestHandle = StartShapeTestCapsule(
-                    cameraPosition.x,
-                    cameraPosition.y,
-                    cameraPosition.z,
+                local coords, normal = GetWorldCoordFromScreenCoord(0.5, 0.5)
+                local destination = coords + normal * 10
+                local handle = StartShapeTestCapsule(
+                    coords.x,
+                    coords.y,
+                    coords.z,
                     destination.x,
                     destination.y,
                     destination.z,
                     Shared.Config.RAYCAST.RAY_RANGE,
                     9,
-                    PlayerPedId(),
+                    Client.LocalPlayer.cache.playerPed,
                     4
                 )
-                local _, hit, endCoords, surfaceNormal, hitHandle = GetShapeTestResult(shapeTestHandle)
+
+                local _, hit, endCoords, surfaceNormal, hitHandle = GetShapeTestResult(handle)
 
                 if hit then
                     local entityType = GetEntityType(hitHandle)
@@ -136,16 +130,18 @@ function Module:enable(state)
                     if entityType == 3 then
                         local findObject = Client.ObjectManager:atHandle(hitHandle)
                         if findObject then
-                            local dist = findObject:dist(Client.LocalPlayer.cachedPosition)
-                            if dist < 2.5 then
-                                self:setEntityHandle(hitHandle)
-                                goto nextTick
+                            if findObject.data.variables.raycastEnabled then
+                                local dist = findObject:dist(Client.LocalPlayer.cache.playerCoords)
+                                if dist < 2.5 then
+                                    self:setEntityHandle(hitHandle)
+                                    goto nextTick
+                                end
                             end
                         end
                     elseif entityType == 1 then
                         local findPed = Client.PedManager:atHandle(hitHandle)
                         if findPed then
-                            local dist = findPed:dist(Client.LocalPlayer.cachedPosition)
+                            local dist = findPed:dist(Client.LocalPlayer.cache.playerCoords)
                             if dist < 2.5 then
                                 self:setEntityHandle(hitHandle)
                                 goto nextTick

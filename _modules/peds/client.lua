@@ -93,7 +93,7 @@ function Ped:addStream()
     if self.data.questionMark or self.data.name then
         Citizen.CreateThread(function()
             while self.isStreamed do
-                local dist = #(Client.LocalPlayer.cachedPosition - self:getVector3Position())
+                local dist = #(Client.LocalPlayer.cache.playerCoords - self:getVector3Position())
 
                 local onScreen = false
                 if dist < 5.0 then
@@ -269,7 +269,7 @@ Citizen.CreateThread(function()
             if Client.LocalPlayer.dimension ~= v.data.dimension then
                 v:removeStream()
             else
-                local dist = v:dist(Client.LocalPlayer.cachedPosition)
+                local dist = v:dist(Client.LocalPlayer.cache.playerCoords)
                 if dist < Shared.Config.STREAM_DISTANCES.PED then
                     v:addStream()
                 else
