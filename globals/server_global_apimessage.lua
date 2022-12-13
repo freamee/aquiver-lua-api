@@ -17,3 +17,4 @@ end
 Utils = loadModule("_modules/utils/server.lua")
 
 Utils:checkGlobalMessage()
+Utils:checkResourceVersion()
