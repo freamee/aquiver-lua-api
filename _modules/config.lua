@@ -16,8 +16,6 @@ local Config = {
     RAYCAST = {
         -- How often check the raycast, performance++
         INTERVAL = 150,
-        -- Distance to find targets (Measured from the gameplay camera coords, and depends on the which camera you use, if you use the far one, maybe 10 will be small.)
-        RAY_DISTANCE = 10.0,
         -- Raycast range, the lower the value is the harder it will be to aim on targets.
         RAY_RANGE = 0.15,
         -- Old ray range. (neeeded .15 for the barrels.)

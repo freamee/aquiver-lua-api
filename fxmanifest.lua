@@ -2,7 +2,7 @@ fx_version 'adamant'
 
 game 'gta5'
 
-version "1.0"
+version "1.01"
 
 dependencies {
     '/server:4752',
