@@ -91,6 +91,7 @@ $textstroke: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
             line-height: 2vw;
             font-size: .9vw;
             font-weight: bold;
+            white-space: pre-line;
         }
 
         // .ped-talk {

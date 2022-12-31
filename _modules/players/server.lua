@@ -157,6 +157,8 @@ function Player:setVar(key, value)
     if self.variables[key] == value then return end
 
     self.variables[key] = value
+    Shared.EventManager:TriggerModuleClientEvent("onPlayerVariableChange", self.source, key, value)
+    Shared.EventManager:TriggerModuleEvent("onPlayerVariableChange", self.source, key, value)
 end
 
 --- Start progress for player.

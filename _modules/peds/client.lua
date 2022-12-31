@@ -86,7 +86,9 @@ function Ped:addStream()
     self.pedHandle = ped
 
     -- Resync animation here. This is basically a set again.
-    self:playAnimation(self.data.animDict, self.data.animName, self.data.animFlag)
+    if self.data.animDict and self.data.animName then
+        self:playAnimation(self.data.animDict, self.data.animName, self.data.animFlag)
+    end
 
     Shared.Utils.Print:Debug(string.format("^3Ped streamed in (%d)", self.data.remoteId))
 
@@ -152,10 +154,21 @@ function Ped:playAnimation(dict, name, flag)
     self.data.animFlag = flag
 
     if DoesEntityExist(self.pedHandle) then
+        local tries, failed = 0, false
+
         RequestAnimDict(self.data.animDict)
-        while not HasAnimDictLoaded(self.data.animDict) do
+        while not HasAnimDictLoaded(self.data.animDict) and not failed do
+            tries = tries + 1
+
+            if tries > 100 then
+                failed = true
+                Shared.Utils.Print:Error("Failed to load animDict (PED)")
+            end
+
             Citizen.Wait(10)
         end
+
+        if failed then return end
 
         TaskPlayAnim(
             self.pedHandle,
